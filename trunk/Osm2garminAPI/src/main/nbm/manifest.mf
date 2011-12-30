@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+OpenIDE-Module-Localizing-Bundle: org/mantlik/osm2garmin/Bundle.properties
+Main-Class: org.mantlik.osm2garmin.Osm2garmin
+AutoUpdate-Show-In-Client: false

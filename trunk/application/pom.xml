@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.mantlik</groupId>
+        <artifactId>Osm2garminGUI</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>Osm2garminGUI-app</artifactId>
+    <packaging>nbm-application</packaging>
+
+    <name>Osm2garminGUI</name>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <netbeans.run.params.ide/>
+        <netbeans.run.params>${netbeans.run.params.ide} -J-Xmx1400m</netbeans.run.params>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.netbeans.cluster</groupId>
+            <artifactId>platform</artifactId>
+            <version>${netbeans.version}</version>
+            <type>pom</type>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>Osm2garminGUI-branding</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- To run NbModuleSuite functional tests in src/test/java, use nbjunit (assumes RELEASE70 or later):
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-nbjunit</artifactId>
+            <version>${netbeans.version}</version>
+            <scope>test</scope>
+        </dependency>
+        -->
+        <!-- To use Jelly in your functional tests, add or replace with:
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-jellytools-platform</artifactId>
+            <version>${netbeans.version}</version>
+            <scope>test</scope>
+        </dependency>
+        -->
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>osm2garminspi</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.modules</groupId>
+            <artifactId>org-netbeans-modules-extbrowser</artifactId>
+            <version>${netbeans.version}</version>
+            <type>nbm</type>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>nbm-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>nbm-installers-plugin</artifactId>
+                <configuration>
+                    <installerOsWindows>true</installerOsWindows>
+                    <installerOsLinux>true</installerOsLinux>
+                    <installerLicenseFile>../LICENSE.txt</installerLicenseFile>
+                    <appIcon>../Globe48.png</appIcon>
+                    <icon16>../Globe.png</icon16>
+                    <instLeftCorner>../ilc.png</instLeftCorner>
+                    <instRightCorner>../irc.png</instRightCorner>
+                    <instWelcomeTop>../wlt.png</instWelcomeTop>
+                    <instWelcomeBottom>../wlb.png</instWelcomeBottom>
+                    <installerVerbose>2</installerVerbose>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>buildnumber-maven-plugin</artifactId>
+                <configuration>
+                    <useLastCommittedRevision>false</useLastCommittedRevision>                    
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <artifactId>docbkx-maven-plugin</artifactId>
+                <groupId>com.agilejava.docbkx</groupId>
+                <configuration>
+                    <sourceDirectory>${basedir}/../Osm2garminGUI/src/main/docbook</sourceDirectory>
+                    <targetDatabaseDocument>file:///${basedir}/src/main/docbook/pdfdb.xml</targetDatabaseDocument>
+                    <targetsFilename>${basedir}/src/main/docbook/targets.db</targetsFilename>
+                    <currentDocid>pdf</currentDocid>
+                    <includes>Documentation.xml</includes>
+                    <bodyFontMaster>9</bodyFontMaster>
+                    <partAutolabel>0</partAutolabel>
+                    <chapterAutolabel>1</chapterAutolabel>
+                    <sectionAutolabel>1</sectionAutolabel>
+                    <sectionLabelIncludesComponentLabel>1</sectionLabelIncludesComponentLabel>
+                    <admonGraphics>1</admonGraphics>
+                    <admonTextlabel>1</admonTextlabel>
+                    <admonGraphicsExtension>.gif</admonGraphicsExtension>
+                    <navigGraphics>1</navigGraphics>
+                    <navigGraphicsExtension>.gif</navigGraphicsExtension>
+                    <generateToc>
+                        book toc,title
+                    </generateToc>
+                    <chunkedOutput>true</chunkedOutput>
+                    <tocMaxDepth>3</tocMaxDepth>
+                    <chunkSectionDepth>1</chunkSectionDepth>
+                    <chunkTocsAndLots>0</chunkTocsAndLots>
+                    <preferInternalOlink>1</preferInternalOlink>
+                    <insertOlinkPdfFrag>1</insertOlinkPdfFrag>
+                    <profileCondition>fo</profileCondition>
+                    <xincludeSupported>true</xincludeSupported>
+                    <collectXrefTargets>yes</collectXrefTargets>
+                    <foCustomization>${basedir}/src/main/docbook/fo.xsl</foCustomization>
+                    <htmlCustomization>${basedir}/src/main/docbook/html.xsl</htmlCustomization>
+                    <targetDirectory>${basedir}/target/docbkx/</targetDirectory>&gt;
+                    <htmlStylesheet>style.css</htmlStylesheet>
+                    <fop1Extensions>1</fop1Extensions>
+                    <customizationParameters>
+                        <parameter>
+                            <name>base.dir</name>
+                            <value>${basedir}/target/docbkx/</value>
+                        </parameter>
+                    </customizationParameters>
+                    <postProcess>
+                        <copy todir="${basedir}/target/docbkx/Documentation" failonerror="false">
+                            <fileset dir="${basedir}/../Osm2garminGUI/src/main/javahelp/org/mantlik/osm2garminspi/docs/" />
+                        </copy>
+                        <copy file="${basedir}/target/docbkx/Documentation/Documentation.html" tofile="${basedir}/target/docbkx/Documentation/index.html" failonerror="false" />
+                    </postProcess>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate-html</goal>
+                            <goal>generate-pdf</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- To run NbModuleSuite in integration-test phase:
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.9</version>
+                <configuration>
+                    <systemProperties>
+                        <property>
+                            <name>cluster.path.final</name>
+                            <value>${project.build.directory}/${brandingToken}/${brandingToken}:${project.build.directory}/${brandingToken}/platform</value>
+                        </property>
+                    </systemProperties>
+                </configuration>
+            </plugin>
+            -->
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>deployment</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>nbm-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>extra</id>
+                                <goals>
+                                    <goal>autoupdate</goal>
+                                    <goal>webstart-app</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>
