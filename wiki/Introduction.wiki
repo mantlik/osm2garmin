@@ -1,0 +1,45 @@
+=Introduction=
+Download !OpenStreetMap data for the whole planet, update existing planet data, add terrain contours generated from SRTM3 database and generate garmin-compatible maps in a single step. 
+
+The application wraps following !OpenStreetMap processing utilities: [http://wiki.openstreetmap.org/wiki/Osmosis Osmosis], [http://www.mkgmap.org.uk/page/tile-splitter Tile Splitter] and [http://www.mkgmap.org.uk/ Mkgmap]. In addition, a utility similar to [http://wiki.openstreetmap.org/wiki/Srtm2Osm Srtm2osm] program has been developed as a part of this application.
+
+*On this page:*
+<wiki:toc max_depth="1" />
+
+=System requirements=
+  * Windows XP/Vista/7 or Linux 2.26
+  * minimum 2 Gb RAM
+  * minimum 150 Gb free disk space for the whole planet maps data (200+ Gb recommended)
+  * [http://java.com/download Sun Java JRE 6] or newer
+
+=Downloads=
+Current installers and user's guide can be downloaded from here:
+http://code.google.com/p/osm2garmin/downloads/list
+
+=Help and support=
+Please post your questions to the [http://groups.google.com/group/osm2garmin-devel Osm2garmin group]. In addition, you can submit a bug report or suggest an enhancement at the [http://code.google.com/p/osm2garmin/issues/entry Issues page].
+
+=Screenshots=
+Application ready to run:
+
+http://osm2garmin.googlecode.com/svn/trunk/Osm2garminGUI/src/main/javahelp/org/mantlik/osm2garminspi/docs/application.png
+
+Processing parameters:
+
+http://osm2garmin.googlecode.com/svn/trunk/Osm2garminGUI/src/main/javahelp/org/mantlik/osm2garminspi/docs/parameters.png
+
+Download sources:
+
+http://osm2garmin.googlecode.com/svn/trunk/Osm2garminGUI/src/main/javahelp/org/mantlik/osm2garminspi/docs/download_sources.png
+
+Regions definitions:
+
+http://osm2garmin.googlecode.com/svn/trunk/Osm2garminGUI/src/main/javahelp/org/mantlik/osm2garminspi/docs/regions.png
+
+=Development=
+Please report bugs or propose enhancements and new features at http://code.google.com/p/osm2garmin/issues 
+or http://groups.google.com/group/osm2garmin-devel
+
+Source code checkout instructions: http://code.google.com/p/osm2garmin/source/checkout
+
+Java developers are welcome to submit proposed patches to the Issue tracker.
