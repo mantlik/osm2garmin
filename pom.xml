@@ -26,9 +26,21 @@
         </dependencies>
     </dependencyManagement>
 
+    <distributionManagement>
+        <repository>
+            <id>releases</id>
+            <url>http://host.mantlik.cz/nexus/content/groups/public/repositories/releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>snapshots</id>
+            <name>Internal Snapshots</name>
+            <url>http://host.mantlik.cz/nexus/content/repositories/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
+
     <scm>
-        <connection>scm:svn:https://host.mantlik.cz/svn/FSurveyApplication/trunk</connection>
-        <developerConnection>scm:svn:https://host.mantlik.cz/svn/FSurveyApplication/trunk</developerConnection>
+        <connection>scm:svn:http://osm2garmin.googlecode.com/svn/trunk</connection>
+        <developerConnection>scm:svn:https://osm2garmin.googlecode.com/svn/trunk/</developerConnection>
     </scm>
 
     <build>
@@ -190,6 +202,11 @@
                             <version>0.1.42</version>
                         </dependency>
                     </dependencies>
+                </plugin>
+                <plugin>
+                    <groupId>com.googlecode.maven-gcu-plugin</groupId>
+                    <artifactId>maven-gcu-plugin</artifactId>
+                    <version>1.1</version>
                 </plugin>
             </plugins>
         </pluginManagement>
