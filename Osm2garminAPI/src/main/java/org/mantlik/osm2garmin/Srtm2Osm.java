@@ -70,6 +70,7 @@ public class Srtm2Osm extends ThreadProcessor {
         int plotMinorThreshold = Integer.parseInt(parameters.getProperty("plot_minor_threshold"));
         int plotMediumThreshold = Integer.parseInt(parameters.getProperty("plot_medium_threshold"));
         int contoursDensity = Integer.parseInt(parameters.getProperty("contours_density", "1"));
+        ArrayList<Contour> gridcont = new ArrayList<Contour>();
         for (int la = 0; la < srtmStep; la++) {
             for (int lo = 0; lo < srtmStep; lo++) {
                 coords = Math.abs(lat + la) + (lat + la > 0 ? "N " : "S ") + Math.abs(lon + lo) + (lon + lo > 0 ? "E" : "W");
@@ -83,6 +84,7 @@ public class Srtm2Osm extends ThreadProcessor {
                 float[][] data = new float[121][121];
                 setStatus("Contours " + coords + ": Making contours.");
                 try {
+                    gridcont.clear();
                     for (int i = 0; i < 10; i++) {
                         for (int j = 0; j < 10; j++) {
                             int mindata = Integer.MAX_VALUE;
@@ -116,10 +118,13 @@ public class Srtm2Osm extends ThreadProcessor {
                             Contours contoursMaker = new Contours(data, 121, 121, 1.0d * lat + la + i / 10d - offsLat,
                                     1.0d * lon + lo + j / 10d - offsLon, 1d / 1200d, interval, 32768.0d);
                             ArrayList c = contoursMaker.makeContours();
-                            addContours(contours, c);
+                            addContours(gridcont, c, null);
                             setStatus("Contours " + coords + ": Making contours - " + (10 * i + j) + " %");
                         }
                     }
+                    String prefix = "Contours " + coords + ": Joining contours " + 
+                            gridcont.size() + "->" + contours.size() + " ";
+                    addContours(contours, gridcont, prefix);
                 } catch (Exception ex) {
                     Logger.getLogger(Srtm2Osm.class.getName()).log(Level.SEVERE, "", ex);
                     setStatus("Contours " + coords + ": Contours creation failed.");
@@ -127,9 +132,10 @@ public class Srtm2Osm extends ThreadProcessor {
                 }
             }
         }
+        coords = Math.abs(lat) + (lat > 0 ? "N " : "S ") + Math.abs(lon) + (lon > 0 ? "E" : "W");
+        setStatus("Contours " + coords + ": Checking contours density.");
         checkContoursDensity(contours, 1200 * srtmStep + 1, 1200 * srtmStep + 1, 1.0d * lat - offsLat,
                 1.0d * lon - offsLon, 1d / 1200d, contoursDensity, majorInterval);
-        coords = Math.abs(lat) + (lat > 0 ? "N " : "S ") + Math.abs(lon) + (lon > 0 ? "E" : "W");
         if (contours == null || contours.isEmpty()) {
             setStatus("Contours " + coords + ": No contours created.");
             setState(COMPLETED);
@@ -166,8 +172,9 @@ public class Srtm2Osm extends ThreadProcessor {
     /*
      * Add contours from list c to listo contours, merge where possible
      */
-    private void addContours(ArrayList<Contour> contours, ArrayList<Contour> add) {
-        for (Contour c : add) {
+    private void addContours(ArrayList<Contour> contours, ArrayList<Contour> add, String logPrefix) {
+        for (int i = 0; i < add.size(); i++) {
+            Contour c = add.get(i);
             if (c.getData().size() < 2) {
                 continue;
             }
@@ -199,6 +206,9 @@ public class Srtm2Osm extends ThreadProcessor {
             }
             if (!finished) {
                 contours.add(c);
+            }
+            if (logPrefix != null) {
+                setStatus(logPrefix + (int)(100.0*i/add.size()) + " %");
             }
         }
     }
