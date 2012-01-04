@@ -56,7 +56,21 @@ public class Point {
         this.y = y;
     }
     
-    public boolean equals(Point p) {
-        return ((x==p.getX()) && (y==p.getY()));
+    @Override
+    public boolean equals(Object p) {
+        if (p.getClass().isAssignableFrom(Point.class)) {
+            Point pp = (Point)p;
+            return ((x==pp.getX()) && (y==pp.getY()));
+        }
+        return this.equals(p);
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 17 * hash + (int) (Double.doubleToLongBits(this.x) ^ (Double.doubleToLongBits(this.x) >>> 32));
+        hash = 17 * hash + (int) (Double.doubleToLongBits(this.y) ^ (Double.doubleToLongBits(this.y) >>> 32));
+        return hash;
+    }
+    
 }
