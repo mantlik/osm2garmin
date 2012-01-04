@@ -133,16 +133,17 @@ public class OsmMaker extends ThreadProcessor {
                     splitterLoader, args);
         } catch (InvocationTargetException ex) {
             Throwable exx = ex.getTargetException();
-            region.splitterMaxAreas = region.splitterMaxAreas / 2;
-            if (region.splitterMaxAreas > 10) {
-                setStatus("Splitter out of memory. Restarting with max_areas=" + region.splitterMaxAreas);
-                System.err.println(exx.getMessage());
-                region.setState(Region.CONTOURS_READY);
+            region.splitterMaxAreas = Math.max(1, region.splitterMaxAreas / 2);
+            setStatus("Splitter out of memory. Restarting with max_areas=" + region.splitterMaxAreas);
+            System.err.println(exx.getMessage());
+            try {
+                Thread.sleep(10000);
+            } catch (InterruptedException ex1) {
+                setState(ERROR);
+                setStatus("Interrupted.");
                 return;
             }
-            Logger.getLogger(OsmMaker.class.getName()).log(Level.SEVERE, null, ex);
-            setState(ERROR);
-            setStatus(ex.getMessage());
+            region.setState(Region.CONTOURS_READY);
             return;
         } catch (Exception ex) {
             Logger.getLogger(OsmMaker.class.getName()).log(Level.SEVERE, null, ex);
