@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -173,6 +174,16 @@ public class Srtm2Osm extends ThreadProcessor {
      * Add contours from list c to listo contours, merge where possible
      */
     private void addContours(ArrayList<Contour> contours, ArrayList<Contour> add, String logPrefix) {
+        HashMap<Point, Integer> starts = new HashMap <Point, Integer>();
+        HashMap<Point, Integer> ends = new HashMap <Point, Integer>();
+        for (int i=0; i<contours.size(); i++) {
+            Contour c = contours.get(i);
+            if (c.isClosed() || c.getData().size() < 2) {
+                continue;
+            }
+            starts.put(c.getData().get(0), i);
+            ends.put(c.getData().get(c.getData().size()-1), i);
+        }
         for (int i = 0; i < add.size(); i++) {
             Contour c = add.get(i);
             if (c.getData().size() < 2) {
@@ -183,29 +194,35 @@ public class Srtm2Osm extends ThreadProcessor {
                 continue;
             }
             boolean finished = false;
-            for (Contour cc : contours) {
-                if (cc.isClosed()) {
-                    continue;
-                }
+            Contour cc = null;
+            Point newstart = c.getData().get(0);
+            Point newend = c.getData().get(c.getData().size() - 1);
+            if (starts.containsKey(newend)) {
+                cc = contours.get(starts.get(newend));
+            } else if (ends.containsKey(newstart)) {
+                cc = contours.get(ends.get(newstart));
+            }
+            if (cc != null && (! cc.isClosed())) {
                 Point start = cc.getData().get(0);
                 Point end = cc.getData().get(cc.getData().size() - 1);
-                Point newstart = c.getData().get(0);
-                Point newend = c.getData().get(c.getData().size() - 1);
                 if (end.equals(newstart)) {
+                    int j = ends.remove(newstart);
+                    ends.put(newend, j);
                     contours.remove(cc);
                     contours.add(joinContours(cc, c));
                     finished = true;
-                    break;
-                }
-                if (newend.equals(start)) {
+                } else if (newend.equals(start)) {
+                    int j = starts.remove(newend);
+                    starts.put(newstart, j);
                     contours.remove(cc);
                     contours.add(joinContours(c, cc));
                     finished = true;
-                    break;
                 }
             }
             if (!finished) {
                 contours.add(c);
+                starts.put(newstart, contours.size()-1);
+                ends.put(newend, contours.size()-1);
             }
             if (logPrefix != null) {
                 setStatus(logPrefix + (int)(100.0*i/add.size()) + " %");
