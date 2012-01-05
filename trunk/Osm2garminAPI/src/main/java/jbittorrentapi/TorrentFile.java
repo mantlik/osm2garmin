@@ -144,11 +144,16 @@ public class TorrentFile {
     public void changeAnnounce() {
         if (!announceList.isEmpty()) {
             ArrayList<String> tier = announceList.get(currentTier);
-            if (currentTierTry > tier.size() && announceList.size()>currentTier+1) {
-                currentTier++;
+            if (currentTierTry > tier.size() ) {
+                if (announceList.size()>currentTier+1) {
+                    currentTier++;
+                } else {
+                    currentTier = 0;
+                }
                 currentTierTry = 0;
                 tier = announceList.get(currentTier);
             }
+            currentTierTry++;
             int randomIndex = (int) (Math.random() * tier.size());  // select randomly (not exactly follows specification)
             announceURL = tier.get(randomIndex);
             System.out.println("Tracker changed to: "+announceURL+".");

@@ -42,9 +42,7 @@ import java.net.UnknownHostException;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.BufferedInputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
+import java.net.*;
 
 /**
  * Class providing methods to enable communication between the client and a
@@ -217,7 +215,8 @@ public class PeerUpdater extends Thread {
     }
 
     /**
-     * Thread method that regularly contacts the tracker and process its response
+     * Thread method that regularly contacts the tracker and process its
+     * response
      */
     @Override
     public void run() {
@@ -337,24 +336,30 @@ public class PeerUpdater extends Thread {
             TorrentFile t, long dl, long ul,
             long left, String event) {
         try {
-            URL source = new URL(t.announceURL + "?info_hash="
-                    + t.info_hash_as_url + "&peer_id="
-                    + Utils.byteArrayToURLString(id) + "&port="
-                    + this.listeningPort
-                    + "&downloaded=" + dl + "&uploaded=" + ul
-                    + "&left="
-                    + left + "&numwant=100&compact=1" + event);
-            System.out.println("Contact Tracker. URL source = " + source);   //DAVID
-            URLConnection uc = source.openConnection();
-            InputStream is = uc.getInputStream();
+            Map m = new HashMap();
+            if (t.announceURL.startsWith("udp://")) {
+                t.changeAnnounce();
+                return null;
+            } else {
+                URL source = new URL(t.announceURL + "?info_hash="
+                        + t.info_hash_as_url + "&peer_id="
+                        + Utils.byteArrayToURLString(id) + "&port="
+                        + this.listeningPort
+                        + "&downloaded=" + dl + "&uploaded=" + ul
+                        + "&left="
+                        + left + "&numwant=100&compact=1" + event);
+                System.out.println("Contact Tracker. URL source = " + source);   //DAVID
+                URLConnection uc = source.openConnection();
+                InputStream is = uc.getInputStream();
 
-            BufferedInputStream bis = new BufferedInputStream(is);
+                BufferedInputStream bis = new BufferedInputStream(is);
 
-            // Decode the tracker bencoded response
-            Map m = BDecoder.decode(bis);
+                // Decode the tracker bencoded response
+                m = BDecoder.decode(bis);
+                bis.close();
+                is.close();
+            }
             System.out.println(m);
-            bis.close();
-            is.close();
 
             return m;
         } catch (MalformedURLException murle) {
@@ -363,9 +368,9 @@ public class PeerUpdater extends Thread {
         } catch (UnknownHostException uhe) {
             this.fireUpdateFailed(3, "Tracker not available... Retrying...");
         } catch (IOException ioe) {
-            this.fireUpdateFailed(4, "Tracker unreachable... Retrying");
+            this.fireUpdateFailed(4, "Tracker unreachable - " + ioe.getMessage());
         } catch (Exception e) {
-            this.fireUpdateFailed(5, "Internal error");
+            this.fireUpdateFailed(5, "Internal error - " + e.getMessage());
         }
         return null;
     }
