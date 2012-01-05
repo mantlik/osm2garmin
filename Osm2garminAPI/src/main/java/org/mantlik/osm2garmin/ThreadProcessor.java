@@ -24,7 +24,6 @@ package org.mantlik.osm2garmin;
 import java.beans.PropertyChangeSupport;
 import java.util.Properties;
 import org.openide.util.RequestProcessor;
-import org.openide.util.RequestProcessor.Task;
 
 /**
  *

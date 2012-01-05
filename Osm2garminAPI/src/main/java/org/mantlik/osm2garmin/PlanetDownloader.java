@@ -120,6 +120,10 @@ public class PlanetDownloader extends ThreadProcessor {
             while (i < 14) {
                 planet_found = true;
                 String planetUrl = mirror + "planet-" + sdf.format(planetDate) + ".osm.pbf";
+                if (! "http".equals(parameters.getProperty("download_method", "http"))) {
+                    planetUrl = parameters.getProperty("torrent_download_url") 
+                            + "planet-" + sdf.format(planetDate) + ".osm.bz2" + ".torrent";
+                }
                 url = new URL(planetUrl);
                 HttpURLConnection connection = null;
                 try {
