@@ -30,8 +30,12 @@ import java.net.*;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.jar.JarOutputStream;
+import java.util.jar.Pack200;
+import java.util.jar.Pack200.Unpacker;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.zip.GZIPInputStream;
 
 /**
  *
@@ -142,7 +146,7 @@ public class Osm2garmin implements PropertyChangeListener {
             while (s.hasNext()) {
                 String[] l = s.nextLine().split(" +");
                 if (l.length >= 5) {
-                    Region region = new Region(l[4], parameters.getProperty("maps_dir"), 
+                    Region region = new Region(l[4], parameters.getProperty("maps_dir"),
                             parameters.getProperty("delete_old_maps", "false").equals("true"));
                     region.lon1 = Float.parseFloat(l[0]);
                     region.lat1 = Float.parseFloat(l[1]);
@@ -468,9 +472,18 @@ public class Osm2garmin implements PropertyChangeListener {
         libfile.mkdirs();
         String[] listfiles = getResourceListing(Osm2garmin.class, "org/mantlik/osm2garmin/" + library + "/");
         for (String name : listfiles) {
+           InputStream stream = Osm2garmin.class.getResourceAsStream(library + "/" + name);
             if (!name.equals("")) {
-                InputStream stream = Osm2garmin.class.getResourceAsStream(library + "/" + name);
-                copyFile(stream, new File(libpath + name));
+                if (name.endsWith("pack.gz")) {
+                    String jarname = name.replace("pack.gz", "jar");
+                    InputStream input = new GZIPInputStream(stream);
+                    Unpacker unpacker = Pack200.newUnpacker();
+                    JarOutputStream jo = new JarOutputStream(new FileOutputStream(libpath+jarname));
+                    unpacker.unpack(input, jo);
+                    jo.close();
+                } else {
+                    copyFile(stream, new File(libpath + name));
+                }
             }
         }
     }
@@ -535,7 +548,7 @@ public class Osm2garmin implements PropertyChangeListener {
     }
 
     /**
-     * This function will recursivly delete directories and files.
+     * This function will recursively delete directories and files.
      *
      * @param path File or Directory to be deleted
      * @return true indicates success.
