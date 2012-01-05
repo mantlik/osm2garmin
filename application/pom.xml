@@ -167,7 +167,8 @@
                                         <include name="*.sh" />
                                     </fileset>
                                     <filtermapper>
-                                        <replacestring from="${project.version}" to="${project.version}-build-${build.no}" />
+                                        <replacestring from="${project.version}-windows" to="${project.version}-build-${buildNumber}-windows" />
+                                        <replacestring from="${project.version}-linux" to="${project.version}-build-${buildNumber}-linux" />
                                     </filtermapper>
                                 </move>
                             </target>
@@ -190,39 +191,47 @@
             <plugin>
                 <groupId>com.googlecode.maven-gcu-plugin</groupId>
                 <artifactId>maven-gcu-plugin</artifactId>
-                <configuration>
-                    <projectName>osm2garmin</projectName>
-                    <failsOnError>false</failsOnError>
-                    <serverId>code.google.com</serverId>
-                    <uploads>
-                        <upload>
-                            <file>${project.build.directory}/Documentation-${project.version}-build-${buildNumber}.pdf</file>
-                            <labels>
-                                <label>Type-Docs</label>
-                                <label>Featured</label>
-                            </labels>
-                            <summary>User's guide in PDF format</summary>
-                        </upload>
-                        <upload>
-                            <file>${project.build.directory}/Osm2garminGUI-${project.version}-build-${buildNumber}-linux.sh</file>
-                            <labels>
-                                <label>OpSys-Linux</label>
-                                <label>Type-Installer</label>
-                                <label>Featured</label>
-                            </labels>
-                            <summary>Osm2Garmin GUI Linux installer</summary>
-                        </upload>
-                        <upload>
-                            <file>${project.build.directory}/Osm2garminGUI-${project.version}-build-${buildNumber}-windows.exe</file>
-                            <labels>
-                                <label>OpSys-Windows</label>
-                                <label>Type-Installer</label>
-                                <label>Featured</label>
-                            </labels>
-                            <summary>Osm2Garmin GUI Windows installer</summary>
-                        </upload>
-                    </uploads>
-                </configuration>
+                <executions>
+                    <execution>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>upload</goal>
+                        </goals>
+                        <configuration>
+                            <projectName>osm2garmin</projectName>
+                            <failsOnError>false</failsOnError>
+                            <serverId>code.google.com</serverId>
+                            <uploads>
+                                <upload>
+                                    <file>${project.build.directory}/Documentation-${project.version}-build-${buildNumber}.pdf</file>
+                                    <labels>
+                                        <label>Type-Docs</label>
+                                        <label>Featured</label>
+                                    </labels>
+                                    <summary>User's guide in PDF format</summary>
+                                </upload>
+                                <upload>
+                                    <file>${project.build.directory}/Osm2garminGUI-${project.version}-build-${buildNumber}-linux.sh</file>
+                                    <labels>
+                                        <label>OpSys-Linux</label>
+                                        <label>Type-Installer</label>
+                                        <label>Featured</label>
+                                    </labels>
+                                    <summary>Osm2Garmin GUI Linux installer</summary>
+                                </upload>
+                                <upload>
+                                    <file>${project.build.directory}/Osm2garminGUI-${project.version}-build-${buildNumber}-windows.exe</file>
+                                    <labels>
+                                        <label>OpSys-Windows</label>
+                                        <label>Type-Installer</label>
+                                        <label>Featured</label>
+                                    </labels>
+                                    <summary>Osm2Garmin GUI Windows installer</summary>
+                                </upload>
+                            </uploads>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <!-- To run NbModuleSuite in integration-test phase:
             <plugin>
