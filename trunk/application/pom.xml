@@ -90,10 +90,6 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-            </plugin>
-            <plugin>
                 <artifactId>docbkx-maven-plugin</artifactId>
                 <groupId>com.agilejava.docbkx</groupId>
                 <configuration>
@@ -140,6 +136,8 @@
                             <fileset dir="${basedir}/../Osm2garminGUI/src/main/javahelp/org/mantlik/osm2garminspi/docs/" />
                         </copy>
                         <copy file="${basedir}/target/docbkx/Documentation/Documentation.html" tofile="${basedir}/target/docbkx/Documentation/index.html" failonerror="false" />
+                        <copy file="${basedir}/target/docbkx/Documentation.pdf" 
+                              tofile="${basedir}/target/Documentation-${project.version}-build-${buildNumber}.pdf" failonerror="false" />
                     </postProcess>
                 </configuration>
                 <executions>
@@ -153,6 +151,43 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <move todir="${project.build.directory}" verbose="true">
+                                    <fileset dir="${project.build.directory}">
+                                        <include name="*.exe" />
+                                        <include name="*.sh" />
+                                    </fileset>
+                                    <filtermapper>
+                                        <replacestring from="${project.version}" to="${project.version}-build-${build.no}" />
+                                    </filtermapper>
+                                </move>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.ant</groupId>
+                        <artifactId>ant-jsch</artifactId>
+                        <version>1.8.2</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>com.jcraft</groupId>
+                        <artifactId>jsch</artifactId>
+                        <version>0.1.42</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+            <plugin>
                 <groupId>com.googlecode.maven-gcu-plugin</groupId>
                 <artifactId>maven-gcu-plugin</artifactId>
                 <configuration>
@@ -161,7 +196,7 @@
                     <serverId>code.google.com</serverId>
                     <uploads>
                         <upload>
-                            <file>${project.build.directory}/docbkx/Documentation.pdf</file>
+                            <file>${project.build.directory}/Documentation-${project.version}-build-${buildNumber}.pdf</file>
                             <labels>
                                 <label>Type-Docs</label>
                                 <label>Featured</label>
@@ -169,7 +204,7 @@
                             <summary>User's guide in PDF format</summary>
                         </upload>
                         <upload>
-                            <file>${project.build.directory}/Osm2garminGUI-${project.version}-linux.sh</file>
+                            <file>${project.build.directory}/Osm2garminGUI-${project.version}-build-${buildNumber}-linux.sh</file>
                             <labels>
                                 <label>OpSys-Linux</label>
                                 <label>Type-Installer</label>
@@ -178,7 +213,7 @@
                             <summary>Osm2Garmin GUI Linux installer</summary>
                         </upload>
                         <upload>
-                            <file>${project.build.directory}/Osm2garminGUI-${project.version}-windows.exe</file>
+                            <file>${project.build.directory}/Osm2garminGUI-${project.version}-build-${buildNumber}-windows.exe</file>
                             <labels>
                                 <label>OpSys-Windows</label>
                                 <label>Type-Installer</label>
