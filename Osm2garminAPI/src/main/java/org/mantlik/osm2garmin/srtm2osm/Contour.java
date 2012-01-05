@@ -97,7 +97,6 @@ public class Contour {
         } else {
             s.println("<tag k=\"contour_ext\" v=\"elevation_minor\" />");
         }
-        s.println("</way>\n");
-        return;
+        s.println("</way>");
     }
 }

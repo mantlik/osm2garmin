@@ -155,7 +155,7 @@ public class ContoursUpdater extends ThreadProcessor {
                     Runtime.getRuntime().gc();
                     try {
                         while (Runtime.getRuntime().freeMemory() + Runtime.getRuntime().maxMemory()
-                                - Runtime.getRuntime().totalMemory() < 400 * 1024 * 1024) {
+                                - Runtime.getRuntime().totalMemory() < 500 * 1024 * 1024) {
                             setStatus(coords + "Not enough memory - waiting"
                                     + " - " + region.name + " " + perc + " % completed.");
                             Thread.sleep(10000);
