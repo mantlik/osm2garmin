@@ -523,9 +523,9 @@ final class Osm2garminPanel extends javax.swing.JPanel {
         cyclingFeaturesItem.setSelected(NbPreferences.forModule(Osm2garmin.class).get("cycling_features",
                 "false").equals("true"));
         srtmStepItem.setText(NbPreferences.forModule(Osm2garmin.class).get("srtm_step",
-                "2"));
+                "5"));
         contoursDensityItem.setText(NbPreferences.forModule(Osm2garmin.class).get("contours_density",
-                "1"));
+                "2"));
     }
 
     void store() {
