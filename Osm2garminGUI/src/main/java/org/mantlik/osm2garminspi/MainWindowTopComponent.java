@@ -42,8 +42,8 @@ import org.openide.DialogDisplayer;
 import org.openide.NotifyDescriptor;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
-import org.openide.util.*;
 import org.openide.util.NbBundle.Messages;
+import org.openide.util.*;
 import org.openide.windows.IOProvider;
 import org.openide.windows.InputOutput;
 import org.openide.windows.TopComponent;
@@ -650,7 +650,7 @@ public final class MainWindowTopComponent extends TopComponent implements Proper
         userdir = NbPreferences.forModule(Osm2garmin.class).get("userdir", userdir);
         par.setProperty("regions", NbPreferences.forModule(Osm2garmin.class).get("regions", userdir + "regions.txt"));
         par.setProperty("maps_dir", NbPreferences.forModule(Osm2garmin.class).get("maps_dir", userdir + "maps/"));
-        par.setProperty("delete_old_maps", NbPreferences.forModule(Osm2garmin.class).get("delete_old_maps", "false"));
+        par.setProperty("delete_old_maps", NbPreferences.forModule(Osm2garmin.class).get("delete_old_maps", "true"));
         par.setProperty("contours_dir", NbPreferences.forModule(Osm2garmin.class).get("contours_dir", userdir + "contours/"));
         par.setProperty("planet_file", NbPreferences.forModule(Osm2garmin.class).get("planet_file", userdir + "planet.osm.pbf"));
         par.setProperty("planet_backup", NbPreferences.forModule(Osm2garmin.class).get("planet_backup", userdir + "planet_backup.osm.pbf"));

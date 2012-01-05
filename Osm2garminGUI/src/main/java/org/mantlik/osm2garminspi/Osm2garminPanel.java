@@ -507,7 +507,7 @@ final class Osm2garminPanel extends javax.swing.JPanel {
         mapsdirItem.setText(NbPreferences.forModule(Osm2garmin.class).get("maps_dir",
                 System.getProperty("netbeans.user") + "/maps/"));
         deleteOldMapsItem.setSelected(NbPreferences.forModule(Osm2garmin.class).get("delete_old_maps",
-                "false").equals("true"));
+                "true").equals("true"));
         srtmdirItem.setText(NbPreferences.forModule(Osm2garmin.class).get("srtm_dir",
                 System.getProperty("netbeans.user") + "/SRTM/"));
         minorintervalItem.setText(NbPreferences.forModule(Osm2garmin.class).get("contour_minor_interval",
