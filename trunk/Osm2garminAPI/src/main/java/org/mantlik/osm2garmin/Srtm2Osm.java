@@ -33,6 +33,7 @@ import org.mantlik.osm2garmin.srtm2osm.Contour;
 import org.mantlik.osm2garmin.srtm2osm.Contours;
 import org.mantlik.osm2garmin.srtm2osm.Point;
 import org.mantlik.osm2garmin.srtm2osm.Srtm;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -123,8 +124,11 @@ public class Srtm2Osm extends ThreadProcessor {
                             setStatus("Contours " + coords + ": Making contours - " + (10 * i + j) + " %");
                         }
                     }
-                    String prefix = "Contours " + coords + ": Joining contours " + 
-                            gridcont.size() + "->" + contours.size() + " ";
+                    setStatus("Contours " + coords + ": Checking contours density.");
+                    checkContoursDensity(gridcont, 1201, 1201, 1.0d * lat + la - offsLat,
+                            1.0d * lon + lo - offsLon, 1d / 1200d, contoursDensity, majorInterval);
+                    String prefix = "Contours " + coords + ": Joining contours "
+                            + gridcont.size() + "->" + contours.size() + " ";
                     addContours(contours, gridcont, prefix);
                 } catch (Exception ex) {
                     Logger.getLogger(Srtm2Osm.class.getName()).log(Level.SEVERE, "", ex);
@@ -134,9 +138,6 @@ public class Srtm2Osm extends ThreadProcessor {
             }
         }
         coords = Math.abs(lat) + (lat > 0 ? "N " : "S ") + Math.abs(lon) + (lon > 0 ? "E" : "W");
-        setStatus("Contours " + coords + ": Checking contours density.");
-        checkContoursDensity(contours, 1200 * srtmStep + 1, 1200 * srtmStep + 1, 1.0d * lat - offsLat,
-                1.0d * lon - offsLon, 1d / 1200d, contoursDensity, majorInterval);
         if (contours == null || contours.isEmpty()) {
             setStatus("Contours " + coords + ": No contours created.");
             setState(COMPLETED);
@@ -169,20 +170,20 @@ public class Srtm2Osm extends ThreadProcessor {
         ss.close();
         setState(COMPLETED);
     }
-
+    private HashMap<Point, Integer> starts = new HashMap<Point, Integer>();
+    private HashMap<Point, Integer> ends = new HashMap<Point, Integer>();
     /*
      * Add contours from list c to listo contours, merge where possible
      */
+
     private void addContours(ArrayList<Contour> contours, ArrayList<Contour> add, String logPrefix) {
-        HashMap<Point, Integer> starts = new HashMap <Point, Integer>();
-        HashMap<Point, Integer> ends = new HashMap <Point, Integer>();
-        for (int i=0; i<contours.size(); i++) {
+        for (int i = 0; i < contours.size(); i++) {
             Contour c = contours.get(i);
             if (c.isClosed() || c.getData().size() < 2) {
                 continue;
             }
             starts.put(c.getData().get(0), i);
-            ends.put(c.getData().get(c.getData().size()-1), i);
+            ends.put(c.getData().get(c.getData().size() - 1), i);
         }
         for (int i = 0; i < add.size(); i++) {
             Contour c = add.get(i);
@@ -202,7 +203,7 @@ public class Srtm2Osm extends ThreadProcessor {
             } else if (ends.containsKey(newstart)) {
                 cc = contours.get(ends.get(newstart));
             }
-            if (cc != null && (! cc.isClosed())) {
+            if (cc != null && (!cc.isClosed())) {
                 Point start = cc.getData().get(0);
                 Point end = cc.getData().get(cc.getData().size() - 1);
                 if (end.equals(newstart)) {
@@ -221,13 +222,15 @@ public class Srtm2Osm extends ThreadProcessor {
             }
             if (!finished) {
                 contours.add(c);
-                starts.put(newstart, contours.size()-1);
-                ends.put(newend, contours.size()-1);
+                starts.put(newstart, contours.size() - 1);
+                ends.put(newend, contours.size() - 1);
             }
             if (logPrefix != null) {
-                setStatus(logPrefix + (int)(100.0*i/add.size()) + " %");
+                setStatus(logPrefix + (int) (100.0 * i / add.size()) + " %");
             }
         }
+        starts.clear();
+        ends.clear();
     }
 
     /*
@@ -255,10 +258,9 @@ public class Srtm2Osm extends ThreadProcessor {
         int[][] density = new int[nlat][nlon];
         int[][] majorDensity = new int[nlat][nlon];
         for (Contour contour : contours) {
-            ArrayList<Point> data = contour.getData();
-            for (int i = 1; i < data.size(); i++) {
-                Point p1 = data.get(i - 1);
-                Point p2 = data.get(i);
+            for (int i = 1; i < contour.getData().size(); i++) {
+                Point p1 = contour.getData().get(i - 1);
+                Point p2 = contour.getData().get(i);
                 double la = (p1.getX() + p2.getX()) / 2;
                 double lo = (p1.getY() + p2.getY()) / 2;
                 int ii = (int) ((la - startlat) / delta);
@@ -271,10 +273,9 @@ public class Srtm2Osm extends ThreadProcessor {
         }
         for (int k = 0; k < contours.size(); k++) {
             Contour contour = contours.get(k);
-            ArrayList<Point> data = contour.getData();
-            for (int i = 1; i < data.size(); i++) {
-                Point p1 = data.get(i - 1);
-                Point p2 = data.get(i);
+            for (int i = 1; i < contour.getData().size(); i++) {
+                Point p1 = contour.getData().get(i - 1);
+                Point p2 = contour.getData().get(i);
                 double la = (p1.getX() + p2.getX()) / 2;
                 double lo = (p1.getY() + p2.getY()) / 2;
                 int ii = (int) ((la - startlat) / delta);
@@ -285,15 +286,16 @@ public class Srtm2Osm extends ThreadProcessor {
                     // remove segment from contour
                     contour.setClosed(false);
                     if (i == 1) { // first segment, delete first point
-                        data.remove(0);
-                    } else if (i == (data.size() - 1)) { //last segment, delete last point
-                        data.remove(i);
+                        contour.getData().remove(0);
+                        i = i - 1;  // next segment replaces deleted one - recheck
+                    } else if (i == (contour.getData().size() - 1)) { //last segment, delete last point
+                        contour.getData().remove(i);
                     } else {
                         // middle segment - break contour
                         Contour newContour = new Contour();
                         newContour.setZ(contour.getZ());
-                        while (data.size() > i) {
-                            newContour.getData().add(data.remove(i));
+                        while (contour.getData().size() > i) {
+                            newContour.getData().add(contour.getData().remove(i));
                         }
                         contours.add(newContour);
                     }
