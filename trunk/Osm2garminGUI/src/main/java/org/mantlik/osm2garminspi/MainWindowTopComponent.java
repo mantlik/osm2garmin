@@ -36,6 +36,7 @@ import java.util.Set;
 import java.util.prefs.BackingStoreException;
 import javax.swing.JTextField;
 import jbittorrentapi.DownloadManager;
+import jbittorrentapi.WebseedTask;
 import org.mantlik.osm2garmin.*;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.DialogDisplayer;
@@ -634,7 +635,8 @@ public final class MainWindowTopComponent extends TopComponent implements Proper
                 }
                 upSpeed = upSpeed / ulsp.length;
                 downSpeed = downSpeed / dlsp.length;
-                text = peers + " peers, downloaded " + downloaded / 1024 / 1024
+                String webseed = WebseedTask.webseedActive ? "+webseed" : "";
+                text = peers + webseed + " peers, downloaded " + downloaded / 1024 / 1024
                         + " mb / uploaded " + uploaded / 1024 / 1024 + " mb, D/U rate "
                         + df1.format(downSpeed) + " / " + df1.format(upSpeed) + " kb/s";
             } else {
@@ -687,6 +689,14 @@ public final class MainWindowTopComponent extends TopComponent implements Proper
         par.setProperty("cycling_features", NbPreferences.forModule(Osm2garmin.class).get("cycling_features", "false"));
         par.setProperty("srtm_step", NbPreferences.forModule(Osm2garmin.class).get("srtm_step", "5"));
         par.setProperty("contours_density", NbPreferences.forModule(Osm2garmin.class).get("contours_density", "2"));
+        String settings = par.getProperty("userdir") + "/settings.properties";
+        if (new File(settings).exists()) {
+            try {
+                par.load(new FileInputStream(settings));
+            } catch (IOException ex) {
+                Exceptions.printStackTrace(ex);
+            }
+        }
         return par;
     }
 

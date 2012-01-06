@@ -264,7 +264,7 @@ public class PeerUpdater extends Thread {
      * @param m The tracker response as a Map
      * @return LinkedHashMap A HashMap containing the peers and their ID as keys
      */
-    public synchronized LinkedHashMap<String, Peer> processResponse(Map m) {
+    public LinkedHashMap<String, Peer> processResponse(Map m) {
         LinkedHashMap<String, Peer> l = null;
         if (m != null) {
             if (m.containsKey("failure reason")) {
@@ -283,17 +283,17 @@ public class PeerUpdater extends Thread {
                 }
 
                 Object peers = m.get("peers");
-                ArrayList peerList = new ArrayList();
+                ArrayList newPeerList = new ArrayList();
                 l = new LinkedHashMap<String, Peer>();
                 if (peers instanceof List) {
-                    peerList.addAll((List) peers);
-                    if (peerList != null && peerList.size() > 0) {
-                        for (int i = 0; i < peerList.size(); i++) {
-                            String peerID = new String((byte[]) ((Map) (peerList.get(i))).get(
+                    newPeerList.addAll((List) peers);
+                    if (newPeerList != null && newPeerList.size() > 0) {
+                        for (int i = 0; i < newPeerList.size(); i++) {
+                            String peerID = new String((byte[]) ((Map) (newPeerList.get(i))).get(
                                     "peer_id"));
-                            String ipAddress = new String((byte[]) ((Map) (peerList.get(
+                            String ipAddress = new String((byte[]) ((Map) (newPeerList.get(
                                     i))).get("ip"));
-                            int port = ((Long) ((Map) (peerList.get(i))).get(
+                            int port = ((Long) ((Map) (newPeerList.get(i))).get(
                                     "port")).intValue();
                             Peer p = new Peer(peerID, ipAddress, port);
                             l.put(p.toString(), p);
@@ -332,7 +332,7 @@ public class PeerUpdater extends Thread {
      * @param event String
      * @return A Map containing the decoded tracker response
      */
-    public synchronized Map contactTracker(byte[] id,
+    public Map contactTracker(byte[] id,
             TorrentFile t, long dl, long ul,
             long left, String event) {
         try {

@@ -76,9 +76,12 @@ public class Srtm2Osm extends ThreadProcessor {
         for (int la = 0; la < srtmStep; la++) {
             for (int lo = 0; lo < srtmStep; lo++) {
                 coords = Math.abs(lat + la) + (lat + la > 0 ? "N " : "S ") + Math.abs(lon + lo) + (lon + lo > 0 ? "E" : "W");
-                setStatus("Contours " + coords + ": Downloading SRTM data.");
-                Srtm srtm = Srtm.get(lon + lo, lat + la, parameters);
-                if (srtm == null) {
+                Srtm srtm = null;
+                if (Srtm.exists(lon + lo, lat + la, parameters)) {
+                    setStatus("Contours " + coords + ": Downloading SRTM data.");
+                    srtm = Srtm.get(lon + lo, lat + la, parameters);
+                }
+                if (srtm==null) {
                     setStatus("Contours " + coords + ": No SRTM data.");
                     continue;
                 }
