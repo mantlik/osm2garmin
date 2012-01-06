@@ -129,7 +129,7 @@ public class PlanetUpdater extends ThreadProcessor {
                 l.add("file=" + Osm2garmin.userdir + "update.osc.gz");
                 args = l.toArray(new String[0]);
                 Osm2garmin.runExternal("org.openstreetmap.osmosis.core.Osmosis", "run", "osmosis",
-                        Osm2garmin.libClassLoader("osmosis", getClass().getClassLoader()), args);
+                        Osm2garmin.libClassLoader("osmosis", getClass().getClassLoader()), args, true);
             }
 
             File torrentFile = new File(parameters.getProperty("planet_file").replace(".osm.pbf", ".osm.bz2"));
@@ -202,7 +202,7 @@ public class PlanetUpdater extends ThreadProcessor {
                 args = largs.toArray(new String[0]);
 
                 Osm2garmin.runExternal("org.openstreetmap.osmosis.core.Osmosis", "run", "osmosis",
-                        Osm2garmin.libClassLoader("osmosis", getClass().getClassLoader()), args);
+                        Osm2garmin.libClassLoader("osmosis", getClass().getClassLoader()), args, true);
             }
 
             if ((!planetFile.exists()) || (planetFile.length() < oldPlanetFile.length())) {

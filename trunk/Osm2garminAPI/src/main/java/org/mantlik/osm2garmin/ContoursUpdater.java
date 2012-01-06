@@ -164,7 +164,7 @@ public class ContoursUpdater extends ThreadProcessor {
                         setStatus(coords + "Splitting contour data "
                                 + " - " + region.name + " " + perc + " % completed.");
                         //uk.me.parabola.splitter.Main.main(args);
-                        Osm2garmin.runExternal("uk.me.parabola.splitter.Main", "main", "splitter", null, args);
+                        Osm2garmin.runExternal("uk.me.parabola.splitter.Main", "main", "splitter", null, args, true);
                     } catch (Exception ex) {
                         Logger.getLogger(ContoursUpdater.class.getName()).log(Level.SEVERE, null, ex);
                         setState(ERROR);
@@ -204,7 +204,7 @@ public class ContoursUpdater extends ThreadProcessor {
                     args = aa.toArray(new String[0]);
                     try {
                         //uk.me.parabola.mkgmap.main.Main.main(args);
-                        Osm2garmin.runExternal("uk.me.parabola.mkgmap.main.Main", "main", "mkgmap", null, args);
+                        Osm2garmin.runExternal("uk.me.parabola.mkgmap.main.Main", "main", "mkgmap", null, args, true);
                     } catch (Exception ex) {
                         Logger.getLogger(ContoursUpdater.class.getName()).log(Level.SEVERE, null, ex);
                         setState(ERROR);
