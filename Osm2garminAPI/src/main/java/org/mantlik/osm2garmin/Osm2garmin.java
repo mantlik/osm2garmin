@@ -81,6 +81,7 @@ public class Osm2garmin implements PropertyChangeListener {
      *
      */
     public static String userdir = ""; // used by GUI to save temporary info
+    private static ArrayList<String> runningClasses = new ArrayList<String>();
 
     /**
      * @param args the command line arguments
@@ -314,15 +315,20 @@ public class Osm2garmin implements PropertyChangeListener {
 
     /**
      *
-     * @param extclass
-     * @param method
-     * @param library
-     * @param loader
-     * @param args
+     * @param extclass external class to run
+     * @param method main method in the extclass
+     * @param library library folder to load classes from
+     * @param loader classloader to use
+     * @param args parameters to pass to the method
+     * @param exclusive block until no other instance of the same class is
+     * running
      * @throws Exception
      */
     public static void runExternal(String extclass, String method, String library,
-            ClassLoader loader, String[] args) throws Exception {
+            ClassLoader loader, String[] args, boolean exclusive) throws Exception {
+        if (exclusive) {
+            waitExclusive(extclass);
+        }
         if (loader == null) {
             loader = libClassLoader(library);
         }
@@ -333,6 +339,9 @@ public class Osm2garmin implements PropertyChangeListener {
         m.setAccessible(true);
         m.invoke(null, (Object) args);
         Thread.currentThread().setContextClassLoader(currentLoader);
+        if (exclusive) {
+            endExclusive(extclass);
+        }
     }
 
     /**
@@ -472,13 +481,13 @@ public class Osm2garmin implements PropertyChangeListener {
         libfile.mkdirs();
         String[] listfiles = getResourceListing(Osm2garmin.class, "org/mantlik/osm2garmin/" + library + "/");
         for (String name : listfiles) {
-           InputStream stream = Osm2garmin.class.getResourceAsStream(library + "/" + name);
+            InputStream stream = Osm2garmin.class.getResourceAsStream(library + "/" + name);
             if (!name.equals("")) {
                 if (name.endsWith("pack.gz")) {
                     String jarname = name.replace("pack.gz", "jar");
                     InputStream input = new GZIPInputStream(stream);
                     Unpacker unpacker = Pack200.newUnpacker();
-                    JarOutputStream jo = new JarOutputStream(new FileOutputStream(libpath+jarname));
+                    JarOutputStream jo = new JarOutputStream(new FileOutputStream(libpath + jarname));
                     unpacker.unpack(input, jo);
                     jo.close();
                 } else {
@@ -572,5 +581,40 @@ public class Osm2garmin implements PropertyChangeListener {
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         changeSupport.firePropertyChange(evt);
+    }
+
+    /*
+     * Waits until no running instance of the same class runs
+     */
+    private static void waitExclusive(String extclass) throws InterruptedException {
+        while (isExclusive(extclass)) {
+            Thread.sleep(1000);
+            if (!isExclusive(extclass)) {
+                if (setExclusive(extclass)) {
+                    return;
+                }
+            }
+        }
+        if (!setExclusive(extclass)) {
+            waitExclusive(extclass);
+        }
+    }
+
+    private static synchronized boolean setExclusive(String extclass) {
+        if (runningClasses.contains(extclass)) {
+            return false;
+        }
+        runningClasses.add(extclass);
+        return true;
+    }
+
+    private static synchronized boolean isExclusive(String extclass) {
+        return runningClasses.contains(extclass);
+    }
+
+    private static synchronized void endExclusive(String extclass) {
+        while (runningClasses.contains(extclass)) {
+            runningClasses.remove(extclass);
+        }
     }
 }
