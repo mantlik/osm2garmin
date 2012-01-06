@@ -66,7 +66,7 @@ public class DownloadTask extends Thread implements IncomingListener,
     private static int nextId = 0;
     private int taskid;
     private int state = this.IDLE;
-    private boolean run = true;
+    boolean run = true;
     private byte[] fileID;
     private byte[] myID;
     public Peer peer;
@@ -75,7 +75,7 @@ public class DownloadTask extends Thread implements IncomingListener,
     public byte[] bitfield = null;
     private boolean isDownloading = false;
     private boolean isUploading = false;
-    private Piece downloadPiece = null;
+    Piece downloadPiece = null;
     private int offset = 0;
     private final EventListenerList listeners = new EventListenerList();
     private Socket peerConnection = null;

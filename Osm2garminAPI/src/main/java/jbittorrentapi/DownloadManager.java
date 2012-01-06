@@ -53,7 +53,7 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
 
     // Client ID
     private byte[] clientID;
-    private TorrentFile torrent = null;
+    TorrentFile torrent = null;
     private int maxConnectionNumber = 100;
     private int nbOfFiles = 0;
     private long length = 0;
@@ -77,6 +77,9 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
     private short optimisticUnchoke = 3;
     private boolean initialized = false;
     private int initProgress = 0;
+    long lastPieceReceived;
+    
+    static final String WEBSEED_ID = "webseed";
 
     /**
      * Create a new manager according to the given torrent and using the client
@@ -150,6 +153,7 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
             }
         }
         this.lastUnchoking = System.currentTimeMillis();
+        lastPieceReceived = System.currentTimeMillis();
         initialized = true;
     }
 
@@ -208,6 +212,12 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
     public void startTrackerUpdate() {
         if (!initialized) {
             init();
+        }
+        if (torrent.name.size() == 1) {
+            // start webseed for 1-file torrent only; multifile webseed not implemented.
+            DownloadTask dt = new WebseedTask(torrent.info_hash_as_binary, clientID, this);
+            task.put(WEBSEED_ID, dt);
+            dt.start();
         }
         this.pu = new PeerUpdater(this.clientID, this.torrent);
         this.pu.addPeerUpdateListener(this);
@@ -523,9 +533,9 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
                         || (this.isComplete.cardinality() > this.nbPieces - 3))
                         && //(this.isRequested.cardinality() == this.nbPieces)) &&
                         (!this.isPieceComplete(i))
-                        && this.peerAvailabilies.get(id) != null) {
+                        && (WEBSEED_ID.equals(id) || this.peerAvailabilies.get(id) != null)) {
 
-                    if (this.peerAvailabilies.get(id).get(i)) {
+                    if (WEBSEED_ID.equals(id) || this.peerAvailabilies.get(id).get(i)) {
                         possible.add(i);
                     }
                 }
@@ -587,7 +597,7 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
      * @param i int
      * @param complete boolean
      */
-    public synchronized void pieceCompleted(String peerID, int i,
+    public void pieceCompleted(String peerID, int i,
             boolean complete) {
         synchronized (this.isRequested) {
             this.isRequested.clear(i);
@@ -614,9 +624,10 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
                         + " %)");
                 this.savePiece(i);
                 this.getPieceBlock(i, 0, 15000);
+                if (! peerID.equals(WEBSEED_ID)) this.lastPieceReceived = System.currentTimeMillis();
 
             } else {
-                System.out.println("Piece download failed: "+i);
+                System.out.println("Piece download from "+ peerID +" failed: "+i);
                 //this.pieceList[i].data = new byte[0];
             }
 
@@ -883,7 +894,7 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
      *
      * @param list LinkedHashMap
      */
-    public synchronized void updatePeerList(LinkedHashMap list) {
+    public void updatePeerList(LinkedHashMap list) {
         //this.lastUnchoking = System.currentTimeMillis();
         synchronized (this.task) {
             //this.peerList.putAll(list);

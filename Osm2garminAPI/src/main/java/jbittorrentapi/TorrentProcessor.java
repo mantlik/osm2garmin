@@ -140,6 +140,16 @@ public class TorrentProcessor {
         }
         torrent.changeAnnounce();
 
+        if (m.containsKey("url-list")) { // extension
+            List urls = (List) m.get("url-list");
+            if ((urls != null) && (!urls.isEmpty())) {
+                for (int j = 0; j < urls.size(); j++) {
+                    String url = new String((byte[])urls.get(j));
+                    torrent.urlList.add(url);
+                }
+            }
+        }
+        
         //Store the info field data
         if (m.containsKey("info")) {
             Map info = (Map) m.get("info");

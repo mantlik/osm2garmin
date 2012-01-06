@@ -49,6 +49,7 @@ public class TorrentFile {
 
     public String announceURL;
     public ArrayList<ArrayList<String>> announceList;
+    public ArrayList<String> urlList;
     public String comment;
     public String createdBy;
     public long creationDate;
@@ -81,7 +82,7 @@ public class TorrentFile {
         super();
         announceURL = new String();
         announceList = new ArrayList<ArrayList<String>>();
-
+        urlList = new ArrayList<String>();
         comment = new String();
         createdBy = new String();
         encoding = new String();

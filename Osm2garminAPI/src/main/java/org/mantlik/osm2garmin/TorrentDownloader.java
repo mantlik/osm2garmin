@@ -102,8 +102,9 @@ public class TorrentDownloader extends ThreadProcessor {
         DecimalFormat df = new DecimalFormat("0.00");
         long dl = dm.downloaded() / 1024 / 1024;
         long ul = dm.uploaded() / 1024 / 1024;
+        String webseed = WebseedTask.webseedActive ? "*" : "";
         return "Download " + torrentFile.getName().replace(".torrent", "") + " " + df.format(getProgress())
-                + " % (" + dm.noOfPeers() + " peers) D/U: " + dl + "mb("
+                + " % (" + dm.noOfPeers() + webseed + " peers) D/U: " + dl + "mb("
                 + df.format(dm.getDLRate()) + ")/" + ul + "mb(" + df.format(dm.getULRate()) + ")";
     }
 
