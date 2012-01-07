@@ -534,9 +534,9 @@ final class Osm2garminPanel extends javax.swing.JPanel {
         majorintervalItem.setText(NbPreferences.forModule(Osm2garmin.class).get("contour_major_interval",
                 "100"));
         thresholdminorItem.setText(NbPreferences.forModule(Osm2garmin.class).get("plot_minor_threshold",
-                "800"));
+                "500"));
         thresholdmediumItem.setText(NbPreferences.forModule(Osm2garmin.class).get("plot_medium_threshold",
-                "3200"));
+                "2400"));
         cyclingFeaturesItem.setSelected(NbPreferences.forModule(Osm2garmin.class).get("cycling_features",
                 "false").equals("true"));
         srtmStepItem.setText(NbPreferences.forModule(Osm2garmin.class).get("srtm_step",

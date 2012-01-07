@@ -81,7 +81,7 @@ public class Srtm2Osm extends ThreadProcessor {
                     setStatus("Contours " + coords + ": Downloading SRTM data.");
                     srtm = Srtm.get(lon + lo, lat + la, parameters);
                 }
-                if (srtm==null) {
+                if (srtm == null) {
                     setStatus("Contours " + coords + ": No SRTM data.");
                     continue;
                 }
@@ -158,16 +158,20 @@ public class Srtm2Osm extends ThreadProcessor {
         ss.println("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
         ss.println("<osm version=\"0.5\" generator=\"Srtm2Osm.java\">");
         long id, wayId;
-        id = Long.parseLong(parameters.getProperty("contour_start_id"));
-        wayId = Long.parseLong(parameters.getProperty("contour_start_way_id"));
-        for (int i = 0; i < contours.size(); i++) {
-            Contour contour = contours.get(i);
-            int level = (int) contour.z;
-            boolean major = (level % majorInterval) == 0;
-            contour.outputOsm(wayId, id, major, ss);
-            wayId++;
-            id += contour.data.size();
-            setStatus("Contours " + coords + ": Creating OSM file - " + (int) (100.0 * i / contours.size()) + " %");
+        for (int pass = 0; pass < 2; pass++) {
+            id = Long.parseLong(parameters.getProperty("contour_start_id"));
+            wayId = Long.parseLong(parameters.getProperty("contour_start_way_id"));
+            boolean nodes = pass == 0;
+            boolean way = pass == 1;
+            for (int i = 0; i < contours.size(); i++) {
+                Contour contour = contours.get(i);
+                int level = (int) contour.z;
+                boolean major = (level % majorInterval) == 0;
+                contour.outputOsm(wayId, id, major, ss, nodes, way);
+                wayId++;
+                id += contour.data.size();
+                setStatus("Contours " + coords + ": Creating OSM file - " + (int) (50.0 * i / contours.size() + 50.0 * pass) + " %");
+            }
         }
         ss.println("</osm>");
         ss.close();
