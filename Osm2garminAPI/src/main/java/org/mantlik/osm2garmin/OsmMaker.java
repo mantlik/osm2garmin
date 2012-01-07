@@ -249,9 +249,9 @@ public class OsmMaker extends ThreadProcessor {
             }
             long id = Long.parseLong(name.replace(".img", ""));
             if (id >= MAPID) {
-                contourMaps.add(region.dir.getPath() + "/" + name);
-            } else {
                 osmMaps.add(region.dir.getPath() + "/" + name);
+            } else {
+                contourMaps.add(region.dir.getPath() + "/" + name);
             }
         }
 
