@@ -36,13 +36,12 @@
  */
 package jbittorrentapi;
 
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.*;
 import java.util.*;
 import javax.swing.event.EventListenerList;
-import java.net.UnknownHostException;
-import java.io.InputStream;
-import java.io.IOException;
-import java.io.BufferedInputStream;
-import java.net.*;
 
 /**
  * Class providing methods to enable communication between the client and a
@@ -67,6 +66,8 @@ public class PeerUpdater extends Thread {
     private boolean first = true;
     private boolean end = false;
     private final EventListenerList listeners = new EventListenerList();
+    private static final int UDP_TRACKER_START_TIMEOUT = 60000;
+    private int udpTrackerTimeout = UDP_TRACKER_START_TIMEOUT;
 
     public PeerUpdater(byte[] id, TorrentFile torrent) {
         peerList = new LinkedHashMap();
@@ -338,8 +339,95 @@ public class PeerUpdater extends Thread {
         try {
             Map m = new HashMap();
             if (t.announceURL.startsWith("udp://")) {
-                t.changeAnnounce();
-                return null;
+                URL url = new URL(t.announceURL.replace("udp://", "http://"));
+                String host = url.getHost();
+                InetAddress[] addresses = InetAddress.getAllByName(host);
+                int index = (int) (Math.random() * (0.0 + addresses.length));
+                InetAddress address = addresses[index];
+                System.out.println("Contact Tracker. URL source = "
+                        + url.toString().replace("http://", "udp://")
+                        + " [" + (address.getAddress()[0] & 0xff)
+                        + "." + (address.getAddress()[1] & 0xff)
+                        + "." + (address.getAddress()[2] & 0xff)
+                        + "." + (address.getAddress()[3] & 0xff)
+                        + " no. " + (index + 1) + " of " + addresses.length
+                        + "]");
+                int port = url.getPort();
+                if (port == -1) {
+                    port = 80;
+                }
+                byte[] message = new byte[]{0, 0, 0x04, 0x17, 0x27, 0x10, 0x19, (byte) (0x80 & 0xff),
+                    0, 0, 0, 0}; // handshake id and command
+                int transaction_id = (int) (Math.random() * Integer.MAX_VALUE);
+                message = Utils.concat(message, Utils.intToByteArray(transaction_id));
+                message = udpClient(address, port, message);
+                if (message == null) {
+                    fireUpdateFailed(4, "Tracker unreachable - timeout.");
+                    return null;
+                }
+                if (message.length < 16) {
+                    fireUpdateFailed(4, "Bad response from tracker.");
+                    return null;
+                }
+                if (Utils.byteArrayToInt(Utils.subArray(message, 0, 4)) == 3) {
+                    fireUpdateFailed(4, "Error from tracker - "
+                            + new String(Utils.subArray(message, 8, message.length - 8)));
+                    return null;
+                }
+                if (transaction_id != Utils.byteArrayToInt(Utils.subArray(message, 4, 4))) {
+                    fireUpdateFailed(4, "Bad response from tracker - bad transaction ID.");
+                    return null;
+                }
+                byte[] connection_id = Utils.subArray(message, 8, 8);
+                message = Utils.concat(connection_id, new byte[]{0, 0, 0, 1}); // announce
+                transaction_id = (int) (Math.random() * Integer.MAX_VALUE);
+                message = Utils.concat(message, Utils.intToByteArray(transaction_id));
+                message = Utils.concat(message, t.info_hash_as_binary);
+                message = Utils.concat(message, id);
+                message = Utils.concat(message, Utils.longToByteArray(dl));
+                message = Utils.concat(message, Utils.longToByteArray(left));
+                message = Utils.concat(message, Utils.longToByteArray(ul));
+                int event_code = 0; // none
+                if (event.contains("started")) {
+                    event_code = 2;
+                } else if (event.contains("stopped")) {
+                    event_code = 3;
+                } else if (event.contains("completed")) {
+                    event_code = 1;
+                }
+                message = Utils.concat(message, Utils.intToByteArray(event_code));
+                message = Utils.concat(message, Utils.intToByteArray(0)); // IP from sender
+                int key = (int) (Math.random() * Integer.MAX_VALUE);
+                message = Utils.concat(message, Utils.intToByteArray(key));
+                message = Utils.concat(message, Utils.intToByteArray(-1)); // numwant
+                message = Utils.concat(message, Utils.intToByteArray(this.listeningPort << 16));
+                message = udpClient(address, port, message);
+                if (message == null) {
+                    fireUpdateFailed(4, "Tracker connection broken.");
+                    return null;
+                }
+                if (message.length < 20) {
+                    fireUpdateFailed(4, "Bad response from tracker.");
+                    return null;
+                }
+                if (Utils.byteArrayToInt(Utils.subArray(message, 0, 4)) == 3) {
+                    fireUpdateFailed(4, "Error from tracker - "
+                            + new String(Utils.subArray(message, 8, message.length - 8)));
+                    return null;
+                }
+                if (transaction_id != Utils.byteArrayToInt(Utils.subArray(message, 4, 4))) {
+                    fireUpdateFailed(4, "Bad response from tracker - bad transaction ID.");
+                    return null;
+                }
+                long inter = Utils.byteArrayToInt(Utils.subArray(message, 8, 4));
+                int leechers = Utils.byteArrayToInt(Utils.subArray(message, 12, 4));
+                int seeders = Utils.byteArrayToInt(Utils.subArray(message, 16, 4));
+                m.put("interval", inter);
+                m.put("leechers", leechers);
+                m.put("seeders", seeders);
+                m.put("peers", Utils.subArray(message, 20, (seeders+leechers)*6));
+                System.out.println(m);
+                return m;
             } else {
                 URL source = new URL(t.announceURL + "?info_hash="
                         + t.info_hash_as_url + "&peer_id="
@@ -373,6 +461,30 @@ public class PeerUpdater extends Thread {
             this.fireUpdateFailed(5, "Internal error - " + e.getMessage());
         }
         return null;
+    }
+
+    /*
+     * Sends a message and waits for response
+     * returns null on error
+     */
+    private byte[] udpClient(InetAddress address, int port, byte[] message) {
+        DatagramSocket clientSocket = null;
+        try {
+            clientSocket = new DatagramSocket();
+            byte[] receiveData = new byte[1024];
+            clientSocket.setSoTimeout(udpTrackerTimeout);
+            DatagramPacket sendPacket = new DatagramPacket(message, message.length, address, port);
+            clientSocket.send(sendPacket);
+            DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+            clientSocket.receive(receivePacket);
+            clientSocket.close();
+            return receivePacket.getData();
+        } catch (IOException ex) {
+            if (clientSocket != null) {
+                clientSocket.close();
+            }
+            return null;
+        }
     }
 
     /**

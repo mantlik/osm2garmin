@@ -609,7 +609,7 @@ public class Osm2garmin implements PropertyChangeListener {
                 wait = day + " days ";
             }
             wait += hour + ":" + min + ":" + sec;
-            processor.setStatus(processor.parameters.getProperty("wait_status") + " (waiting " + wait + ")");
+            processor.setStatus(processor.parameters.getProperty("wait_status", "") + " (waiting " + wait + ")");
         }
         processor.setStatus(processor.parameters.getProperty("wait_status"));
         processor.parameters.remove("wait_status");
