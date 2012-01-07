@@ -222,6 +222,27 @@
                     </listitem>
                 </varlistentry>
                 <varlistentry>
+                    <term>Exclusive run of external tools</term>
+                    <listitem>
+                        <para>
+                            If checked, no simultaneous run of more than one external tool, such as Osmosis,
+                            Mkgmap or Splitter is allowed. Useful in case of out-of-memory problems.
+                        </para>
+                        <para>
+                            If running on 64bit system with 64bit JRE, memory limit can be increased in the configuration file
+                            located at
+                        </para>
+                        <programlisting>&lt;PROGRAM_FILES&gt;/osm2garmin_&lt;version&gt;/etc/osm2garmin.conf</programlisting>
+                        <para>
+                            In the file replace -J-Xmx1400m with higher value, e.g. -J-Xmx2000m.
+                        </para>
+                        <para>
+                            You can edit osm2garmin.conf in privilegued editor only in Windows Vista or 7. Right-click your Notepad
+                            Start menu shortcut and select "Run as administrator" item.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
                     <term>Delete old maps when processing starts</term>
                     <listitem>
                         <para>

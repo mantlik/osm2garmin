@@ -320,15 +320,13 @@ public class Osm2garmin implements PropertyChangeListener {
      * @param library library folder to load classes from
      * @param loader classloader to use
      * @param args parameters to pass to the method
-     * @param exclusive block until no other instance of the same class is
-     * running
+     * @param processor instance invoking the process (used for wait status
+     * display)
      * @throws Exception
      */
     public static void runExternal(String extclass, String method, String library,
-            ClassLoader loader, String[] args, boolean exclusive) throws Exception {
-        if (exclusive) {
-            waitExclusive(extclass);
-        }
+            ClassLoader loader, String[] args, ThreadProcessor processor) throws Exception {
+        waitExclusive(extclass, processor);
         if (loader == null) {
             loader = libClassLoader(library);
         }
@@ -339,9 +337,7 @@ public class Osm2garmin implements PropertyChangeListener {
         m.setAccessible(true);
         m.invoke(null, (Object) args);
         Thread.currentThread().setContextClassLoader(currentLoader);
-        if (exclusive) {
-            endExclusive(extclass);
-        }
+        endExclusive(extclass);
     }
 
     /**
@@ -586,17 +582,39 @@ public class Osm2garmin implements PropertyChangeListener {
     /*
      * Waits until no running instance of the same class runs
      */
-    private static void waitExclusive(String extclass) throws InterruptedException {
+    private static void waitExclusive(String extclass, ThreadProcessor processor) throws InterruptedException {
+        long interval = 10000;
+        processor.parameters.setProperty("wait_status", processor.getStatus());
         while (isExclusive(extclass)) {
-            Thread.sleep(1000);
+            Thread.sleep(interval);
             if (!isExclusive(extclass)) {
                 if (setExclusive(extclass)) {
+                    processor.setStatus(processor.parameters.getProperty("wait_status"));
+                    processor.parameters.remove("wait_status");
+                    processor.parameters.remove("wait_sleep");
                     return;
                 }
             }
+            long sleep = Long.parseLong(processor.parameters.getProperty("wait_sleep","0"));
+            sleep += interval;
+            processor.parameters.setProperty("wait_sleep", "" + sleep);
+            int sec = (int) ((sleep / 1000) % 60);
+            int min = (int) ((sleep / 1000 / 60) % 60);
+            int hour = (int) ((sleep / 1000 / 60 / 60) % 24);
+            int day = (int) (sleep / 1000 / 60 / 60 / 24);
+            String wait = "";
+            if (day == 1) {
+                wait = "1 day ";
+            } else if (day > 1) {
+                wait = day + " days ";
+            }
+            wait += hour + ":" + min + ":" + sec;
+            processor.setStatus(processor.parameters.getProperty("wait_status") + " (waiting " + wait + ")");
         }
+        processor.setStatus(processor.parameters.getProperty("wait_status"));
+        processor.parameters.remove("wait_status");
         if (!setExclusive(extclass)) {
-            waitExclusive(extclass);
+            waitExclusive(extclass, processor);
         }
     }
 
@@ -609,6 +627,9 @@ public class Osm2garmin implements PropertyChangeListener {
     }
 
     private static synchronized boolean isExclusive(String extclass) {
+        if (parameters.getProperty("exclusive_utils", "true").equals("true")) {
+            return !runningClasses.isEmpty();
+        }
         return runningClasses.contains(extclass);
     }
 

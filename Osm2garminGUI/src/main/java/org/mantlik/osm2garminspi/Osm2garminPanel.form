@@ -114,8 +114,9 @@
                               </Group>
                               <Group type="102" attributes="0">
                                   <Group type="103" groupAlignment="0" attributes="0">
-                                      <Component id="deleteOldMapsItem" min="-2" pref="399" max="-2" attributes="0"/>
+                                      <Component id="exclusiveUtilsItem" min="-2" pref="399" max="-2" attributes="0"/>
                                       <Component id="cyclingFeaturesItem" min="-2" pref="399" max="-2" attributes="0"/>
+                                      <Component id="deleteOldMapsItem" min="-2" pref="399" max="-2" attributes="0"/>
                                   </Group>
                                   <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                               </Group>
@@ -200,6 +201,8 @@
                       <Component id="jLabel17" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="jLabel16" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="exclusiveUtilsItem" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="deleteOldMapsItem" min="-2" max="-2" attributes="0"/>
                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
@@ -467,14 +470,14 @@
             </Property>
           </Properties>
         </Component>
-        <Component class="javax.swing.JCheckBox" name="deleteOldMapsItem">
+        <Component class="javax.swing.JCheckBox" name="exclusiveUtilsItem">
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-              <ResourceString bundle="org/mantlik/osm2garminspi/Bundle.properties" key="Osm2garminPanel.deleteOldMapsItem.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+              <ResourceString bundle="org/mantlik/osm2garminspi/Bundle.properties" key="Osm2garminPanel.exclusiveUtilsItem.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
             </Property>
           </Properties>
           <Events>
-            <EventHandler event="propertyChange" listener="java.beans.PropertyChangeListener" parameters="java.beans.PropertyChangeEvent" handler="deleteOldMapsItemPropertyChange"/>
+            <EventHandler event="propertyChange" listener="java.beans.PropertyChangeListener" parameters="java.beans.PropertyChangeEvent" handler="exclusiveUtilsItemPropertyChange"/>
           </Events>
         </Component>
         <Component class="javax.swing.JCheckBox" name="cyclingFeaturesItem">
@@ -521,6 +524,16 @@
           </Properties>
           <Events>
             <EventHandler event="propertyChange" listener="java.beans.PropertyChangeListener" parameters="java.beans.PropertyChangeEvent" handler="contoursDensityItemPropertyChange"/>
+          </Events>
+        </Component>
+        <Component class="javax.swing.JCheckBox" name="deleteOldMapsItem">
+          <Properties>
+            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+              <ResourceString bundle="org/mantlik/osm2garminspi/Bundle.properties" key="Osm2garminPanel.deleteOldMapsItem.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+            </Property>
+          </Properties>
+          <Events>
+            <EventHandler event="propertyChange" listener="java.beans.PropertyChangeListener" parameters="java.beans.PropertyChangeEvent" handler="deleteOldMapsItemPropertyChange"/>
           </Events>
         </Component>
       </SubComponents>

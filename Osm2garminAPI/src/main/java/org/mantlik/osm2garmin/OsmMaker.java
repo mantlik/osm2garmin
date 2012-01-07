@@ -130,7 +130,7 @@ public class OsmMaker extends ThreadProcessor {
 
             splitterLoader = Osm2garmin.libClassLoader("splitter", getClass().getClassLoader());
             Osm2garmin.runExternal("uk.me.parabola.splitter.Main", "main", "splitter",
-                    splitterLoader, args, true);
+                    splitterLoader, args, this);
         } catch (InvocationTargetException ex) {
             Throwable exx = ex.getTargetException();
             region.splitterMaxAreas = Math.max(1, region.splitterMaxAreas / 2);
@@ -180,7 +180,7 @@ public class OsmMaker extends ThreadProcessor {
         }
         try {
             //uk.me.parabola.mkgmap.main.Main.main(args);
-            Osm2garmin.runExternal("uk.me.parabola.mkgmap.main.Main", "main", "mkgmap", null, args, true);
+            Osm2garmin.runExternal("uk.me.parabola.mkgmap.main.Main", "main", "mkgmap", null, args, this);
         } catch (Exception ex) {
             Logger.getLogger(OsmMaker.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -202,7 +202,7 @@ public class OsmMaker extends ThreadProcessor {
                     //uk.me.parabola.splitter.Main.main(args);
                     splitterLoader = Osm2garmin.libClassLoader("splitter", getClass().getClassLoader());
                     Osm2garmin.runExternal("uk.me.parabola.splitter.Main", "main", "splitter",
-                            splitterLoader, args, true);
+                            splitterLoader, args, this);
                 } catch (Exception ex) {
                     Logger.getLogger(OsmMaker.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -230,7 +230,7 @@ public class OsmMaker extends ThreadProcessor {
                 }
                 try {
                     //uk.me.parabola.mkgmap.main.Main.main(args);
-                    Osm2garmin.runExternal("uk.me.parabola.mkgmap.main.Main", "main", "mkgmap", null, args, true);
+                    Osm2garmin.runExternal("uk.me.parabola.mkgmap.main.Main", "main", "mkgmap", null, args, this);
                 } catch (Exception ex) {
                     Logger.getLogger(OsmMaker.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -274,7 +274,7 @@ public class OsmMaker extends ThreadProcessor {
         args = aa.toArray(new String[0]);
         try {
             //uk.me.parabola.mkgmap.main.Main.main(args);
-            Osm2garmin.runExternal("uk.me.parabola.mkgmap.main.Main", "main", "mkgmap", null, args, true);
+            Osm2garmin.runExternal("uk.me.parabola.mkgmap.main.Main", "main", "mkgmap", null, args, this);
         } catch (Exception ex) {
             Logger.getLogger(OsmMaker.class.getName()).log(Level.SEVERE, null, ex);
             setState(ERROR);
