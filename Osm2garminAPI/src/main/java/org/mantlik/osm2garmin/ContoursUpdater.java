@@ -148,7 +148,7 @@ public class ContoursUpdater extends ThreadProcessor {
 
                     // run splitter
                     String[] args = new String[]{
-                        "--max-areas=1", "--max-nodes=1000000", "--mixed",
+                        "--max-areas=1", "--max-nodes=1000000",
                         "--status-freq=0", "--output-dir=" + contoursDir,
                         "--mapid=" + d8.format(Long.parseLong(name) + 1), contoursDir + name + ".osm.gz"
                     };

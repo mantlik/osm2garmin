@@ -24,14 +24,13 @@ package org.mantlik.osm2garmin.srtm2osm;
 import java.io.PrintStream;
 import java.util.ArrayList;
 
-
 /**
  *
  * @author fm
  */
 public class Contour {
 
-    public ArrayList <Point> data = new ArrayList <Point>();
+    public ArrayList<Point> data = new ArrayList<Point>();
     public double z;
     public boolean finished = false;
     public boolean closed = false;
@@ -67,36 +66,41 @@ public class Contour {
     public void setZ(double z) {
         this.z = z;
     }
-    
-    public void outputOsm(long wayid, long startid, boolean major, PrintStream s) {
+
+    public void outputOsm(long wayid, long startid, boolean major, PrintStream s,
+            boolean nodes, boolean way) {
         int size = data.size();
         if (isClosed()) {
-            size --;  // repeat first node at the way end
+            size--;  // repeat first node at the way end
         }
         if (data.isEmpty() || size < 2) {
             return;
         }
-        long id = startid;
-        for (int i=0; i<size;i++) {
-            s.println("<node id=\""+id+"\" lat=\""+data.get(i).x +"\" lon=\""+data.get(i).y +"\" />");
-            id++;
+        if (nodes) {
+            long id = startid;
+            for (int i = 0; i < size; i++) {
+                s.println("<node id=\"" + id + "\" lat=\"" + data.get(i).x + "\" lon=\"" + data.get(i).y + "\" />");
+                id++;
+            }
         }
-        id = startid;
-        s.println("<way id=\""+wayid+"\">");
-        for (int i=0; i<size;i++) {
-            s.println("<nd ref=\""+id+"\" />");
-            id++;
+        if (way) {
+            long id = startid;
+            s.println("<way id=\"" + wayid + "\">");
+            for (int i = 0; i < size; i++) {
+                s.println("<nd ref=\"" + id + "\" />");
+                id++;
+            }
+            if (isClosed()) {  // last node equals to the first one
+                s.println("<nd ref=\"" + startid + "\" />");
+            }
+            s.println("<tag k=\"ele\" v=\"" + z + "\" />");
+            s.println("<tag k=\"contour\" v=\"elevation\" />");
+            if (major) {
+                s.println("<tag k=\"contour_ext\" v=\"elevation_major\" />");
+            } else {
+                s.println("<tag k=\"contour_ext\" v=\"elevation_minor\" />");
+            }
+            s.println("</way>");
         }
-        if (isClosed()) {  // last node equals to the first one
-            s.println("<nd ref=\""+startid+"\" />");
-        }
-        s.println("<tag k=\"ele\" v=\""+z+"\" />");
-        s.println("<tag k=\"contour\" v=\"elevation\" />");
-        if (major) {
-            s.println("<tag k=\"contour_ext\" v=\"elevation_major\" />");
-        } else {
-            s.println("<tag k=\"contour_ext\" v=\"elevation_minor\" />");
-        }
-        s.println("</way>");
     }
 }

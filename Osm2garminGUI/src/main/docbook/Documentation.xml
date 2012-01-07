@@ -339,7 +339,7 @@
                 </listitem>
             </varlistentry>
             <varlistentry>
-                <term>install.bat</term>
+                <term>installer.bat</term>
                 <listitem>
                     <para>
                         Script to register region maps to Mapsource. Creates necessary registry items needed for Mapsource
@@ -348,7 +348,7 @@
                 </listitem>
             </varlistentry>
             <varlistentry>
-                <term>uninstall.bat</term>
+                <term>uninstaller.bat</term>
                 <listitem>
                     <para>
                         Script to uninstall maps from MapSource. You have to uninstall and reinstall all maps if you change
