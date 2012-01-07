@@ -193,6 +193,20 @@ public class Utils {
     }
 
     /**
+     * Convert a long value to its byte array representation
+     * @param value long
+     * @return byte[]
+     */
+    public static byte[] longToByteArray(long value) {
+        byte[] b = new byte[8];
+        for (int i = 0; i < 8; i++) {
+            int offset = (b.length - 1 - i) * 8;
+            b[i] = (byte) ((value >>> offset) & 0xFF);
+        }
+        return b;
+    }
+
+    /**
      * Convert a byte array integer (4 bytes) to its int value
      * @param b byte[]
      * @return int
