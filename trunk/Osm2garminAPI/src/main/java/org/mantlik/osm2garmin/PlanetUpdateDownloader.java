@@ -126,7 +126,7 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
 
             try {
                 Osm2garmin.runExternal("org.openstreetmap.osmosis.core.Osmosis", "run", "osmosis",
-                        Osm2garmin.libClassLoader("osmosis", getClass().getClassLoader()), osargs, true);
+                        Osm2garmin.libClassLoader("osmosis", getClass().getClassLoader()), osargs, this);
             } catch (Exception ex) {
                 Logger.getLogger(PlanetUpdateDownloader.class.getName()).log(Level.SEVERE, null, ex);
                 setState(ERROR);

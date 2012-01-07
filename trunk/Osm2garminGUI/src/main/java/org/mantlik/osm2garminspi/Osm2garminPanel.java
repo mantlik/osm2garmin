@@ -72,12 +72,13 @@ final class Osm2garminPanel extends javax.swing.JPanel {
         jLabel19 = new javax.swing.JLabel();
         thresholdmediumItem = new javax.swing.JTextField();
         jLabel20 = new javax.swing.JLabel();
-        deleteOldMapsItem = new javax.swing.JCheckBox();
+        exclusiveUtilsItem = new javax.swing.JCheckBox();
         cyclingFeaturesItem = new javax.swing.JCheckBox();
         srtmStepItem = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
         contoursDensityItem = new javax.swing.JTextField();
+        deleteOldMapsItem = new javax.swing.JCheckBox();
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(null, org.openide.util.NbBundle.getMessage(Osm2garminPanel.class, "Osm2garminPanel.jPanel1.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, null, new java.awt.Color(51, 153, 255))); // NOI18N
 
@@ -204,10 +205,10 @@ final class Osm2garminPanel extends javax.swing.JPanel {
 
         org.openide.awt.Mnemonics.setLocalizedText(jLabel20, org.openide.util.NbBundle.getMessage(Osm2garminPanel.class, "Osm2garminPanel.jLabel20.text")); // NOI18N
 
-        org.openide.awt.Mnemonics.setLocalizedText(deleteOldMapsItem, org.openide.util.NbBundle.getMessage(Osm2garminPanel.class, "Osm2garminPanel.deleteOldMapsItem.text")); // NOI18N
-        deleteOldMapsItem.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+        org.openide.awt.Mnemonics.setLocalizedText(exclusiveUtilsItem, org.openide.util.NbBundle.getMessage(Osm2garminPanel.class, "Osm2garminPanel.exclusiveUtilsItem.text")); // NOI18N
+        exclusiveUtilsItem.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
             public void propertyChange(java.beans.PropertyChangeEvent evt) {
-                deleteOldMapsItemPropertyChange(evt);
+                exclusiveUtilsItemPropertyChange(evt);
             }
         });
 
@@ -235,6 +236,13 @@ final class Osm2garminPanel extends javax.swing.JPanel {
         contoursDensityItem.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
             public void propertyChange(java.beans.PropertyChangeEvent evt) {
                 contoursDensityItemPropertyChange(evt);
+            }
+        });
+
+        org.openide.awt.Mnemonics.setLocalizedText(deleteOldMapsItem, org.openide.util.NbBundle.getMessage(Osm2garminPanel.class, "Osm2garminPanel.deleteOldMapsItem.text")); // NOI18N
+        deleteOldMapsItem.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                deleteOldMapsItemPropertyChange(evt);
             }
         });
 
@@ -293,8 +301,9 @@ final class Osm2garminPanel extends javax.swing.JPanel {
                                 .addGap(1, 1, 1))
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(deleteOldMapsItem, javax.swing.GroupLayout.PREFERRED_SIZE, 399, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(cyclingFeaturesItem, javax.swing.GroupLayout.PREFERRED_SIZE, 399, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addComponent(exclusiveUtilsItem, javax.swing.GroupLayout.PREFERRED_SIZE, 399, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(cyclingFeaturesItem, javax.swing.GroupLayout.PREFERRED_SIZE, 399, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(deleteOldMapsItem, javax.swing.GroupLayout.PREFERRED_SIZE, 399, javax.swing.GroupLayout.PREFERRED_SIZE))
                                 .addGap(0, 0, Short.MAX_VALUE))
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
@@ -360,6 +369,8 @@ final class Osm2garminPanel extends javax.swing.JPanel {
                     .addComponent(jLabel20)
                     .addComponent(jLabel17)
                     .addComponent(jLabel16))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(exclusiveUtilsItem)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(deleteOldMapsItem)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -479,9 +490,9 @@ final class Osm2garminPanel extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_thresholdmediumItemPropertyChange
 
-    private void deleteOldMapsItemPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_deleteOldMapsItemPropertyChange
+    private void exclusiveUtilsItemPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_exclusiveUtilsItemPropertyChange
         controller.changed();
-    }//GEN-LAST:event_deleteOldMapsItemPropertyChange
+    }//GEN-LAST:event_exclusiveUtilsItemPropertyChange
 
     private void cyclingFeaturesItemPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_cyclingFeaturesItemPropertyChange
         controller.changed();
@@ -501,12 +512,18 @@ final class Osm2garminPanel extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_contoursDensityItemPropertyChange
 
+    private void deleteOldMapsItemPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_deleteOldMapsItemPropertyChange
+        controller.changed();
+    }//GEN-LAST:event_deleteOldMapsItemPropertyChange
+
     void load() {
         userdirItem.setText(NbPreferences.forModule(Osm2garmin.class).get("userdir",
                 System.getProperty("netbeans.user") + "/"));
         mapsdirItem.setText(NbPreferences.forModule(Osm2garmin.class).get("maps_dir",
                 System.getProperty("netbeans.user") + "/maps/"));
         deleteOldMapsItem.setSelected(NbPreferences.forModule(Osm2garmin.class).get("delete_old_maps",
+                "true").equals("true"));
+        exclusiveUtilsItem.setSelected(NbPreferences.forModule(Osm2garmin.class).get("exclusive_utils",
                 "true").equals("true"));
         srtmdirItem.setText(NbPreferences.forModule(Osm2garmin.class).get("srtm_dir",
                 System.getProperty("netbeans.user") + "/SRTM/"));
@@ -545,6 +562,8 @@ final class Osm2garminPanel extends javax.swing.JPanel {
         NbPreferences.forModule(Osm2garmin.class).put("maps_dir", mapsdirItem.getText());
         NbPreferences.forModule(Osm2garmin.class).put("delete_old_maps", 
                 deleteOldMapsItem.isSelected() ? "true": "false");
+        NbPreferences.forModule(Osm2garmin.class).put("exclusive_utils", 
+                exclusiveUtilsItem.isSelected() ? "true": "false");
         NbPreferences.forModule(Osm2garmin.class).put("srtm_dir", srtmdirItem.getText());
         NbPreferences.forModule(Osm2garmin.class).put("contours_minor_interval", minorintervalItem.getText());
         NbPreferences.forModule(Osm2garmin.class).put("contours_medium_interval", mediumintervalItem.getText());
@@ -566,6 +585,7 @@ final class Osm2garminPanel extends javax.swing.JPanel {
     private javax.swing.JCheckBox cyclingFeaturesItem;
     private javax.swing.JCheckBox deleteOldMapsItem;
     private javax.swing.ButtonGroup downloadMethodItem;
+    private javax.swing.JCheckBox exclusiveUtilsItem;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
