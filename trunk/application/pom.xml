@@ -65,21 +65,18 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>nbm-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>nbm-installers-plugin</artifactId>
                 <configuration>
                     <installerOsWindows>true</installerOsWindows>
                     <installerOsLinux>true</installerOsLinux>
                     <installerLicenseFile>../LICENSE.txt</installerLicenseFile>
+                    <installersFilePrefix>${project.name}-${project.version}-build-${buildNumber}</installersFilePrefix>
+                    <installDirName>${brandingToken}_${project.version.short}</installDirName>
                     <appIcon>../Globe48.png</appIcon>
                     <icon16>../Globe.png</icon16>
                     <instLeftCorner>../ilc.png</instLeftCorner>
                     <instRightCorner>../irc.png</instRightCorner>
                     <instWelcomeTop>../wlt.png</instWelcomeTop>
                     <instWelcomeBottom>../wlb.png</instWelcomeBottom>
-                    <installerVerbose>2</installerVerbose>
                 </configuration>
             </plugin>
             <plugin>
@@ -153,40 +150,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>deploy</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target>
-                                <move todir="${project.build.directory}" verbose="true">
-                                    <fileset dir="${project.build.directory}">
-                                        <include name="*.exe" />
-                                        <include name="*.sh" />
-                                    </fileset>
-                                    <filtermapper>
-                                        <replacestring from="${project.version}-windows" to="${project.version}-build-${buildNumber}-windows" />
-                                        <replacestring from="${project.version}-linux" to="${project.version}-build-${buildNumber}-linux" />
-                                    </filtermapper>
-                                </move>
-                            </target>
-                        </configuration>
-                    </execution>
-                </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.apache.ant</groupId>
-                        <artifactId>ant-jsch</artifactId>
-                        <version>1.8.2</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>com.jcraft</groupId>
-                        <artifactId>jsch</artifactId>
-                        <version>0.1.42</version>
-                    </dependency>
-                </dependencies>
             </plugin>
             <plugin>
                 <groupId>com.googlecode.maven-gcu-plugin</groupId>
