@@ -49,7 +49,7 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>nbm-maven-plugin</artifactId>
-                    <version>3.6</version>
+                    <version>3.7-SNAPSHOT</version>
                     <extensions>true</extensions>
                     <configuration>
                         <brandingToken>${brandingToken}</brandingToken>
@@ -75,11 +75,6 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
                     <version>2.3.1</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>nbm-installers-plugin</artifactId>
-                    <version>1.0</version>    
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
@@ -164,12 +159,11 @@
                         <preparationGoals>clean install</preparationGoals>
                         <goals>clean install</goals>
                         <autoVersionSubmodules>true</autoVersionSubmodules>
-                        <commitByProject>true</commitByProject>
-                        <developmentVersion>1.0.-SNAPSHOT</developmentVersion>
-                        <releaseVersion>1.0.0</releaseVersion>
-                        <tag>RELEASE_0-8-0</tag>
+                        <commitByProject>false</commitByProject>
+                        <developmentVersion>1.1-SNAPSHOT</developmentVersion>
+                        <releaseVersion>1.0</releaseVersion>
+                        <tag>RELEASE_1-0-0</tag>
                         <tagBase>http://10.168.68.1/svn/FSurveyApplication/tags</tagBase>
-                        <scmCommentPrefix>Issue 190:</scmCommentPrefix>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -223,5 +217,6 @@
         <netbeans.version>RELEASE71-BETA</netbeans.version>
         <brandingToken>osm2garmin</brandingToken>
         <netbeans.hint.license>gpl20</netbeans.hint.license>
+        <project.version.short>1.0</project.version.short>
     </properties>
 </project>
