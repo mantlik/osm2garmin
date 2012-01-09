@@ -68,9 +68,16 @@ class NodeCollector implements MapCollector {
 
 	@Override
 	public SplittableArea getRoundedArea(int resolution) {
-		Area bounds = RoundingUtils.round(getExactArea(), resolution);
-		SplittableArea result = new SplittableNodeArea(bounds, coords, resolution);
+		Area bbounds = RoundingUtils.round(getExactArea(), resolution);
+		SplittableArea result = new SplittableNodeArea(bbounds, coords, resolution);
 		coords = null;
 		return result;
 	}
+
+    @Override
+    public SplittableArea getRoundedArea(int resolution, Area bbounds) {
+		SplittableArea result = new SplittableNodeArea(bbounds, coords, resolution);
+		coords = null;
+		return result;
+    }
 }

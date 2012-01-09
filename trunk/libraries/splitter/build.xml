@@ -45,7 +45,7 @@
   <property name="xpp.jar" location="${lib}/xpp3-1.1.4c.jar"/>
   <property name="testng.jar" location="${lib}/testng-5.9-jdk15.jar"/>
   <property name="osmbin.jar" location="${lib}/osmpbf.jar"/>
-  <property name="fastutil.jar" location="${lib}/fastutil.jar"/>
+  <property name="fastutil.jar" location="${lib}/fastutil-6.1.0.jar"/>
   <property name="dsiutils.jar" location="${lib}/dsiutils-1.0.11.jar"/>
   <property name="protobuf.jar" location="${lib}/protobuf.jar"/>
 
@@ -73,7 +73,7 @@
   </target>
 
   <target name="compile" depends="prepare" description="main compilation">
-    <javac srcdir="${src}" destdir="${build.classes}" debug="yes">
+    <javac srcdir="${src}" destdir="${build.classes}" debug="yes" source="1.6" target="1.6">
       <include name="**/*.java"/>
       <classpath refid="classpath"/>
     </javac>
@@ -111,7 +111,7 @@
     <mkdir dir="${dist}/doc/api"/>
 
     <!-- Make the jar -->
-    <jar basedir="${build.classes}" jarfile="${dist}/splitter.jar" manifest="resources/MANIFEST.MF">
+    <jar basedir="${build.classes}" jarfile="${dist}/splitter2.jar" manifest="resources/MANIFEST.MF">
       <!--<manifest>-->
         <!--<attribute name="Main-Class" value="uk.me.parabola.splitter.Main"/>-->
       <!--</manifest>-->

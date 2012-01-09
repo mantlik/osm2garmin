@@ -120,7 +120,7 @@ public class DensityMap {
 				try {
 					System.arraycopy(nodeMap[startX + x], startY, result.nodeMap[x], 0, maxY);
 				} catch (ArrayIndexOutOfBoundsException e) {
-					System.out.println("subSet() died at " + startX + ',' + startY + "  " + maxX + ',' + maxY + "  " + x);
+					System.err.println("subSet() died at " + startX + ',' + startY + "  " + maxX + ',' + maxY + "  " + x);
 				}
 			}
 			for (int y = 0; y < maxY; y++) {

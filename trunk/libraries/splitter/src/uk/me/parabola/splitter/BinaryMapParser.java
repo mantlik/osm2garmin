@@ -132,7 +132,7 @@ public class BinaryMapParser extends BinaryParser {
             throw new Error("File requires unknown feature: " + s);
         }
 
-		System.out.println("Bounding box "+leftf+" "+bottomf+" "+rightf+" "+topf);
+		System.err.println("Bounding box "+leftf+" "+bottomf+" "+rightf+" "+topf);
 		
 		Area area = new Area(
 				Utils.toMapUnit(bottomf),
@@ -146,7 +146,8 @@ public class BinaryMapParser extends BinaryParser {
 	private void processNodes(Node tmp) {
 		nodeCount++;
 		if (nodeCount % NODE_STATUS_UPDATE_THRESHOLD == 0) {
-			System.out.println(Utils.format(nodeCount) + " nodes processed... id="+tmp.getId());
+                        Main.status = Utils.format(nodeCount) + " nodes processed... id="+tmp.getId();
+			System.err.println(Utils.format(nodeCount) + " nodes processed... id="+tmp.getId());
 		}
 
 }
@@ -154,13 +155,15 @@ public class BinaryMapParser extends BinaryParser {
 private void processWays(Way tmp)  {
 	wayCount++;
 	if (wayCount % WAY_STATUS_UPDATE_THRESHOLD == 0) {
-		System.out.println(Utils.format(wayCount) + " ways processed... id="+tmp.getId());
+		System.err.println(Utils.format(wayCount) + " ways processed... id="+tmp.getId());
+                Main.status = Utils.format(wayCount) + " ways processed... id="+tmp.getId();
 	}
 }
 private void processRelations(Relation tmp)  {
 	relationCount++;
 	if (relationCount % RELATION_STATUS_UPDATE_THRESHOLD == 0) {
-		System.out.println(Utils.format(relationCount) + " ways processed... id="+tmp.getId());
+		System.err.println(Utils.format(relationCount) + " relations processed... id="+tmp.getId());
+                Main.status = Utils.format(relationCount) + " relations processed... id="+tmp.getId();
 	}
 }
 
