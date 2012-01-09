@@ -40,8 +40,9 @@ class NodeCollector implements MapCollector {
 		// Since we are rounding areas to fit on a low zoom boundary we
 		// can drop the bottom 8 bits of the lat and lon and then fit
 		// the whole lot into a single int.
-		int glat = Utils.toMapUnit(n.getLat());
-		int glon = Utils.toMapUnit(n.getLon());		
+
+		int glat = n.getMapLat();
+		int glon = n.getMapLon();
 		int coord = ((glat << 8) & 0xffff0000) + ((glon >> 8) & 0xffff);
 
 		coords.add(coord);

@@ -180,7 +180,7 @@ public class Convert {
 		if (isNegative)
 			decimal = -decimal;
 
-		if (decimalPoint > 0)
+               if (decimalPoint >= 0 && decimalPoint < i - 1)
 			return decimal / PowersOfTen[i - decimalPoint - 2];
 		else
 			return decimal;

@@ -28,7 +28,7 @@ public interface SplitterParams {
 	@Option(description = "A default description to give to each area.")
 	String getDescription();
 
-	@Option(defaultValue = "255", description = "The maximum number of areas to process in a single pass. More areas require more memory. 1-255.")
+	@Option(defaultValue = "255", description = "The maximum number of areas to process in a single pass. More areas require more memory, but less time. Values: 1-2048.")
 	int getMaxAreas();
 
 	@Option(defaultValue = "2000", description = "Nodes/ways/rels that fall outside an area will still be included if they are within this many map units.")
@@ -58,13 +58,13 @@ public interface SplitterParams {
 	@Option(description = "Specify this if the input osm file has nodes, ways and relations intermingled.")
 	boolean isMixed();
 
-	@Option(description = "The path to the cache directory. If the path doesn't exist it will be created.")
+	@Option(description = "Deprecated, now does nothing")
 	String getCache();
 
 	@Option(description = "The path to the output directory. Defaults to the current working directory.")
 	String getOutputDir();
 
-	@Option(description = "The name of the file containing the area definitions. Can be .list or .kml.")
+	@Option(description = "The name of a file containing the areas definitions. Can be .list or .kml. Providing such a file will save processing time.")
 	String getSplitFile();
 
 	@Option(description = "The name of a GeoNames file to use for determining tile names. Typically cities15000.zip from http://download.geonames.org/export/dump/")
@@ -84,4 +84,7 @@ public interface SplitterParams {
 
 	@Option(defaultValue = "auto", description = "The maximum number of threads used by splitter.")
 	ThreadCount getMaxThreads();
+	
+	@Option(defaultValue = "pbf", description = "The output type, either pbf or xml.")
+	String getOutput();
 }

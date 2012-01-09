@@ -45,6 +45,8 @@ public class SparseInt2ShortMap  implements Int2ShortFunction {
 	}
 	
 	public boolean containsKey(int key) {
+		if (key < 0) 
+			return false;
 		int chunkid = key/CHUNK_SIZE;
 		int chunkoffset = key%CHUNK_SIZE;
 		if (chunkid >= valschunks.size())

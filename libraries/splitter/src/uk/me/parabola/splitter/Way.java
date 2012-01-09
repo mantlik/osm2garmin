@@ -12,15 +12,15 @@
  */
 package uk.me.parabola.splitter;
 
-import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.longs.LongArrayList;
 
 /**
  * @author Steve Ratcliffe
  */
 public class Way extends Element {
-	private final IntArrayList refs = new IntArrayList(10);
+	private final LongArrayList refs = new LongArrayList(10);
 
-	public void set(int id) {
+	public void set(long id) {
 		setId(id);
 	}
 
@@ -30,11 +30,11 @@ public class Way extends Element {
 		refs.clear();
 	}
 
-	public void addRef(int ref) {
+	public void addRef(long ref) {
 		refs.add(ref);
 	}
 
-	public IntArrayList getRefs() {
+	public LongArrayList getRefs() {
 		return refs;
 	}
 }

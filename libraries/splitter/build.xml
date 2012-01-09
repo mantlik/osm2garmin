@@ -45,7 +45,7 @@
   <property name="xpp.jar" location="${lib}/xpp3-1.1.4c.jar"/>
   <property name="testng.jar" location="${lib}/testng-5.9-jdk15.jar"/>
   <property name="osmbin.jar" location="${lib}/osmpbf.jar"/>
-  <property name="fastutil.jar" location="${lib}/fastutil-6.1.0.jar"/>
+  <property name="fastutil.jar" location="${lib}/fastutil.jar"/>
   <property name="dsiutils.jar" location="${lib}/dsiutils-1.0.11.jar"/>
   <property name="protobuf.jar" location="${lib}/protobuf.jar"/>
 

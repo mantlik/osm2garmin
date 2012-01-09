@@ -3,11 +3,11 @@
     <type>org.netbeans.modules.ant.freeform</type>
     <configuration>
         <general-data xmlns="http://www.netbeans.org/ns/freeform-project/1">
-            <name>splitter2</name>
+            <name>splitter</name>
         </general-data>
         <general-data xmlns="http://www.netbeans.org/ns/freeform-project/2">
             <!-- Do not use Project Properties customizer when editing this file manually. -->
-            <name>splitter2</name>
+            <name>splitter</name>
             <properties/>
             <folders>
                 <source-folder>
@@ -83,12 +83,13 @@
         <java-data xmlns="http://www.netbeans.org/ns/freeform-project-java/3">
             <compilation-unit>
                 <package-root>src</package-root>
-                <classpath mode="compile">lib/dsiutils-1.0.11.jar;lib/fastutil.jar;lib/osmpbf.jar;lib/protobuf.jar;lib/testng-5.9-jdk15.jar;lib/xpp3-1.1.4c.jar;lib/fastutil-6.1.0.jar</classpath>
+                <classpath mode="compile">lib/dsiutils-1.0.11.jar;lib/fastutil.jar;lib/osmpbf.jar;lib/protobuf.jar;lib/xpp3-1.1.4c.jar</classpath>
                 <source-level>1.6</source-level>
             </compilation-unit>
             <compilation-unit>
                 <package-root>test</package-root>
                 <unit-tests/>
+                <classpath mode="compile">lib/testng-5.9-jdk15.jar</classpath>
                 <source-level>1.6</source-level>
             </compilation-unit>
         </java-data>
