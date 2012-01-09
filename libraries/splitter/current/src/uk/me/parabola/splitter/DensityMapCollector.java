@@ -49,8 +49,8 @@ class DensityMapCollector implements MapCollector {
 
 	@Override
 	public void processNode(Node n) {
-		int glat = Utils.toMapUnit(n.getLat());
-		int glon = Utils.toMapUnit(n.getLon());
+		int glat = n.getMapLat();
+		int glon = n.getMapLon();
 		densityMap.addNode(glat, glon);
 		details.addToBounds(glat, glon);
 	}
@@ -77,4 +77,5 @@ class DensityMapCollector implements MapCollector {
 	public SplittableArea getRoundedArea(int resolution) {
 		Area bounds = RoundingUtils.round(getExactArea(), resolution);
 		return new SplittableDensityArea(densityMap.subset(bounds));
-	}}
+	}
+}

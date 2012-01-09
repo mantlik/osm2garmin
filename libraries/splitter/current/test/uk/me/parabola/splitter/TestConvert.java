@@ -25,6 +25,8 @@ public class TestConvert {
 		parse("0");
 		parse("1");
 		parse("0.0000012345");
+		parse("12.");
+		parse(".12");
 		parse("1.123");
 		parse("1.123456789");
 		parse("1.1234567891");

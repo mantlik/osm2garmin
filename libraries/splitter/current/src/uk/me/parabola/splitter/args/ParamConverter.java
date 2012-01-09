@@ -102,14 +102,14 @@ public class ParamConverter {
 				boolean valid = false;
 				try {
 					threads = Integer.valueOf(value);
-					if (threads >= 1 && threads <= cpuCores) {
+					if (threads >= 1) {
 						valid = true;
 					}
 				} catch (NumberFormatException e) {
 				}
 				if (!valid) {
 					throw new IllegalArgumentException(
-							'\'' + value + "' should be a number in the range 1-" + cpuCores + ", or 'auto' to use all available CPU cores.");
+							'\'' + value + "' should be a number >= 1, or 'auto' to use all available CPU cores.");
 				}
 				return new ThreadCount(threads, false);
 			}

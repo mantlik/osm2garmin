@@ -47,8 +47,9 @@ import java.util.Set;
 public class Main {
 	private static final String DEFAULT_DIR = ".";
 
-	// We can only process a maximum of 255 areas at a time because we
-	// compress an area ID into 8 bits to save memory (and 0 is reserved)
+	// We store area IDs and all used combinations of area IDs in a dictionary. The index to this
+	// dictionary is saved in short values. If Short.MaxValue() is reached, the user might limit 
+	// the number of areas that is processed in one pass.  
 	private int maxAreasPerPass;
 
 	// A list of the OSM files to parse.
@@ -98,7 +99,9 @@ public class Main {
 	private String kmlOutputFile;
 	// The maximum number of threads the splitter should use.
 	private int maxThreads;
-
+	// The output type
+	private boolean pbfOutput;
+	
 	public static void main(String[] args) {
 
 		Main m = new Main();
@@ -224,6 +227,17 @@ public class Main {
 		geoNamesFile = params.getGeonamesFile();
 		resolution = params.getResolution();
 		trim = !params.isNoTrim();
+		String output = params.getOutput();
+		// Remove warning and make the default pbf after a while.
+		if (output.equals("unset")) {
+			System.err.println("\n\n**** WARNING: the default output type has changed to pbf, use --output=xml for .osm.gz files\n");
+			output = "pbf";
+		}
+		if(!output.equals("xml") && !output.equals("pbf")) {
+			System.err.println("The --output parameter must be either xml or pbf. Resetting to xml.");
+		}
+		pbfOutput = "pbf".equals(output);
+		
 		if (resolution < 1 || resolution > 24) {
 			System.err.println("The --resolution parameter must be a value between 1 and 24. Resetting to 13.");
 			resolution = 13;
@@ -235,9 +249,9 @@ public class Main {
 		fileOutputDir = new File(outputDir == null? DEFAULT_DIR: outputDir);
 
 		maxAreasPerPass = params.getMaxAreas();
-		if (maxAreasPerPass < 1 || maxAreasPerPass > 255) {
-			System.err.println("The --max-areas parameter must be a value between 1 and 255. Resetting to 255.");
-			maxAreasPerPass = 255;
+		if (maxAreasPerPass < 1 || maxAreasPerPass > 2048) {
+			System.err.println("The --max-areas parameter must be a value between 1 and 2048. Resetting to 2048.");
+			maxAreasPerPass = 2048;
 		}
 		kmlOutputFile = params.getWriteKml();
 		densityMap = !params.isLegacyMode();
@@ -247,7 +261,7 @@ public class Main {
 
 		maxThreads = params.getMaxThreads().getCount();
 		filenames = parser.getAdditionalParams();
-
+		
 		String splitFile = params.getSplitFile();
 		if (splitFile != null) {
 			try {
@@ -343,7 +357,7 @@ public class Main {
 			OSMWriter[] currentWriters = new OSMWriter[Math.min(areasPerPass, areas.size() - i * areasPerPass)];
 			for (int j = 0; j < currentWriters.length; j++) {
 				Area area = areas.get(i * areasPerPass + j);
-				currentWriters[j] = new OSMWriter(area, fileOutputDir);
+				currentWriters[j] = pbfOutput ? new BinaryMapWriter(area, fileOutputDir) : new OSMXMLWriter(area, fileOutputDir);
 				currentWriters[j].initForWrite(area.getMapId(), overlapAmount);
 			}
 
@@ -381,7 +395,7 @@ public class Main {
 		for (String filename : filenames) {
 			System.out.println("Processing " + filename);
 			try {
-				if (filename.endsWith(".osm.pbf")) {
+				if (filename.endsWith(".pbf")) {
 					// Is it a binary file?
 					File file = new File(filename);
 					BlockInputStream blockinput = (new BlockInputStream(
@@ -402,9 +416,11 @@ public class Main {
 					}
 				}
 			} catch (FileNotFoundException e) {
-				e.printStackTrace();
+				System.out.printf("ERROR: file %s was not found\n", filename);
 			} catch (XmlPullParserException e) {
-				e.printStackTrace();
+				System.out.printf("ERROR: file %s is not a valid OSM XML file\n", filename);
+			} catch (IllegalArgumentException e) {
+				System.out.printf("ERROR: file %s contains unexpected data\n", filename);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -441,12 +457,15 @@ public class Main {
 		w.println("# for each one.");
 		for (Area a : areas) {
 			w.println();
-			w.format("mapname: %d\n", a.getMapId());
+			w.format("mapname: %08d\n", a.getMapId());
 			if (a.getName() == null)
 				w.println("# description: OSM Map");
 			else
-				w.println("description: " + a.getName());
-			w.format("input-file: %d.osm.gz\n", a.getMapId());
+				w.println("description: " + (a.getName().length() > 50 ? a.getName().substring(0, 50) : a.getName()));
+			if(pbfOutput)
+			  w.format("input-file: %08d.osm.pbf\n", a.getMapId());
+			else
+			  w.format("input-file: %08d.osm.gz\n", a.getMapId());
 		}
 
 		w.println();

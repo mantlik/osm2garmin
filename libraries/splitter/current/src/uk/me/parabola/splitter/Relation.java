@@ -21,17 +21,17 @@ import java.util.List;
 public class Relation extends Element {
 	private final List<Member> members = new ArrayList<Member>();
 
-	public void set(int id) {
+	public void set(long id) {
 		setId(id);
 	}
-
+	
 	@Override
 	public void reset() {
 		super.reset();
 		members.clear();
 	}
 
-	public void addMember(String type, int ref, String role) {
+	public void addMember(String type, long ref, String role) {
 		Member mem = new Member(type, ref, role);
 		members.add(mem);
 	}
@@ -42,10 +42,10 @@ public class Relation extends Element {
 
 	static class Member {
 		private String type;
-		private int ref;
+		private long ref;
 		private String role;
 
-		Member(String type, int ref, String role) {
+		Member(String type, long ref, String role) {
 			this.type = type;
 			this.ref = ref;
 			this.role = role;
@@ -55,7 +55,7 @@ public class Relation extends Element {
 			return type;
 		}
 
-		public int getRef() {
+		public long getRef() {
 			return ref;
 		}
 

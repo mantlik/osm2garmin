@@ -21,7 +21,7 @@ public class Node extends Element {
 	private double lat, lon;
 	private int mapLat, mapLon;
 
-	public void set(int id, double lat, double lon) {
+	public void set(long id, double lat, double lon) {
 		setId(id);
 		this.lat = lat;
 		this.lon = lon;

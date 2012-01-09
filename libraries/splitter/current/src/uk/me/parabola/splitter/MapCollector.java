@@ -17,4 +17,6 @@ public interface MapCollector extends MapProcessor {
 	Area getExactArea();
 
 	SplittableArea getRoundedArea(int resolution);
+
+	void boundTag(Area bounds);
 }

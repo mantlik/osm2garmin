@@ -158,7 +158,8 @@ public class ParamParser {
 	}
 
 	public <P> void displayUsage() {
-		System.out.println("Usage:");
+		System.out.println("Usage: java [JAVA_OPTIONS] -jar splitter.jar [OPTIONS] input_file (*.osm or *.pbf)");
+		System.out.println("Options:");
 		StringBuilder buf = new StringBuilder(100);
 		for (Param param : paramMap.values()) {
 			buf.setLength(0);
