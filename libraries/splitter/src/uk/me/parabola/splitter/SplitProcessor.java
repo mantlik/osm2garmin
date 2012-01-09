@@ -30,8 +30,8 @@ import java.util.concurrent.BlockingQueue;
  */
 class SplitProcessor implements MapProcessor {
 
-	private final SparseInt2ShortMultiMap coords = new SparseInt2ShortMultiMap((short) -1,2);
-	private final SparseInt2ShortMultiMap ways = new SparseInt2ShortMultiMap((short) -1,2);
+	private final SparseLong2ShortMultiMap coords = new SparseLong2ShortMultiMap((short) -1,2);
+	private final SparseLong2ShortMultiMap ways = new SparseLong2ShortMultiMap((short) -1,2);
 
 	private final OSMWriter[] writers;
 	private final InputQueueInfo[] writerInputQueues;
@@ -160,9 +160,9 @@ class SplitProcessor implements MapProcessor {
 
 	@Override
 	public void endMap() {
-		System.out.println("coords occupancy");
+		System.err.println("coords occupancy");
 		coords.stats();
-		System.out.println("ways occupancy");
+		System.err.println("ways occupancy");
 		ways.stats();
 		for (int i = 0; i < writerInputQueues.length; i++) {
 			try {
@@ -172,7 +172,7 @@ class SplitProcessor implements MapProcessor {
 			}
 		}
 		try {
-			toProcess.put(STOP_MSG);// Magic flag used to indicate that all data is done.
+			if (maxThreads > 1) toProcess.put(STOP_MSG);// Magic flag used to indicate that all data is done.
 
 		} catch (InterruptedException e1) {
 			e1.printStackTrace();
@@ -195,7 +195,7 @@ class SplitProcessor implements MapProcessor {
 		if (index < 0)
 			index = -index-1;
 
-		//System.out.println("Send to "+entry.getValue().size());
+		//System.err.println("Send to "+entry.getValue().size());
 		for (OSMWriter w : writersets[index]) {
 			int n = writerToID.get(w);
 			boolean found = w.nodeBelongsToThisArea(currentNode); 
@@ -215,7 +215,7 @@ class SplitProcessor implements MapProcessor {
 	private void writeWay(Way currentWay) throws IOException {
 		if (!seenWay) {
 			seenWay = true;
-			System.out.println("Writing ways " + new Date());
+			System.err.println("Writing ways " + new Date());
 		}
 		if (!currentWayAreaSet.isEmpty()) {
 				// this way falls into 4 or less areas (the normal case). Store these areas in the ways map
@@ -237,7 +237,7 @@ class SplitProcessor implements MapProcessor {
 	private void writeRelation(Relation currentRelation) throws IOException {
 		if (!seenRel) {
 			seenRel = true;
-			System.out.println("Writing relations " + new Date());
+			System.err.println("Writing relations " + new Date());
 		}
 		for (int n = currentRelAreaSet.nextSetBit(0); n >= 0; n = currentRelAreaSet.nextSetBit(n + 1)) {
 			// if n is out of bounds, then something has gone wrong
@@ -274,7 +274,7 @@ class SplitProcessor implements MapProcessor {
 			flush();
 		}
 		void flush() throws InterruptedException {
-			//System.out.println("Flush");
+			//System.err.println("Flush");
 			inputQueue.put(staging);
 			staging = new ArrayList<Element>(STAGING_SIZE);
 			toProcess.put(this);
@@ -335,7 +335,7 @@ class SplitProcessor implements MapProcessor {
 
 				}
 			}
-			System.out.println("Thread " + Thread.currentThread().getName() + " has finished");
+			System.err.println("Thread " + Thread.currentThread().getName() + " has finished");
 		}
 	}
 }

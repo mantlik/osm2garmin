@@ -158,7 +158,7 @@ public class ParamParser {
 	}
 
 	public <P> void displayUsage() {
-		System.out.println("Usage:");
+		System.err.println("Usage:");
 		StringBuilder buf = new StringBuilder(100);
 		for (Param param : paramMap.values()) {
 			buf.setLength(0);
@@ -170,7 +170,7 @@ public class ParamParser {
 			if (param.getDefaultValue() != null) {
 				buf.append(" Default is ").append(param.getDefaultValue()).append('.');
 			}
-			System.out.println(buf.toString());
+			System.err.println(buf.toString());
 		}
 	}
 

@@ -40,6 +40,21 @@ public interface SplitterParams {
 	@Option(defaultValue = "13", description = "The resolution of the overview map to be produced by mkgmap.")
 	int getResolution();
 
+	@Option(defaultValue = "0.0", description = "Left edge of the splitted area (longitude degrees).")
+	double getLeft();
+
+	@Option(defaultValue = "0.0", description = "Right edge of the splitted area (longitude degrees).")
+	double getRight();
+
+	@Option(defaultValue = "0.0", description = "Bottom edge of the splitted area (latitude degrees).")
+	double getBottom();
+
+	@Option(defaultValue = "0.0", description = "Top edge of the splitted area (latitude degrees).")
+	double getTop();
+
+	@Option(description = "Stop after analysis phase.")
+	boolean getStopAfterAnalysis();
+
 	@Option(description = "Specify this if the input osm file has nodes, ways and relations intermingled.")
 	boolean isMixed();
 

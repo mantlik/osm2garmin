@@ -55,14 +55,14 @@ public class SplittableDensityArea implements SplittableArea {
 
 		Area bounds = densities.getBounds();
 		if (densities.getNodeCount() <= maxNodes) {
-			System.out.println("Area " + bounds + " contains " + Utils.format(densities.getNodeCount())
+			System.err.println("Area " + bounds + " contains " + Utils.format(densities.getNodeCount())
 					+ " nodes. DONE!");
 			densities = null;
 			return Collections.singletonList(bounds);
 		}
 
 		if (densities.getWidth() < 4 && densities.getHeight() < 4) {
-			System.out.println("Area " + bounds + " contains " + Utils.format(densities.getNodeCount())
+			System.err.println("Area " + bounds + " contains " + Utils.format(densities.getNodeCount())
 							+ " nodes but is already at the minimum size so can't be split further");
 			return Collections.singletonList(bounds);
 		}
@@ -89,7 +89,7 @@ public class SplittableDensityArea implements SplittableArea {
 		} 
 		// No dice. Use this as-is.
 		if (splitResult == null) {
-			System.out.println("Area " + bounds + " contains " + Utils.format(densities.getNodeCount())
+			System.err.println("Area " + bounds + " contains " + Utils.format(densities.getNodeCount())
 					+ " nodes but can't be split further");
 			return Collections.singletonList(bounds);
 		}

@@ -223,14 +223,14 @@ class OSMParser extends AbstractXppParser implements MapReader {
 		Area bounds = new Area(mapUnits[0], mapUnits[1], mapUnits[2], mapUnits[3]);
 
 		if (bounds.getMinLong() > bounds.getMaxLong()) {
-			System.out.println("A <bounds/> tag was found but it crosses +/-180 the latitude line (western edge=" +
+			System.err.println("A <bounds/> tag was found but it crosses +/-180 the latitude line (western edge=" +
 							Utils.toDegrees(bounds.getMinLong()) + ", eastern=" + Utils.toDegrees(bounds.getMaxLong()) +
 							"). The splitter isn't currently able to deal with this, so the bounds are being ignored");
 			return;
 		}
 
 		processor.boundTag(bounds);
-		System.out.println("A <bounds/> tag was found. Area covered is " + bounds.toString());
+		System.err.println("A <bounds/> tag was found. Area covered is " + bounds.toString());
 	}
 
 	/**
@@ -244,7 +244,7 @@ class OSMParser extends AbstractXppParser implements MapReader {
 				state = State.None;
 				nodeCount++;
 				if (nodeCount % NODE_STATUS_UPDATE_THRESHOLD == 0) {
-					System.out.println(Utils.format(nodeCount) + " nodes processed...");
+					System.err.println(Utils.format(nodeCount) + " nodes processed...");
 				}
 			}
 		} else if (state == State.Way) {
@@ -254,7 +254,7 @@ class OSMParser extends AbstractXppParser implements MapReader {
 				state = State.None;
 				wayCount++;
 				if (wayCount % WAY_STATUS_UPDATE_THRESHOLD == 0) {
-					System.out.println(Utils.format(wayCount) + " ways processed...");
+					System.err.println(Utils.format(wayCount) + " ways processed...");
 				}
 			}
 		} else if (state == State.Relation) {
@@ -264,7 +264,7 @@ class OSMParser extends AbstractXppParser implements MapReader {
 				state = State.None;
 				relationCount++;
 				if (relationCount % RELATION_STATUS_UPDATE_THRESHOLD == 0) {
-					System.out.println(Utils.format(relationCount) + " relations processed...");
+					System.err.println(Utils.format(relationCount) + " relations processed...");
 				}
 			}
 		}

@@ -75,6 +75,12 @@ class DensityMapCollector implements MapCollector {
 
 	@Override
 	public SplittableArea getRoundedArea(int resolution) {
-		Area bounds = RoundingUtils.round(getExactArea(), resolution);
-		return new SplittableDensityArea(densityMap.subset(bounds));
-	}}
+		Area bbounds = RoundingUtils.round(getExactArea(), resolution);
+		return new SplittableDensityArea(densityMap.subset(bbounds));
+	}
+
+    @Override
+    public SplittableArea getRoundedArea(int resolution, Area bbounds) {
+	return new SplittableDensityArea(densityMap.subset(bbounds));
+    }
+}

@@ -32,6 +32,7 @@ public class ParamConverter {
 		converterMap.put(Boolean.class, new Converter<Boolean>() { @Override Boolean convert(String value) { return Boolean.valueOf(value); } });
 		converterMap.put(Integer.class, new IntegerConverter());
 		converterMap.put(Long.class, new LongConverter());
+		converterMap.put(Double.class, new DoubleConverter());
 		converterMap.put(File.class, new Converter<File>() { @Override File convert(String value) { return new File(value); } });
 		converterMap.put(ThreadCount.class, new ThreadCountConverter());
 
@@ -85,6 +86,16 @@ public class ParamConverter {
 		@Override Long convert(String value) {
 			try {
 				return Long.valueOf(value);
+			} catch (NumberFormatException e) {
+				throw new NumberFormatException('\'' + value + "' is not a valid number.");
+			}
+		}
+	}
+
+	private static class DoubleConverter extends Converter<Double> {
+		@Override Double convert(String value) {
+			try {
+				return Double.valueOf(value);
 			} catch (NumberFormatException e) {
 				throw new NumberFormatException('\'' + value + "' is not a valid number.");
 			}

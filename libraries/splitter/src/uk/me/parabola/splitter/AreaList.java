@@ -215,9 +215,9 @@ public class AreaList {
 	}
 
 	public void dump() {
-		System.out.println("Areas read from file");
+		System.err.println("Areas read from file");
 		for (Area area : areas) {
-			System.out.println(area.getMapId() + " " + area.toString());
+			System.err.println(area.getMapId() + " " + area.toString());
 		}
 	}
 }

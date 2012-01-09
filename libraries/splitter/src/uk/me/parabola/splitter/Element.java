@@ -23,14 +23,14 @@ import java.util.Map;
  */
 public class Element {
 	private ArrayList<Tag> tags; 
-	private int id;
+	private long id;
 
 	
 	protected void setId(int id) {
 		this.id = id;
 	}
 
-	public int getId() {
+	public long getId() {
 		return id;
 	}
 

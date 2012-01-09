@@ -63,7 +63,7 @@ public class OSMWriter {
 			writer = new OutputStreamWriter(zos, "utf-8");
 			writeHeader();
 		} catch (IOException e) {
-			System.out.println("Could not open or write file header. Reason: " + e.getMessage());
+			System.err.println("Could not open or write file header. Reason: " + e.getMessage());
 			throw new RuntimeException(e);
 		}
 	}
@@ -89,7 +89,7 @@ public class OSMWriter {
 			flush();
 			writer.close();
 		} catch (IOException e) {
-			System.out.println("Could not write end of file: " + e);
+			System.err.println("Could not write end of file: " + e);
 		}
 	}
 
@@ -99,7 +99,7 @@ public class OSMWriter {
 	
 	public void write(Node node) throws IOException {
 		writeString("<node id='");
-		writeInt(node.getId());
+		writeLong(node.getId());
 		writeString("' lat='");
 		writeDouble(node.getLat());
 		writeString("' lon='");
@@ -115,7 +115,7 @@ public class OSMWriter {
 
 	public void write(Way way) throws IOException {
 		writeString("<way id='");
-		writeInt(way.getId());
+		writeLong(way.getId());
 		writeString("'>\n");
 		IntArrayList refs = way.getRefs();
 		for (int i = 0; i < refs.size(); i++) {
@@ -130,7 +130,7 @@ public class OSMWriter {
 
 	public void write(Relation rel) throws IOException {
 		writeString("<relation id='");
-		writeInt(rel.getId());
+		writeLong(rel.getId());
 		writeString("'>\n");
 		List<Relation.Member> memlist = rel.getMembers();
 		for (Relation.Member m : memlist) {
@@ -243,6 +243,13 @@ public class OSMWriter {
 	private void writeInt(int value) throws IOException {
 		checkFlush(11);
 		index += Convert.intToString(value, charBuf, index);
+	}
+        
+        private final static DecimalFormat df = new DecimalFormat("0");
+	private void writeLong(long value) throws IOException {
+                String s = df.format(value);
+		checkFlush(s.length());
+		writeString(s);
 	}
 
 	private void writeChar(char value) throws IOException {
