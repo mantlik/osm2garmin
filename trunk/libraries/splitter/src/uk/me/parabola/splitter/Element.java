@@ -14,9 +14,7 @@ package uk.me.parabola.splitter;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 
 /**
  * @author Steve Ratcliffe
@@ -26,7 +24,7 @@ public class Element {
 	private long id;
 
 	
-	protected void setId(int id) {
+	protected void setId(long id) {
 		this.id = id;
 	}
 
@@ -36,6 +34,7 @@ public class Element {
 
 	public void reset() {
 		this.id = 0;
+		if (tags != null)
 		tags.clear();
 		//tags = null;
 	}

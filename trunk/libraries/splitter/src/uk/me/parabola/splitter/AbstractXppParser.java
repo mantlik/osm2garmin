@@ -42,6 +42,10 @@ public abstract class AbstractXppParser {
 	protected int getIntAttr(String name) {
 		return Integer.parseInt(parser.getAttributeValue(null, name));
 	}
+	
+	protected long getLongAttr(String name) {
+		return Long.parseLong(parser.getAttributeValue(null, name));
+	}
 
 	protected String getTextContent() {
 		return parser.getText();
