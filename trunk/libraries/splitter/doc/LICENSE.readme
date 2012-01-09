@@ -1,0 +1,17 @@
+
+The code of the project itself is under GPL-3
+
+This project depends on several externally developed jar files.
+
+The licenses for each jar included in the lib directory is summarised
+below.  The full text of each license is included in this directory.
+
+xpp3 - xpp3
+
+fastutil.jar - apache-2.0
+testng.jar - apache-2.0
+protobuf.jar - apache-2.0
+
+dsiutils - LGPL
+
+osmpbf.jar - LGPL-3+
