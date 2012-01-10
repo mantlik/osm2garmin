@@ -277,11 +277,17 @@ public class PeerUpdater extends Thread {
                         + "'");
                 return null;
             } else {
-                if (((Long) m.get("interval")).intValue() < this.interval) {
+                //if (((Long) m.get("interval")).intValue() < this.interval) {
                     this.interval = ((Long) m.get("interval")).intValue();
-                } else {
-                    this.interval *= 2;
-                }
+                    if (this.interval < 150) {
+                        this.interval = 150;
+                    }
+                    if (this.interval > 3600) {
+                        this.interval = 3600;
+                    }
+                //} else {
+                //    this.interval *= 2;
+                //}
 
                 Object peers = m.get("peers");
                 ArrayList newPeerList = new ArrayList();
@@ -314,6 +320,7 @@ public class PeerUpdater extends Thread {
                     }
                 }
             }
+            System.out.println("Tracker response OK. Next connection  after " + (int)(interval / 60) + " min.");
             return l;
         } else {
             return null;
