@@ -71,11 +71,11 @@ final class RegionsPanel extends javax.swing.JPanel implements ListSelectionList
 
             },
             new String [] {
-                "Name", "Lat1", "Lon1", "Lat2", "Lon2"
+                "Enabled", "Name", "Lat1", "Lon1", "Lat2", "Lon2"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.Float.class, java.lang.Float.class, java.lang.Float.class, java.lang.Float.class
+                java.lang.Boolean.class, java.lang.String.class, java.lang.Float.class, java.lang.Float.class, java.lang.Float.class, java.lang.Float.class
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -91,11 +91,12 @@ final class RegionsPanel extends javax.swing.JPanel implements ListSelectionList
             }
         });
         jScrollPane3.setViewportView(regionsTable);
-        regionsTable.getColumnModel().getColumn(0).setHeaderValue(org.openide.util.NbBundle.getMessage(RegionsPanel.class, "RegionsPanel.regionsTable.columnModel.title0_1")); // NOI18N
-        regionsTable.getColumnModel().getColumn(1).setHeaderValue(org.openide.util.NbBundle.getMessage(RegionsPanel.class, "RegionsPanel.regionsTable.columnModel.title1_1")); // NOI18N
-        regionsTable.getColumnModel().getColumn(2).setHeaderValue(org.openide.util.NbBundle.getMessage(RegionsPanel.class, "RegionsPanel.regionsTable.columnModel.title2_1")); // NOI18N
-        regionsTable.getColumnModel().getColumn(3).setHeaderValue(org.openide.util.NbBundle.getMessage(RegionsPanel.class, "RegionsPanel.regionsTable.columnModel.title3_1")); // NOI18N
-        regionsTable.getColumnModel().getColumn(4).setHeaderValue(org.openide.util.NbBundle.getMessage(RegionsPanel.class, "RegionsPanel.regionsTable.columnModel.title4_1")); // NOI18N
+        regionsTable.getColumnModel().getColumn(0).setHeaderValue(org.openide.util.NbBundle.getMessage(RegionsPanel.class, "RegionsPanel.regionsTable.columnModel.title5")); // NOI18N
+        regionsTable.getColumnModel().getColumn(1).setHeaderValue(org.openide.util.NbBundle.getMessage(RegionsPanel.class, "RegionsPanel.regionsTable.columnModel.title0_1")); // NOI18N
+        regionsTable.getColumnModel().getColumn(2).setHeaderValue(org.openide.util.NbBundle.getMessage(RegionsPanel.class, "RegionsPanel.regionsTable.columnModel.title1_1")); // NOI18N
+        regionsTable.getColumnModel().getColumn(3).setHeaderValue(org.openide.util.NbBundle.getMessage(RegionsPanel.class, "RegionsPanel.regionsTable.columnModel.title2_1")); // NOI18N
+        regionsTable.getColumnModel().getColumn(4).setHeaderValue(org.openide.util.NbBundle.getMessage(RegionsPanel.class, "RegionsPanel.regionsTable.columnModel.title3_1")); // NOI18N
+        regionsTable.getColumnModel().getColumn(5).setHeaderValue(org.openide.util.NbBundle.getMessage(RegionsPanel.class, "RegionsPanel.regionsTable.columnModel.title4_1")); // NOI18N
 
         org.openide.awt.Mnemonics.setLocalizedText(addRegionButton, org.openide.util.NbBundle.getMessage(RegionsPanel.class, "RegionsPanel.addRegionButton.text")); // NOI18N
         addRegionButton.addActionListener(new java.awt.event.ActionListener() {
@@ -217,11 +218,12 @@ final class RegionsPanel extends javax.swing.JPanel implements ListSelectionList
         if ((selectedRow < 0) || (selectedRow >= regionsTable.getRowCount())) {
             return;
         }
-        String name = (String) model.getValueAt(selectedRow, 0);
-        float lat1 = (Float) model.getValueAt(selectedRow, 1);
-        float lon1 = (Float) model.getValueAt(selectedRow, 2);
-        float lat2 = (Float) model.getValueAt(selectedRow, 3);
-        float lon2 = (Float) model.getValueAt(selectedRow, 4);
+        boolean enabled = (Boolean) model.getValueAt(selectedRow, 0);
+        String name = (String) model.getValueAt(selectedRow, 1);
+        float lat1 = (Float) model.getValueAt(selectedRow, 2);
+        float lon1 = (Float) model.getValueAt(selectedRow, 3);
+        float lat2 = (Float) model.getValueAt(selectedRow, 4);
+        float lon2 = (Float) model.getValueAt(selectedRow, 5);
         float left = Math.max(lon1 - 5, -180);
         float right = Math.min(lon2 + 5, 180);
         float bottom = Math.max(lat1 - 5, -65);
@@ -235,7 +237,7 @@ final class RegionsPanel extends javax.swing.JPanel implements ListSelectionList
         File r = new File(rname);
         try {
             PrintStream printer = new PrintStream(r);
-            printer.println("<html><head><title>"+name+"</title></head><body>");
+            printer.println("<html><head><title>" + name + "</title></head><body>");
             printer.println("<img src=\"" + addr + "\" />");
             printer.println("</body></html>");
             printer.close();
@@ -282,13 +284,18 @@ final class RegionsPanel extends javax.swing.JPanel implements ListSelectionList
             s = new Scanner(new FileInputStream(r));
             while (s.hasNext()) {
                 String[] l = s.nextLine().split(" +");
-                if (l.length >= 5) {
+                if (l.length >= 5 && !(l[0].startsWith("#"))) {
+                    boolean enabled = true;
+                    if (l[0].startsWith("x")) {
+                        enabled = false;
+                        l[0] = l[0].replace("x", "");
+                    }
                     String name = l[4];
                     float lon1 = Float.parseFloat(l[0]);
                     float lat1 = Float.parseFloat(l[1]);
                     float lon2 = Float.parseFloat(l[2]);
                     float lat2 = Float.parseFloat(l[3]);
-                    model.insertRow(model.getRowCount(), new Object[]{name, lat1, lon1, lat2, lon2});
+                    model.insertRow(model.getRowCount(), new Object[]{enabled, name, lat1, lon1, lat2, lon2});
                 }
             }
         } catch (FileNotFoundException ex) {
@@ -311,12 +318,16 @@ final class RegionsPanel extends javax.swing.JPanel implements ListSelectionList
             DefaultTableModel model = (DefaultTableModel) regionsTable.getModel();
             PrintStream printer = new PrintStream(r);
             for (int i = 0; i < regionsTable.getRowCount(); i++) {
-                String name = (String) model.getValueAt(i, 0);
-                float lat1 = (Float) model.getValueAt(i, 1);
-                float lon1 = (Float) model.getValueAt(i, 2);
-                float lat2 = (Float) model.getValueAt(i, 3);
-                float lon2 = (Float) model.getValueAt(i, 4);
+                boolean enabled = (Boolean) model.getValueAt(i, 0);
+                String name = (String) model.getValueAt(i, 1);
+                float lat1 = (Float) model.getValueAt(i, 2);
+                float lon1 = (Float) model.getValueAt(i, 3);
+                float lat2 = (Float) model.getValueAt(i, 4);
+                float lon2 = (Float) model.getValueAt(i, 5);
                 name = name.trim().replace(" ", "_");
+                if (!enabled) {
+                    printer.print("x");
+                }
                 if (!name.equals("")) {
                     printer.println(lon1 + " " + lat1 + " " + lon2 + " " + lat2 + " " + name);
                 }

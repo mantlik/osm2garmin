@@ -296,7 +296,8 @@
             </para>
             <para>
                 Regions are processed from top to the bottom of the list. You can change the sequence
-                with the Move up and Move down buttons. 
+                with the Move up and Move down buttons. Uncheck the "Enabled" box to disable the region
+                from processing.
             </para>
             <para>
                 Display button will open the schematic map of the
