@@ -179,10 +179,10 @@ public class Srtm2Osm extends ThreadProcessor {
     }
     private HashMap<Point, Integer> starts = new HashMap<Point, Integer>();
     private HashMap<Point, Integer> ends = new HashMap<Point, Integer>();
-    /*
-     * Add contours from list c to listo contours, merge where possible
-     */
 
+    /*
+     * Add contours from list add to list contours, merge where possible
+     */
     private void addContours(ArrayList<Contour> contours, ArrayList<Contour> add, String logPrefix) {
         for (int i = 0; i < contours.size(); i++) {
             Contour c = contours.get(i);
@@ -216,14 +216,16 @@ public class Srtm2Osm extends ThreadProcessor {
                 if (end.equals(newstart)) {
                     int j = ends.remove(newstart);
                     ends.put(newend, j);
+                    j = contours.indexOf(cc);
                     contours.remove(cc);
-                    contours.add(joinContours(cc, c));
+                    contours.add(j, joinContours(cc, c));
                     finished = true;
                 } else if (newend.equals(start)) {
                     int j = starts.remove(newend);
                     starts.put(newstart, j);
+                    j = contours.indexOf(cc);
                     contours.remove(cc);
-                    contours.add(joinContours(c, cc));
+                    contours.add(j, joinContours(c, cc));
                     finished = true;
                 }
             }
@@ -246,6 +248,11 @@ public class Srtm2Osm extends ThreadProcessor {
      * checked)
      */
     private Contour joinContours(Contour c1, Contour c2) {
+        Point end = c1.getData().get(c1.getData().size()-1);
+        Point start = c2.getData().get(0);
+        if (!end.equals(start)){
+            System.err.println("Joining contours with non-equal ends: " + end + " and " + start);
+        }
         for (int i = 1; i < c2.getData().size(); i++) {
             c1.getData().add(c2.getData().get(i));
         }
@@ -291,12 +298,20 @@ public class Srtm2Osm extends ThreadProcessor {
                         || (density[ii][jj] > contoursDensity
                         && (contour.getZ() % majorInterval != 0))) {
                     // remove segment from contour
-                    contour.setClosed(false);
                     if (i == 1) { // first segment, delete first point
                         contour.getData().remove(0);
                         i = i - 1;  // next segment replaces deleted one - recheck
+                        contour.setClosed(false);
                     } else if (i == (contour.getData().size() - 1)) { //last segment, delete last point
                         contour.getData().remove(i);
+                        contour.setClosed(false);
+                    } else if (contour.isClosed()) {
+                        int id = 1;
+                        while (id < i) {
+                            contour.getData().add(contour.getData().remove(0));
+                            contour.setClosed(false);
+                            i = 0;
+                        }
                     } else {
                         // middle segment - break contour
                         Contour newContour = new Contour();

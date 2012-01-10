@@ -34,7 +34,7 @@ public class Point {
         super();
     }
 
-    public Point (double x, double y) {
+    public Point(double x, double y) {
         super();
         this.x = x;
         this.y = y;
@@ -55,12 +55,12 @@ public class Point {
     public void setY(double y) {
         this.y = y;
     }
-    
+
     @Override
     public boolean equals(Object p) {
         if (p.getClass().isAssignableFrom(Point.class)) {
-            Point pp = (Point)p;
-            return ((x==pp.getX()) && (y==pp.getY()));
+            Point pp = (Point) p;
+            return ((x == pp.getX()) && (y == pp.getY()));
         }
         return this.equals(p);
     }
@@ -72,5 +72,9 @@ public class Point {
         hash = 17 * hash + (int) (Double.doubleToLongBits(this.y) ^ (Double.doubleToLongBits(this.y) >>> 32));
         return hash;
     }
-    
+
+    @Override
+    public String toString() {
+        return "[" + getX() + "," + getY() + "]";
+    }
 }

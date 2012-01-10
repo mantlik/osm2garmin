@@ -688,7 +688,7 @@ public final class MainWindowTopComponent extends TopComponent implements Proper
         par.setProperty("log_report", NbPreferences.forModule(Osm2garmin.class).get("log_report", "report.log"));
         par.setProperty("cycling_features", NbPreferences.forModule(Osm2garmin.class).get("cycling_features", "false"));
         par.setProperty("srtm_step", NbPreferences.forModule(Osm2garmin.class).get("srtm_step", "5"));
-        par.setProperty("contours_density", NbPreferences.forModule(Osm2garmin.class).get("contours_density", "2"));
+        par.setProperty("contours_density", NbPreferences.forModule(Osm2garmin.class).get("contours_density", "4"));
         par.setProperty("exclusive_utils", NbPreferences.forModule(Osm2garmin.class).get("exclusive_utils", "true"));
         //String settings = par.getProperty("userdir") + "/settings.properties";
         //if (new File(settings).exists()) {
