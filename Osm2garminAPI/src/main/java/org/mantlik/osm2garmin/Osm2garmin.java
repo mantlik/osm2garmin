@@ -147,11 +147,13 @@ public class Osm2garmin implements PropertyChangeListener {
                         r);
             }
             Scanner s = new Scanner(new FileInputStream(r));
+            int familyID = 5001;
             while (s.hasNext()) {
                 String[] l = s.nextLine().split(" +");
                 if (l.length >= 5) {
                     Region region = new Region(l[4], parameters.getProperty("maps_dir"),
-                            parameters.getProperty("delete_old_maps", "false").equals("true"));
+                            parameters.getProperty("delete_old_maps", "false").equals("true"), familyID);
+                    familyID ++;
                     region.lon1 = Float.parseFloat(l[0]);
                     region.lat1 = Float.parseFloat(l[1]);
                     region.lon2 = Float.parseFloat(l[2]);

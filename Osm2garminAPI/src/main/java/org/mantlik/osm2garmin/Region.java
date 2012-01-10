@@ -88,14 +88,19 @@ public class Region {
      * 
      */
     public int splitterMaxAreas = 32;
+    /*
+     * 
+     */
+    public int familyID = 5000;
 
     /**
      * 
      * @param name region name used as map dir name as well
      * @param mapsdir directory to save map dir
      * @param deleteOldMap  delete contents of map dir if exists
+     * @param familyID family ID for registration in GMAPSUPP - must be unique for the whole system 
      */
-    public Region(String name, String mapsdir, boolean deleteOldMap) {
+    public Region(String name, String mapsdir, boolean deleteOldMap, int familyID) {
         this.name = name.trim();
         if (!mapsdir.endsWith("/")) {
             mapsdir = mapsdir + "/";
@@ -134,10 +139,14 @@ public class Region {
      * Create MapSource installer and uninstaller for ID no 5001+reg
      */
     void makeInstallers(int reg) {
-        int id = 5001 + reg;
-        String hexid = Integer.toString(id, 16).toUpperCase();
+        // contours map ID
+        int familyID_cont = familyID + 1000;
+        String hexid = Integer.toString(familyID, 16).toUpperCase();
         // swap bytes
         hexid = hexid.substring(2) + hexid.substring(0, 2);
+
+        String hexid_cont = Integer.toString(familyID_cont, 16).toUpperCase();
+        hexid_cont = hexid_cont.substring(2) + hexid_cont.substring(0, 2);
         try {
             PrintStream installer = new PrintStream(new File(dir.getPath() + "/installer.bat"));
             PrintStream uninstaller = new PrintStream(new File(dir.getPath() + "/uninstaller.bat"));
@@ -147,10 +156,14 @@ public class Region {
             installer.print("set KEY=HKLM\\SOFTWARE\\Garmin\\MapSource\r\n");
             installer.print(":key_ok\r\n\r\n");
 
-            installer.print("reg ADD %KEY%\\Families\\FAMILY_" + id + " /v ID /t REG_BINARY /d " + hexid + " /f\r\n");
-            installer.print("reg ADD %KEY%\\Families\\FAMILY_" + id + "\\1 /v Loc /t REG_SZ /d \"%~dp0\\\" /f\r\n");
-            installer.print("reg ADD %KEY%\\Families\\FAMILY_" + id + "\\1 /v Bmap /t REG_SZ /d \"%~dp0osmmap.img\" /f\r\n");
-            installer.print("reg ADD %KEY%\\Families\\FAMILY_" + id + "\\1 /v Tdb /t REG_SZ /d \"%~dp0osmmap.tdb\" /f\r\n");
+            installer.print("reg ADD %KEY%\\Families\\FAMILY_" + familyID + " /v ID /t REG_BINARY /d " + hexid + " /f\r\n");
+            installer.print("reg ADD %KEY%\\Families\\FAMILY_" + familyID + "\\1 /v Loc /t REG_SZ /d \"%~dp0\\\" /f\r\n");
+            installer.print("reg ADD %KEY%\\Families\\FAMILY_" + familyID + "\\1 /v Bmap /t REG_SZ /d \"%~dp0osmmap.img\" /f\r\n");
+            installer.print("reg ADD %KEY%\\Families\\FAMILY_" + familyID + "\\1 /v Tdb /t REG_SZ /d \"%~dp0osmmap.tdb\" /f\r\n");
+            installer.print("reg ADD %KEY%\\Families\\FAMILY_" + familyID_cont + " /v ID /t REG_BINARY /d " + hexid_cont + " /f\r\n");
+            installer.print("reg ADD %KEY%\\Families\\FAMILY_" + familyID_cont + "\\1 /v Loc /t REG_SZ /d \"%~dp0\\\" /f\r\n");
+            installer.print("reg ADD %KEY%\\Families\\FAMILY_" + familyID_cont + "\\1 /v Bmap /t REG_SZ /d \"%~dp0osmmap.img\" /f\r\n");
+            installer.print("reg ADD %KEY%\\Families\\FAMILY_" + familyID_cont + "\\1 /v Tdb /t REG_SZ /d \"%~dp0osmmap.tdb\" /f\r\n");
             installer.close();
 
             uninstaller.print("set KEY=HKLM\\SOFTWARE\\Wow6432Node\\Garmin\\MapSource\r\n");
@@ -158,7 +171,8 @@ public class Region {
             uninstaller.print("set KEY=HKLM\\SOFTWARE\\Garmin\\MapSource\r\n");
             uninstaller.print(":key_ok\r\n\r\n");
 
-            uninstaller.print("reg DELETE %KEY%\\Families\\FAMILY_" + id + " /f\r\n");
+            uninstaller.print("reg DELETE %KEY%\\Families\\FAMILY_" + familyID + " /f\r\n");
+            uninstaller.print("reg DELETE %KEY%\\Families\\FAMILY_" + familyID_cont + " /f\r\n");
             uninstaller.close();
 
         } catch (FileNotFoundException ex) {
