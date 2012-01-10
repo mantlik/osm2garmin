@@ -77,7 +77,7 @@ public class ContoursUpdater extends ThreadProcessor {
                 int la = (int) Math.floor(lat);
                 int lo = (int) Math.floor(lon);
                 String name = d8.format(((la + 90) * 360 + lo + 180) * 1000); // 0 to 64800000
-                String srtmName = Srtm.getName(lo, la).substring(0, 8);
+                String srtmName = Srtm.getName(lo, la).substring(0, 7);
                 String coords = "Contours " + (int) Math.abs(lat) + (lat > 0 ? "N " : "S ")
                         + (int) Math.abs(lon) + (lon > 0 ? "E" : "W") + ": ";
 
@@ -86,15 +86,16 @@ public class ContoursUpdater extends ThreadProcessor {
                         + " - " + region.name + " " + perc + " % completed.");
 
                 File zipfile = new File(contoursDir + srtmName + ".zip");
-                File zipFile2 = new File(contoursDir + name + ".zip");
+                // typo in file name up to r34
+                File zipFile3 = new File(contoursDir + srtmName + "..zip");
                 if (zipfile.exists() && (zipfile.length() > 0)) {
                     unpackFiles(zipfile);
                     continue;
-                } else if (zipFile2.exists()) {
-                    if (zipFile2.length() > 0) {
-                        unpackFiles(zipFile2);
+                } else if (zipFile3.exists()) {
+                    if (zipFile3.length() > 0) {
+                        unpackFiles(zipFile3);
                     }
-                    zipFile2.renameTo(zipfile);
+                    zipFile3.renameTo(zipfile);
                     continue;
                 }
 
@@ -108,18 +109,7 @@ public class ContoursUpdater extends ThreadProcessor {
 
                 //String name = d000.format(Math.abs(lo)) + (lo >= 0 ? "E" : "W") + d00.format(Math.abs(la)) + (la >= 0 ? "N" : "S");
                 String outputName = contoursDir + name + ".osm.gz";
-                OutputStream os;
-                try {
-                    os = new GZIPOutputStream(new BufferedOutputStream(new FileOutputStream(
-                            new File(outputName))));
-                } catch (IOException ex) {
-                    Logger.getLogger(PlanetUpdater.class.getName()).log(Level.SEVERE, null, ex);
-                    setStatus("Error creating contours output.");
-                    setState(ERROR);
-                    region.setState(Region.ERROR);
-                    return;
-                }
-                srtm2osm = new Srtm2Osm(parameters, la, lo, os);
+                srtm2osm = new Srtm2Osm(parameters, la, lo, outputName);
                 while (srtm2osm.getState() == Srtm2Osm.RUNNING) {
                     try {
                         Thread.sleep(1000);
@@ -130,6 +120,12 @@ public class ContoursUpdater extends ThreadProcessor {
                         return;
                     }
                     setStatus(srtm2osm.getStatus() + " - " + region.name + " " + perc + " % completed.");
+                }
+                if (srtm2osm.getState() == Srtm2Osm.ERROR) {
+                    setState(ERROR);
+                    setStatus(srtm2osm.getStatus());
+                    region.setState(Region.ERROR);
+                    return;
                 }
                 File f = new File(outputName);
                 //if (f.exists() && f.length() < 30) {
@@ -148,7 +144,7 @@ public class ContoursUpdater extends ThreadProcessor {
 
                     // run splitter
                     String[] args = new String[]{
-                        "--max-areas=1", "--max-nodes=1000000",
+                        "--max-areas=4", "--max-nodes=1000000", "--output=pbf",
                         "--status-freq=0", "--output-dir=" + contoursDir,
                         "--mapid=" + d8.format(Long.parseLong(name) + 1), contoursDir + name + ".osm.gz"
                     };
@@ -172,11 +168,11 @@ public class ContoursUpdater extends ThreadProcessor {
                         region.setState(Region.ERROR);
                         return;
                     }
-                    if (new File(contoursDir + d8.format(Long.parseLong(name) + 1) + ".osm.gz").exists()) {
+                    if (new File(contoursDir + d8.format(Long.parseLong(name) + 1) + ".osm.pbf").exists()) {
                         f.delete();
                         outputFiles.clear();
                         for (int i = 1; i < 1000; i++) {
-                            String fname = contoursDir + d8.format(Long.parseLong(name) + i) + ".osm.gz";
+                            String fname = contoursDir + d8.format(Long.parseLong(name) + i) + ".osm.pbf";
                             if (!new File(fname).exists()) {
                                 break;
                             }
@@ -214,30 +210,25 @@ public class ContoursUpdater extends ThreadProcessor {
                     }
                 }
 
-                for (int i = 0; i < osmFiles.length; i++) {
-                    new File(osmFiles[i]).delete();
-                }
-                boolean noFile = true;
+                ArrayList <String> imgFiles = new ArrayList<String>();
+                String nn;
                 for (String file : osmFiles) {
-                    if (new File(file.replace(".osm.gz", ".img")).exists()) {
-                        noFile = false;
-                        break;
+                    nn = file.replace(".osm.gz", ".img");
+                    nn = nn.replace(".osm.pbf", ".img");
+                    if (new File(nn).exists()) {
+                        imgFiles.add(nn);
                     }
                 }
 
-                if (!noFile) {
+                if (!imgFiles.isEmpty()) {
                     // pack files
                     setStatus(coords + "Packing files for later use "
                             + " - " + region.name + " " + perc + " % completed.");
                     try {
                         ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(
                                 new FileOutputStream(new File(contoursDir + srtmName + ".zip"))));
-                        for (int i = 0; i < osmFiles.length; i++) {
-                            String fname = osmFiles[i].replace(".osm.gz", ".img");
+                        for (String fname : imgFiles) {
                             File file = new File(fname);
-                            if (!file.exists()) {
-                                continue;
-                            }
                             InputStream is = new BufferedInputStream(new FileInputStream(file));
                             out.putNextEntry(new ZipEntry("/" + file.getName()));
                             int len;
@@ -260,6 +251,9 @@ public class ContoursUpdater extends ThreadProcessor {
                     if (zipFile.length() > 0) {
                         unpackFiles(zipFile);
                     }
+                }
+                for (int i = 0; i < osmFiles.length; i++) {
+                    new File(osmFiles[i]).delete();
                 }
             }
         }

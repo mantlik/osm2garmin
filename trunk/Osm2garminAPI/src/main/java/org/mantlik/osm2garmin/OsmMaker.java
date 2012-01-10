@@ -111,7 +111,7 @@ public class OsmMaker extends ThreadProcessor {
         String splitFile = region.dir.getPath() + "/" + "areas.list";
         if (!new File(splitFile).exists()) {
             args = new String[]{
-                "--output-dir=" + region.dir.getPath(), "--max-areas=" + max_areas, "--mapid=" + MAPID,
+                "--output-dir=" + region.dir.getPath(), "--max-areas=" + max_areas, "--mapid=" + MAPID, "--output=pbf",
                 "--geonames-file=" + Osm2garmin.userdir + "cities15000.zip", "--bottom=" + region.lat1,
                 "--top=" + region.lat2, "--left=" + region.lon1, "--right=" + region.lon2, "--status-freq=0",
                 "--max-threads=1", "--max-nodes=1200000", region.dir.getPath() + "/" + region.name + ".osm.pbf"
@@ -120,7 +120,7 @@ public class OsmMaker extends ThreadProcessor {
             args = new String[]{
                 "--output-dir=" + region.dir.getPath(), "--max-areas=" + max_areas, "--mapid=" + MAPID,
                 "--geonames-file=" + Osm2garmin.userdir + "cities15000.zip", "--status-freq=0",
-                "--split-file=" + splitFile,
+                "--split-file=" + splitFile, "--output=pbf",
                 "--max-threads=1", region.dir.getPath() + "/" + region.name + ".osm.pbf"
             };
         }
@@ -159,7 +159,7 @@ public class OsmMaker extends ThreadProcessor {
 
         // Create list of splitted files
         long maxid = MAPID;
-        while (new File(region.dir.getPath() + "/" + maxid + ".osm.gz").exists()) {
+        while (new File(region.dir.getPath() + "/" + maxid + ".osm.pbf").exists()) {
             maxid++;
         }
         maxid--;
@@ -194,9 +194,9 @@ public class OsmMaker extends ThreadProcessor {
                 setStatus(region.name + " splitting area (" + id + ".img) - " + getProgress() + " %");
                 args = new String[]{
                     "--output-dir=" + region.dir.getPath(), "--max-areas=20", "--mapid=" + (maxid + 1),
-                    "--geonames-file=" + Osm2garmin.userdir + "cities15000.zip",
+                    "--geonames-file=" + Osm2garmin.userdir + "cities15000.zip", "--output=pbf",
                     "--max-nodes=800000", "--status-freq=0",
-                    region.dir.getPath() + "/" + id + ".osm.gz"
+                    region.dir.getPath() + "/" + id + ".osm.pbf"
                 };
                 try {
                     //uk.me.parabola.splitter.Main.main(args);
@@ -211,10 +211,10 @@ public class OsmMaker extends ThreadProcessor {
                     imgFile.delete();
                 }
                 // convert splitted to Garmin in next iterations
-                while (new File(region.dir.getPath() + "/" + (maxid + 1) + ".osm.gz").exists()) {
+                while (new File(region.dir.getPath() + "/" + (maxid + 1) + ".osm.pbf").exists()) {
                     maxid++;
                 }
-                new File(region.dir.getPath() + "/" + id + ".osm.gz").delete();
+                new File(region.dir.getPath() + "/" + id + ".osm.pbf").delete();
                 // convert to Garmin
                 setStatus(region.name + " converting to Garmin format");
                 args = new String[]{
@@ -236,7 +236,7 @@ public class OsmMaker extends ThreadProcessor {
                 }
 
             }
-            new File(region.dir.getPath() + "/" + id + ".osm.gz").delete();
+            new File(region.dir.getPath() + "/" + id + ".osm.pbf").delete();
         }
 
         // make maps lists

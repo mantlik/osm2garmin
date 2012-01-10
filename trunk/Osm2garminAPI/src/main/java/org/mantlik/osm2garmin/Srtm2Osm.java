@@ -21,14 +21,13 @@
  */
 package org.mantlik.osm2garmin;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.zip.GZIPOutputStream;
 import org.mantlik.osm2garmin.srtm2osm.Contour;
 import org.mantlik.osm2garmin.srtm2osm.Contours;
 import org.mantlik.osm2garmin.srtm2osm.Point;
@@ -42,21 +41,21 @@ import org.openide.util.Exceptions;
 public class Srtm2Osm extends ThreadProcessor {
 
     private int lat, lon;
-    private OutputStream osm;
+    private String outputFile;
 
     /**
      *
      * @param parameters
      * @param lat
      * @param lon
-     * @param osm
+     * @param outputFile
      */
-    public Srtm2Osm(Properties parameters, int lat, int lon, OutputStream osm) {
+    public Srtm2Osm(Properties parameters, int lat, int lon, String outputFile) {
         super(parameters);
         super.parameters = parameters;
         this.lat = lat;
         this.lon = lon;
-        this.osm = osm;
+        this.outputFile = outputFile;
     }
 
     @Override
@@ -144,38 +143,39 @@ public class Srtm2Osm extends ThreadProcessor {
         if (contours == null || contours.isEmpty()) {
             setStatus("Contours " + coords + ": No contours created.");
             setState(COMPLETED);
-            try {
-                osm.close();
-            } catch (IOException ex) {
-                Logger.getLogger(Srtm2Osm.class.getName()).log(Level.SEVERE, null, ex);
-                return;
-            }
             return;
         }
         // export contours to file
         setStatus("Contours " + coords + ": Creating OSM file.");
-        PrintStream ss = new PrintStream(osm);
-        ss.println("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
-        ss.println("<osm version=\"0.5\" generator=\"Srtm2Osm.java\">");
-        long id, wayId;
-        for (int pass = 0; pass < 2; pass++) {
-            id = Long.parseLong(parameters.getProperty("contour_start_id"));
-            wayId = Long.parseLong(parameters.getProperty("contour_start_way_id"));
-            boolean nodes = pass == 0;
-            boolean way = pass == 1;
-            for (int i = 0; i < contours.size(); i++) {
-                Contour contour = contours.get(i);
-                int level = (int) contour.z;
-                boolean major = (level % majorInterval) == 0;
-                contour.outputOsm(wayId, id, major, ss, nodes, way);
-                wayId++;
-                id += contour.data.size();
-                setStatus("Contours " + coords + ": Creating OSM file - " + (int) (50.0 * i / contours.size() + 50.0 * pass) + " %");
+        PrintStream ss = null;
+        try {
+            ss = new PrintStream(new GZIPOutputStream(new BufferedOutputStream(new FileOutputStream(outputFile))));
+            ss.println("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
+            ss.println("<osm version=\"0.5\" generator=\"Srtm2Osm.java\">");
+            for (int pass = 0; pass < 2; pass++) {
+                long id = Long.parseLong(parameters.getProperty("contour_start_id"));
+                long wayId = Long.parseLong(parameters.getProperty("contour_start_way_id"));
+                boolean nodes = pass == 0;
+                boolean way = pass == 1;
+                for (int i = 0; i < contours.size(); i++) {
+                    Contour contour = contours.get(i);
+                    int level = (int) contour.z;
+                    boolean major = (level % majorInterval) == 0;
+                    contour.outputOsm(wayId, id, major, ss, nodes, way);
+                    wayId++;
+                    id += contour.data.size();
+                    setStatus("Contours " + coords + ": Creating OSM file - " + (int) (50.0 * i / contours.size() + 50.0 * pass) + " %");
+                }
             }
+            ss.println("</osm>");
+            setState(COMPLETED);
+        } catch (IOException ex) {
+            Logger.getLogger(Srtm2Osm.class.getName()).log(Level.SEVERE, null, ex);
+            setStatus("Error creating " + outputFile);
+            setState(ERROR);
+        } finally {
+            ss.close();
         }
-        ss.println("</osm>");
-        ss.close();
-        setState(COMPLETED);
     }
     private HashMap<Point, Integer> starts = new HashMap<Point, Integer>();
     private HashMap<Point, Integer> ends = new HashMap<Point, Integer>();
