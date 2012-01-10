@@ -236,7 +236,6 @@ public class OsmMaker extends ThreadProcessor {
                 }
 
             }
-            new File(region.dir.getPath() + "/" + id + ".osm.pbf").delete();
         }
 
         // make maps lists
@@ -263,11 +262,11 @@ public class OsmMaker extends ThreadProcessor {
         aa.add("--gmapsupp");
         aa.add("--nsis");
         aa.add("--index");
-        aa.add("--family-id=60");
+        aa.add("--family-id=" + region.familyID + 1000);
         aa.add("--series-name=\"" + region.name + "\"");
         aa.add("--product-id=1");
         aa.addAll(osmMaps);
-        aa.add("--family-id=50");
+        aa.add("--family-id=" + region.familyID);
         aa.add("--product-id=1");
         aa.add("--show-profiles");
         aa.addAll(contourMaps);
@@ -280,6 +279,10 @@ public class OsmMaker extends ThreadProcessor {
             setState(ERROR);
             setStatus(ex.getMessage());
             return;
+        }
+
+        for (long id = MAPID; id <= maxid; id++) {
+            new File(region.dir.getPath() + "/" + id + ".osm.pbf").delete();
         }
 
         setStatus(" completed.");
