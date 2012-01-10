@@ -33,6 +33,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 import org.mantlik.osm2garmin.srtm2osm.Srtm;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -253,7 +254,17 @@ public class ContoursUpdater extends ThreadProcessor {
                     }
                 }
                 for (int i = 0; i < osmFiles.length; i++) {
-                    new File(osmFiles[i]).delete();
+                    File osmFile = new File(osmFiles[i]);
+                    if (! osmFile.delete()) {
+                        try {
+                            Thread.sleep(500);
+                            if (! osmFile.delete()) {
+                                osmFile.deleteOnExit();
+                            }
+                        } catch (InterruptedException ex) {
+                            osmFile.deleteOnExit();
+                        }
+                    }
                 }
             }
         }

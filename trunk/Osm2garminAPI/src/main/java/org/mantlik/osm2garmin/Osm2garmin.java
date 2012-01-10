@@ -150,7 +150,9 @@ public class Osm2garmin implements PropertyChangeListener {
             int familyID = 5001;
             while (s.hasNext()) {
                 String[] l = s.nextLine().split(" +");
-                if (l.length >= 5) {
+                // Comment starts with #
+                // GUI temporarily excluded region starts with x
+                if (l.length >= 5 && !(l[0].startsWith("#") || l[0].startsWith("x"))) {
                     Region region = new Region(l[4], parameters.getProperty("maps_dir"),
                             parameters.getProperty("delete_old_maps", "false").equals("true"), familyID);
                     familyID ++;
