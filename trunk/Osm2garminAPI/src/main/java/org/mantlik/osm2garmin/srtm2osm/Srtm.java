@@ -190,9 +190,11 @@ public class Srtm {
                 indexPath += ".index.html";
                 File indexFile = new File(indexPath);
                 if (!indexFile.exists()) {
-                    // download error, try again with the next attempt
-                    regionMap.clear();
-                    return null;
+                    if (!downloadRegionIndex(i, srtmPath, url)) {
+                        // download error, try again with the next attempt
+                        regionMap.clear();
+                        return null;
+                    }
                 }
                 try {
                     Scanner scanner = new Scanner(indexFile);
