@@ -450,7 +450,7 @@ public class BinaryMapWriter extends OSMWriter {
       writeHeader();
     }
     catch(IOException e) {
-      System.out.println("Could not open or write file header. Reason: "
+      System.err.println("Could not open or write file header. Reason: "
           + e.getMessage());
       throw new RuntimeException(e);
     }
@@ -462,7 +462,7 @@ public class BinaryMapWriter extends OSMWriter {
         .newBuilder();
 
     Osmformat.HeaderBBox.Builder bbox = Osmformat.HeaderBBox.newBuilder();
-    System.out.println(bounds);
+    System.err.println(bounds);
     bbox.setLeft(serializer.mapRawDegrees(Utils.toDegrees(bounds.getMinLong())));
     bbox.setBottom(serializer.mapRawDegrees(Utils.toDegrees(bounds.getMinLat())));
     bbox.setRight(serializer.mapRawDegrees(Utils.toDegrees(bounds.getMaxLong())));
@@ -500,10 +500,11 @@ public class BinaryMapWriter extends OSMWriter {
     try {
 		serializer.switchTypes();
 		serializer.processBatch();
-		serializer.close();
+                serializer.flush();
+                serializer.close();
     }
     catch(IOException e) {
-      System.out.println("Could not write end of file: " + e);
+      System.err.println("Could not write end of file: " + e);
     }
   }
 

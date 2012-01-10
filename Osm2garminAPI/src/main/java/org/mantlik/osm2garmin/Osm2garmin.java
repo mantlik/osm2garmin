@@ -136,6 +136,9 @@ public class Osm2garmin implements PropertyChangeListener {
         boolean contoursSplitterBusy = false;
         parameters = params;
         userdir = parameters.getProperty("userdir", userdir);
+        // Delete libraries - ensure newest libraries versions are used
+        File libdir = new File(userdir + "lib");
+        deleteFile(libdir);
         // parse regions
         File r = new File(parameters.getProperty("regions"));
         try {
@@ -595,7 +598,7 @@ public class Osm2garmin implements PropertyChangeListener {
                     return;
                 }
             }
-            long sleep = Long.parseLong(processor.parameters.getProperty("wait_sleep","0"));
+            long sleep = Long.parseLong(processor.parameters.getProperty("wait_sleep", "0"));
             sleep += interval;
             processor.parameters.setProperty("wait_sleep", "" + sleep);
             int sec = (int) ((sleep / 1000) % 60);

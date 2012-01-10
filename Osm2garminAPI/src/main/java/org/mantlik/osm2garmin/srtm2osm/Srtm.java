@@ -24,6 +24,8 @@ package org.mantlik.osm2garmin.srtm2osm;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Scanner;
 import java.util.logging.Level;
@@ -47,6 +49,7 @@ public class Srtm {
         "North_America", "South_America"};
     int lastIndex = 1;
     static String[] lists = new String[REGIONS.length];
+    private static final Map<String, Integer> regionMap = new HashMap<String, Integer>();
 
     Srtm(Properties parameters) {
         this.setPath(parameters.getProperty("srtm_dir"));
@@ -167,37 +170,52 @@ public class Srtm {
                 + "/" + fname + ".zip", output);
     }
 
+    /*
+     * Returns region name for a file
+     */
     private static String findRegion(String fname, String srtmPath, String url) {
-        String region;
-        for (int i = 0; i < REGIONS.length; i++) {
-            region = REGIONS[i];
-            String indexPath = region;
-            if (!srtmPath.equals("")) {
-                indexPath = srtmPath + "/" + indexPath;
-            }
-            File indexDir = new File(indexPath);
-            if (!indexDir.exists()) {
-                indexDir.mkdirs();
-            }
-            indexPath += ".index.html";
-            File indexFile = new File(indexPath);
-            if (!indexFile.exists()) {
-                if (!downloadRegionIndex(i, srtmPath, url)) {
+        if (regionMap.isEmpty()) {
+            System.err.println("Downloading SRTM map data.");
+            String region;
+            for (int i = 0; i < REGIONS.length; i++) {
+                region = REGIONS[i];
+                String indexPath = region;
+                if (!srtmPath.equals("")) {
+                    indexPath = srtmPath + "/" + indexPath;
+                }
+                File indexDir = new File(indexPath);
+                if (!indexDir.exists()) {
+                    indexDir.mkdirs();
+                }
+                indexPath += ".index.html";
+                File indexFile = new File(indexPath);
+                if (!indexFile.exists()) {
+                    // download error, try again with the next attempt
+                    regionMap.clear();
                     return null;
                 }
-            }
-            boolean match = false;
-            try {
-                Scanner scanner = new Scanner(indexFile);
-                while (scanner.hasNextLine()) {
-                    String line = scanner.nextLine();
-                    if (line.contains(fname)) {
-                        return region;
+                try {
+                    Scanner scanner = new Scanner(indexFile);
+                    while (scanner.hasNext()) {
+                        String line = scanner.next();
+                        if (line.contains("href=\"")) {
+                            int index = line.indexOf(".hgt.zip") - 7;
+                            if (index >= 0) {
+                                String srtm = line.substring(index, index + 7);
+                                regionMap.put(srtm, i);
+                            }
+                        }
                     }
+                    scanner.close();
+                } catch (FileNotFoundException ex) {
+                    Logger.getLogger(Srtm.class.getName()).log(Level.SEVERE, null, ex);
                 }
-            } catch (FileNotFoundException ex) {
-                Logger.getLogger(Srtm.class.getName()).log(Level.SEVERE, null, ex);
             }
+            System.out.println("SRTM map filled in with " + regionMap.size() + " entries.");
+        }
+        String name = fname.replace(".hgt", "");
+        if (regionMap.containsKey(name)) {
+            return REGIONS[regionMap.get(name)];
         }
         return null;
     }
@@ -260,7 +278,7 @@ public class Srtm {
     public final void setUrl(String url) {
         this.url = url;
     }
-    
+
     public static boolean exists(int lon, int lat, Properties props) {
         String fname = getName(lon, lat);
         String region = findRegion(fname, props.getProperty("srtm_dir"), props.getProperty("srtm_url"));
