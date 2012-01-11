@@ -33,6 +33,7 @@ import jbittorrentapi.*;
  */
 public class TorrentDownloader extends ThreadProcessor {
 
+    private TorrentFile torrent;
     private File torrentFile;
     private File saveDir;
     private DownloadManager dm;
@@ -50,6 +51,18 @@ public class TorrentDownloader extends ThreadProcessor {
     public TorrentDownloader(Properties parameters, File torrentFile, File saveDir) {
         super(parameters);
         this.torrentFile = torrentFile;
+        this.saveDir = saveDir;
+    }
+
+    /**
+     * 
+     * @param parameters
+     * @param torrent
+     * @param saveDir
+     */
+    public TorrentDownloader(Properties parameters, TorrentFile torrent, File saveDir) {
+        super(parameters);
+        this.torrent = torrent;
         this.saveDir = saveDir;
     }
 
@@ -96,14 +109,14 @@ public class TorrentDownloader extends ThreadProcessor {
             return "Torrent download completed. Seeding started.";
         }
         if (dm.init_progress() > -1) {
-            return "Checking file " + torrentFile.getName().replace(".torrent", "")
+            return "Checking file " + torrent.saveAs
                     + " ("+dm.init_progress()+" %)";
         }
         DecimalFormat df = new DecimalFormat("0.00");
         long dl = dm.downloaded() / 1024 / 1024;
         long ul = dm.uploaded() / 1024 / 1024;
         String webseed = WebseedTask.webseedActive ? "*" : "";
-        return "Download " + torrentFile.getName().replace(".torrent", "") + " " + df.format(getProgress())
+        return "Download " + torrent.saveAs + " " + df.format(getProgress())
                 + " % (" + dm.noOfPeers() + webseed + " peers) D/U: " + dl + "mb("
                 + df.format(dm.getDLRate()) + ")/" + ul + "mb(" + df.format(dm.getULRate()) + ")";
     }
@@ -111,7 +124,9 @@ public class TorrentDownloader extends ThreadProcessor {
     @Override
     public void run() {
         TorrentProcessor tp = new TorrentProcessor();
-        TorrentFile torrent = tp.getTorrentFile(tp.parseTorrent(torrentFile.getPath()));
+        if (torrent == null) {
+            torrent = tp.getTorrentFile(tp.parseTorrent(torrentFile.getPath()));
+        }
         if (saveDir != null) {
             String savePath = saveDir.getPath();
             if (!savePath.endsWith("/")) {

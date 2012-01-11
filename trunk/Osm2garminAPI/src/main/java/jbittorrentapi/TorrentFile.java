@@ -55,7 +55,7 @@ public class TorrentFile {
     public long creationDate;
     public String encoding;
     public String saveAs;
-    public int pieceLength;
+    private ArrayList<Integer> pieceLength;
 
     /*
      * In case of multiple files torrent, saveAs is the name of a directory
@@ -70,7 +70,6 @@ public class TorrentFile {
     public ArrayList piece_hash_values_as_binary;
     public ArrayList piece_hash_values_as_hex;
     public ArrayList piece_hash_values_as_url;
-    
     private boolean lastAnnounceOK = true;
     private int currentTier = 0;
     private int currentTierTry = 0;
@@ -89,7 +88,7 @@ public class TorrentFile {
         saveAs = new String();
         creationDate = -1;
         total_length = -1;
-        pieceLength = -1;
+        pieceLength = new ArrayList<Integer>();
 
         name = new ArrayList();
         length = new ArrayList<Long>();
@@ -127,7 +126,7 @@ public class TorrentFile {
             }
             System.out.println("\n");
             System.out.println("Pieces hashes (piece length = "
-                    + this.pieceLength + ") :\n");
+                    + this.pieceLength.get(0) + ") :\n");
             for (int i = 0; i < this.piece_hash_values_as_binary.size(); i++) {
                 System.out.println((i + 1) + ":\t\t"
                         + this.piece_hash_values_as_binary.get(i));
@@ -139,14 +138,25 @@ public class TorrentFile {
 
     }
 
+    public void setPieceLength(int piece, int pieceLength) {
+        while (this.pieceLength.size() < (piece + 1)) {
+            this.pieceLength.add(pieceLength);
+        }
+        this.pieceLength.set(piece, pieceLength);
+    }
+
+    public int getPieceLength(int piece) {
+        return pieceLength.get(piece);
+    }
+
     /**
      * Select random announce url from announce-list
      */
     public void changeAnnounce() {
         if (!announceList.isEmpty()) {
             ArrayList<String> tier = announceList.get(currentTier);
-            if (currentTierTry > tier.size() ) {
-                if (announceList.size()>currentTier+1) {
+            if (currentTierTry > tier.size()) {
+                if (announceList.size() > currentTier + 1) {
                     currentTier++;
                 } else {
                     currentTier = 0;
@@ -157,11 +167,11 @@ public class TorrentFile {
             currentTierTry++;
             int randomIndex = (int) (Math.random() * tier.size());  // select randomly (not exactly follows specification)
             announceURL = tier.get(randomIndex);
-            System.out.println("Tracker changed to: "+announceURL+".");
+            System.out.println("Tracker changed to: " + announceURL + ".");
         }
     }
-    
-    public void announceOK () {
+
+    public void announceOK() {
         lastAnnounceOK = true;
         currentTier = 0;
         currentTierTry = 0;

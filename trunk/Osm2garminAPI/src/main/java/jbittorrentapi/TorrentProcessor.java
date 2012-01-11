@@ -126,9 +126,9 @@ public class TorrentProcessor {
                 // simplified processing - consider first tier only
                 for (int j = 0; j < tiers.size(); j++) {
                     List tier = (List) tiers.get(j);
-                    if (torrent.announceList.size() < j+1) {
+                    if (torrent.announceList.size() < j + 1) {
                         torrent.announceList.add(new ArrayList<String>());
-                    } 
+                    }
                     for (int i = 0; i < tier.size(); i++) {
                         String announce = new String((byte[]) tier.get(i));
                         if (!torrent.announceList.get(j).contains(announce)) {
@@ -144,12 +144,12 @@ public class TorrentProcessor {
             List urls = (List) m.get("url-list");
             if ((urls != null) && (!urls.isEmpty())) {
                 for (int j = 0; j < urls.size(); j++) {
-                    String url = new String((byte[])urls.get(j));
+                    String url = new String((byte[]) urls.get(j));
                     torrent.urlList.add(url);
                 }
             }
         }
-        
+
         //Store the info field data
         if (m.containsKey("info")) {
             Map info = (Map) m.get("info");
@@ -167,7 +167,7 @@ public class TorrentProcessor {
                 this.torrent.saveAs = new String((byte[]) info.get("name"));
             }
             if (info.containsKey("piece length")) {
-                this.torrent.pieceLength = (int) ((Long) info.get("piece length")).longValue();
+                this.torrent.setPieceLength(0, (int) ((Long) info.get("piece length")).longValue());
             } else {
                 return null;
             }
@@ -210,6 +210,10 @@ public class TorrentProcessor {
                 this.torrent.total_length = ((Long) info.get("length")).longValue();
                 this.torrent.name.add(new String((byte[]) info.get("name")));
             }
+            // Fill in piece lengths
+            torrent.setPieceLength(torrent.piece_hash_values_as_binary.size()-1, torrent.getPieceLength(0));
+            torrent.setPieceLength(torrent.piece_hash_values_as_binary.size()-1,
+                    (int) (torrent.total_length % torrent.getPieceLength(0)));
         } else {
             return null;
         }
@@ -237,7 +241,7 @@ public class TorrentProcessor {
     public void setTorrentData(String url, int pLength, String comment,
             String encoding, String filename) {
         this.torrent.announceURL = url;
-        this.torrent.pieceLength = pLength * 1024;
+        this.torrent.setPieceLength(0, pLength * 1024);
         this.torrent.createdBy = Constants.CLIENT;
         this.torrent.comment = comment;
         this.torrent.creationDate = System.currentTimeMillis();
@@ -259,7 +263,7 @@ public class TorrentProcessor {
     public void setTorrentData(String url, int pLength, String comment,
             String encoding, String name, List filenames) throws Exception {
         this.torrent.announceURL = url;
-        this.torrent.pieceLength = pLength * 1024;
+        this.torrent.setPieceLength(0, pLength * 1024);
         this.torrent.comment = comment;
         this.torrent.createdBy = Constants.CLIENT;
         this.torrent.creationDate = System.currentTimeMillis();
@@ -282,8 +286,8 @@ public class TorrentProcessor {
      *
      * @param length int
      */
-    public void setPieceLength(int length) {
-        this.torrent.pieceLength = length * 1024;
+    public void setPieceLength(int piece, int length) {
+        this.torrent.setPieceLength(piece, length * 1024);
     }
 
     /**
@@ -406,7 +410,7 @@ public class TorrentProcessor {
      * @param torr TorrentFile
      */
     public void generatePieceHashes(TorrentFile torr) {
-        ByteBuffer bb = ByteBuffer.allocate(torr.pieceLength);
+        ByteBuffer bb = ByteBuffer.allocate(torr.getPieceLength(0));
         int index = 0;
         long total = 0;
         torr.piece_hash_values_as_binary.clear();
@@ -417,7 +421,7 @@ public class TorrentProcessor {
                 try {
                     FileInputStream fis = new FileInputStream(f);
                     int read = 0;
-                    byte[] data = new byte[torr.pieceLength];
+                    byte[] data = new byte[torr.getPieceLength(0)];
                     while ((read = fis.read(data, 0, bb.remaining())) != -1) {
                         bb.put(data, 0, read);
                         if (bb.remaining() == 0) {
@@ -488,7 +492,7 @@ public class TorrentProcessor {
             }
             info.put("files", files);
         }
-        info.put("piece length", torr.pieceLength);
+        info.put("piece length", torr.getPieceLength(0));
         byte[] pieces = new byte[0];
         for (int i = 0; i < torr.piece_hash_values_as_binary.size(); i++) {
             pieces = Utils.concat(pieces,
