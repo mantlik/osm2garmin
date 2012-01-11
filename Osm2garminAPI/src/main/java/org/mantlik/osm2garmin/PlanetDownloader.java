@@ -359,8 +359,6 @@ public class PlanetDownloader extends ThreadProcessor {
                     return false;
                 }
             }
-            // pause seeding to copy downloaded file
-            torrentDownloader.pause();
             File torrentDownloadFile = new File(parent + torrentName);
             File planetBzFile = new File(planetFile.getPath().replace(".osm.pbf", ".osm.bz2"));
             try {
@@ -370,7 +368,6 @@ public class PlanetDownloader extends ThreadProcessor {
                         + planetBzFile.getName());
                 return false;
             }
-            torrentDownloader.resume();
         }
 
         // remove download properties
