@@ -141,13 +141,10 @@ public class Region {
      */
     void makeInstallers(int reg) {
         // contours map ID
-        int familyID_cont = familyID + 1000;
         String hexid = Integer.toString(familyID, 16).toUpperCase();
         // swap bytes
         hexid = hexid.substring(2) + hexid.substring(0, 2);
 
-        String hexid_cont = Integer.toString(familyID_cont, 16).toUpperCase();
-        hexid_cont = hexid_cont.substring(2) + hexid_cont.substring(0, 2);
         try {
             PrintStream installer = new PrintStream(new File(dir.getPath() + "/installer.bat"));
             PrintStream uninstaller = new PrintStream(new File(dir.getPath() + "/uninstaller.bat"));
