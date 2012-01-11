@@ -237,6 +237,7 @@ public class OsmMaker extends ThreadProcessor {
 
             }
         }
+        System.gc();
 
         // make maps lists
         ArrayList<String> contourMaps = new ArrayList<String>();

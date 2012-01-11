@@ -210,6 +210,7 @@ public class ContoursUpdater extends ThreadProcessor {
                         return;
                     }
                 }
+                System.gc();
 
                 ArrayList <String> imgFiles = new ArrayList<String>();
                 String nn;
