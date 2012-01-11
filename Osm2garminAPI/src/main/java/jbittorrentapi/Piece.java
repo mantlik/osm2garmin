@@ -66,6 +66,8 @@ public class Piece {
      * this value must correspond to the SHA1 hash of the pieceBlock map concatenated
      */
     byte[] sha1;
+    
+    private DataVerifier verifier;
 
     public Piece(int index, int length, int blockSize, byte[] sha1){
         this(index, length, blockSize, sha1, null);
@@ -90,6 +92,12 @@ public class Piece {
             this.filesAndoffset = new TreeMap<Integer, Long>();
     }
 
+    public Piece(int index, int length, int blockSize, byte[] sha1, TreeMap<Integer, Long> m, DataVerifier verifier) {
+        this(index, length, blockSize, sha1, m);
+        this.verifier = verifier;
+    }
+
+    
     public void clearData(){
         this.pieceBlock.clear();
     }
@@ -144,6 +152,9 @@ public class Piece {
      * @return boolean
      */
     public synchronized boolean verify(){
+        if (verifier != null) {
+            return verifier.verify(this.data());
+        }
         return Utils.byteArrayToByteString(Utils.hash(this.data())).matches(Utils.byteArrayToByteString(this.sha1));
     }
 

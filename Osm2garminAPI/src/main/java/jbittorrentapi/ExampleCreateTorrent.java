@@ -55,7 +55,7 @@ class ExampleCreateTorrent{
         TorrentProcessor tp = new TorrentProcessor();
         tp.setAnnounceURL(args[1]);
         try{
-            tp.setPieceLength(Integer.parseInt(args[2]));
+            tp.setPieceLength(0, Integer.parseInt(args[2]));
         }catch(Exception e){
             System.err.println("Piece length must be an integer");
             System.exit(0);

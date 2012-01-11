@@ -53,7 +53,7 @@ import java.util.TreeMap;
 public class WebseedTask extends DownloadTask {
 
     private DownloadManager manager;
-    private static final long MAX_IDLE_TIME = 120000;  // start download when no piece received
+    private static final long MAX_IDLE_TIME = 120000;  // start download when no piece received 2 min
     public static boolean webseedActive = false;
 
     public WebseedTask(byte[] fileID, byte[] myID, DownloadManager manager) {
@@ -68,30 +68,43 @@ public class WebseedTask extends DownloadTask {
                 if ((System.currentTimeMillis() - manager.lastPieceReceived) > MAX_IDLE_TIME) {
                     webseedActive = true;
                     manager.peerReady(DownloadManager.WEBSEED_ID);
-                    if (downloadPiece != null && downloadPiece.getFileAndOffset().size() == 1) {
+                    if (downloadPiece != null) {
+                        boolean breakDownload = false;
+                        downloadPiece.clearData();
                         TreeMap<Integer, Long> offsets = (TreeMap<Integer, Long>) downloadPiece.getFileAndOffset();
-                        long offset = offsets.get(offsets.firstKey());
                         ArrayList<String> urls = manager.torrent.urlList;
                         int index = (int) (Math.random() * urls.size());
                         String url = urls.get(index);
-                        String tempFileName = File.createTempFile("piece", ".tmp").getAbsolutePath();
-                        Downloader downloader = new Downloader(new URL(url), tempFileName, false);
-                        downloader.setSize(downloadPiece.getLength());
-                        downloader.setOffset(offset);
-                        downloader.run();
-                        if (downloader.getStatus() == Downloader.COMPLETE) {
+                        int fileIndex = offsets.firstKey();
+                        for (int i = 0; i < offsets.size(); i++) {
+                            long offs = offsets.get(fileIndex);
+                            String tempFileName = File.createTempFile("piece", ".tmp").getAbsolutePath();
+                            String fileUrl = url;
+                            if (manager.torrent.name.size() > 1) {  // multifile torrent
+                                fileUrl += "/" + manager.torrent.name.get(fileIndex);
+                            }
+                            Downloader downloader = new Downloader(new URL(fileUrl), tempFileName, false);
+                            downloader.setSize(downloadPiece.getLength());
+                            downloader.setOffset(offs);
+                            downloader.run();
+                            if (downloader.getStatus() != Downloader.COMPLETE) {
+                                manager.pieceCompleted(DownloadManager.WEBSEED_ID, downloadPiece.getIndex(), false);
+                                breakDownload = true;
+                                continue;
+                            }
                             InputStream is = new FileInputStream(tempFileName);
                             byte[] block = new byte[downloadPiece.getLength()];
                             is.read(block);
                             is.close();
                             new File(tempFileName).delete();
-                            downloadPiece.clearData();
-                            downloadPiece.setBlock(0, block);
-                            if (downloadPiece.verify()) {
-                                manager.pieceCompleted(DownloadManager.WEBSEED_ID, downloadPiece.getIndex(), true);
-                            } else {
-                                manager.pieceCompleted(DownloadManager.WEBSEED_ID, downloadPiece.getIndex(), false);
-                            }
+                            downloadPiece.setBlock(i, block);
+                            fileIndex = offsets.higherKey(fileIndex);
+                        }
+                        if (breakDownload) {
+                            continue;
+                        }
+                        if (downloadPiece.verify()) {
+                            manager.pieceCompleted(DownloadManager.WEBSEED_ID, downloadPiece.getIndex(), true);
                         } else {
                             manager.pieceCompleted(DownloadManager.WEBSEED_ID, downloadPiece.getIndex(), false);
                         }
