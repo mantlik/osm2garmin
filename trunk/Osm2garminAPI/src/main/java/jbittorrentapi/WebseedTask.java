@@ -98,7 +98,9 @@ public class WebseedTask extends DownloadTask {
                             is.close();
                             new File(tempFileName).delete();
                             downloadPiece.setBlock(i, block);
-                            fileIndex = offsets.higherKey(fileIndex);
+                            if (fileIndex < offsets.lastKey()) {
+                                fileIndex = offsets.higherKey(fileIndex);
+                            }
                         }
                         if (breakDownload) {
                             continue;

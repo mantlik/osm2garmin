@@ -38,6 +38,7 @@ package jbittorrentapi;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 
 /**
  * Representation of a torrent file
@@ -67,9 +68,9 @@ public class TorrentFile {
     public String info_hash_as_hex;
     public String info_hash_as_url;
     public long total_length;
-    public ArrayList piece_hash_values_as_binary;
-    public ArrayList piece_hash_values_as_hex;
-    public ArrayList piece_hash_values_as_url;
+    public HashMap piece_hash_values_as_binary;
+    public HashMap piece_hash_values_as_hex;
+    public HashMap piece_hash_values_as_url;
     private boolean lastAnnounceOK = true;
     private int currentTier = 0;
     private int currentTierTry = 0;
@@ -93,9 +94,9 @@ public class TorrentFile {
         name = new ArrayList();
         length = new ArrayList<Long>();
 
-        piece_hash_values_as_binary = new ArrayList();
-        piece_hash_values_as_url = new ArrayList();
-        piece_hash_values_as_hex = new ArrayList();
+        piece_hash_values_as_binary = new HashMap();
+        piece_hash_values_as_url = new HashMap();
+        piece_hash_values_as_hex = new HashMap();
         info_hash_as_binary = new byte[20];
         info_hash_as_url = new String();
         info_hash_as_hex = new String();
