@@ -352,7 +352,7 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
             conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("HEAD");
             conn.getInputStream();
-            return conn.getContentLengthLong();
+            return conn.getContentLength();
         } catch (IOException e) {
             return -1;
         } finally {
