@@ -39,11 +39,13 @@ public class TorrentDownloader extends ThreadProcessor {
     private DownloadManager dm;
     private boolean stop = false;
     private boolean paused = false;
-    
-    private static ArrayList <DownloadManager> downloads = new ArrayList<DownloadManager>();
+    private int startPiece = 0;
+    private int noOfPieces;
+    private DataVerifier verifier;
+    private static ArrayList<DownloadManager> downloads = new ArrayList<DownloadManager>();
 
     /**
-     * 
+     *
      * @param parameters
      * @param torrentFile
      * @param saveDir
@@ -55,7 +57,7 @@ public class TorrentDownloader extends ThreadProcessor {
     }
 
     /**
-     * 
+     *
      * @param parameters
      * @param torrent
      * @param saveDir
@@ -66,8 +68,16 @@ public class TorrentDownloader extends ThreadProcessor {
         this.saveDir = saveDir;
     }
 
+    public TorrentDownloader(Properties parameters, TorrentFile torrent, File saveDir,
+            int startPiece, int noOfPieces, DataVerifier verifier) {
+        this(parameters, torrent, saveDir);
+        this.startPiece = startPiece;
+        this.noOfPieces = noOfPieces;
+        this.verifier = verifier;
+    }
+
     /**
-     * 
+     *
      * @return
      */
     @Override
@@ -82,7 +92,7 @@ public class TorrentDownloader extends ThreadProcessor {
     }
 
     /**
-     * 
+     *
      * @return
      */
     @Override
@@ -97,7 +107,7 @@ public class TorrentDownloader extends ThreadProcessor {
     }
 
     /**
-     * 
+     *
      * @return
      */
     @Override
@@ -110,7 +120,7 @@ public class TorrentDownloader extends ThreadProcessor {
         }
         if (dm.init_progress() > -1) {
             return "Checking file " + torrent.saveAs
-                    + " ("+dm.init_progress()+" %)";
+                    + " (" + dm.init_progress() + " %)";
         }
         DecimalFormat df = new DecimalFormat("0.00");
         long dl = dm.downloaded() / 1024 / 1024;
@@ -134,7 +144,11 @@ public class TorrentDownloader extends ThreadProcessor {
             }
             Constants.SAVEPATH = savePath;
         }
-        dm = new DownloadManager(torrent, Utils.generateID());
+        if (verifier != null) {
+            dm = new DownloadManager(torrent, Utils.generateID(), startPiece, noOfPieces, verifier);
+        } else {
+            dm = new DownloadManager(torrent, Utils.generateID());
+        }
         downloads.add(dm);
         dm.startListening(Integer.valueOf(parameters.getProperty("torrent_port_start", "6881")),
                 Integer.valueOf(parameters.getProperty("torrent_port_end", "6889")));
@@ -154,7 +168,7 @@ public class TorrentDownloader extends ThreadProcessor {
     }
 
     /**
-     * 
+     *
      */
     public void stop() {
         stop = true;
@@ -162,7 +176,7 @@ public class TorrentDownloader extends ThreadProcessor {
     }
 
     /**
-     * 
+     *
      */
     public void pause() {
         paused = true;
@@ -171,13 +185,13 @@ public class TorrentDownloader extends ThreadProcessor {
     }
 
     /**
-     * 
+     *
      */
     public void resume() {
         dm.checkTempFiles();
         dm.startTrackerUpdate();
     }
-    
+
     public static long downloaded() {
         long downloaded = 0;
         for (DownloadManager dm : downloads) {
@@ -193,21 +207,21 @@ public class TorrentDownloader extends ThreadProcessor {
         }
         return uploaded;
     }
-    
+
     public int getNoOfPieces() {
         if (dm == null) {
             return 0;
         }
         return dm.noOfPieces();
     }
-    
+
     public boolean isPieceComplete(int piece) {
-        if (dm==null) {
+        if (dm == null) {
             return false;
         }
-        return dm.isPieceComplete(piece);
+        return dm.isPieceComplete(piece + dm.startPiece());
     }
-    
+
     public static DownloadManager[] getDownloads() {
         return downloads.toArray(new DownloadManager[0]);
     }

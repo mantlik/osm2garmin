@@ -526,7 +526,11 @@ public final class MainWindowTopComponent extends TopComponent implements Proper
             planetUpdateDownloadStatus.setText(downloader.getStatus());
             int width = planetUpdateDownloadStatus.getWidth();
             int height = planetUpdateDownloadStatus.getHeight();
+            TorrentDownloader torrent = downloader.torrentDownloader;
             Image image = progressMap(width, height, downloader);
+            if (torrent != null && torrent.getState() == TorrentDownloader.RUNNING) {
+                image = torrentMap(width, height, torrent);
+            }
             ((JTextFieldImage) planetUpdateDownloadStatus).setImage(image);
         } else if (evt.getSource().getClass().equals(PlanetUpdater.class)) {
             PlanetUpdater updater = (PlanetUpdater) evt.getSource();

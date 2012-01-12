@@ -80,6 +80,7 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
     private int initProgress = 0;
     long lastPieceReceived;
     static final String WEBSEED_ID = "webseed";
+    private DataVerifier verifier;
 
     /**
      * Create a new manager according to the given torrent and using the client
@@ -113,6 +114,16 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
 
     public DownloadManager(TorrentFile torrent, final byte[] clientID) {
         this(torrent, clientID, 0, torrent.piece_hash_values_as_binary.size());
+    }
+
+    public DownloadManager(TorrentFile torrent, final byte[] clientID, DataVerifier verifier) {
+        this(torrent, clientID);
+        this.verifier = verifier;
+    }
+
+    public DownloadManager(TorrentFile torrent, final byte[] clientID, int startPiece, int nbPieces, DataVerifier verifier) {
+        this(torrent, clientID, startPiece, nbPieces);
+        this.verifier = verifier;
     }
 
     /*
@@ -150,7 +161,7 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
             length += torrent.getPieceLength(i);
             if (i >= startPiece) {
                 pieceList.put(i, new Piece(i, torrent.getPieceLength(i),
-                        16384, (byte[]) torrent.piece_hash_values_as_binary.get(i), tm));
+                        16384, (byte[]) torrent.piece_hash_values_as_binary.get(i), tm, verifier));
                 //System.out.println("Piece " + i + " is complete: " + this.testComplete(i));
                 if (this.testComplete(i)) {
                     this.setComplete(i, true);
@@ -220,12 +231,9 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
         if (!initialized) {
             init();
         }
-        if (torrent.name.size() == 1) {
-            // start webseed for 1-file torrent only; multifile webseed not implemented.
-            DownloadTask dt = new WebseedTask(torrent.info_hash_as_binary, clientID, this);
-            task.put(WEBSEED_ID, dt);
-            dt.start();
-        }
+        DownloadTask dt = new WebseedTask(torrent.info_hash_as_binary, clientID, this);
+        task.put(WEBSEED_ID, dt);
+        dt.start();
         this.pu = new PeerUpdater(this.clientID, this.torrent);
         this.pu.addPeerUpdateListener(this);
         this.pu.setListeningPort(this.cl.getConnectedPort());
@@ -291,6 +299,13 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
         return nbPieces;
     }
 
+    /*
+     * @return first piece to download
+     */
+    public int startPiece() {
+        return startPiece;
+    }
+
     /**
      * Create the ConnectionListener to accept incoming connection from peers
      *
@@ -344,6 +359,9 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
         for (int i = 0; i < this.nbOfFiles; i++) {
             File temp = new File(saveas + ((String) (this.torrent.name.get(i))));
             try {
+                if (temp.getParentFile() != null) {
+                    temp.getParentFile().mkdirs();
+                }
                 this.output_files[i] = new RandomAccessFile(temp, "rw");
                 this.output_files[i].setLength((Long) this.torrent.length.get(
                         i));

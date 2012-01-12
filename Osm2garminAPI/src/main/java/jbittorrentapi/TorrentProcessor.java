@@ -180,10 +180,10 @@ public class TorrentProcessor {
 
                 for (int i = 0; i < piecesHash2.length / 20; i++) {
                     byte[] temp = Utils.subArray(piecesHash2, i * 20, 20);
-                    this.torrent.piece_hash_values_as_binary.add(temp);
-                    this.torrent.piece_hash_values_as_hex.add(Utils.byteArrayToByteString(
+                    this.torrent.piece_hash_values_as_binary.put(i, temp);
+                    this.torrent.piece_hash_values_as_hex.put(i, Utils.byteArrayToByteString(
                             temp));
-                    this.torrent.piece_hash_values_as_url.add(Utils.byteArrayToURLString(
+                    this.torrent.piece_hash_values_as_url.put(i, Utils.byteArrayToURLString(
                             temp));
                 }
             } else {
@@ -425,7 +425,7 @@ public class TorrentProcessor {
                     while ((read = fis.read(data, 0, bb.remaining())) != -1) {
                         bb.put(data, 0, read);
                         if (bb.remaining() == 0) {
-                            torr.piece_hash_values_as_binary.add(Utils.hash(bb.array()));
+                            torr.piece_hash_values_as_binary.put(index++, Utils.hash(bb.array()));
                             bb.clear();
                         }
                     }
@@ -435,7 +435,7 @@ public class TorrentProcessor {
             }
         }
         if (bb.remaining() != bb.capacity()) {
-            torr.piece_hash_values_as_binary.add(Utils.hash(Utils.subArray(
+            torr.piece_hash_values_as_binary.put(index++, Utils.hash(Utils.subArray(
                     bb.array(), 0, bb.capacity() - bb.remaining())));
         }
     }
