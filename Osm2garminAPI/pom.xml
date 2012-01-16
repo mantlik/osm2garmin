@@ -35,11 +35,6 @@
             <version>${netbeans.version}</version>
             <type>jar</type>
         </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-compress</artifactId>
-            <version>1.4-SNAPSHOT</version>
-        </dependency>
     </dependencies>
 
     <build>

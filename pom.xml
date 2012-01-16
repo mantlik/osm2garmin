@@ -160,9 +160,9 @@
                         <goals>clean install</goals>
                         <autoVersionSubmodules>true</autoVersionSubmodules>
                         <commitByProject>true</commitByProject>
-                        <developmentVersion>1.1-SNAPSHOT</developmentVersion>
-                        <releaseVersion>1.0</releaseVersion>
-                        <tag>RELEASE_1-0-0</tag>
+                        <developmentVersion>1.0-SNAPSHOT</developmentVersion>
+                        <releaseVersion>1.0-RC1</releaseVersion>
+                        <tag>RELEASE_1-0-RC1</tag>
                     </configuration>
                 </plugin>
                 <plugin>
