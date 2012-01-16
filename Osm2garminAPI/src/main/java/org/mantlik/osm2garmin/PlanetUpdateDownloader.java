@@ -185,12 +185,16 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
                     return;
                 }
             }
+            setStatus("Processing updates...");
             int sequence = 0;
             String[] args;
             ArrayList<String> l = new ArrayList<String>();
             int ii = 0;
+            int fileno;
             // process downloads with Osmosis - 24 files in a single pass
-            for (int fileno = firstPieceToProcess; fileno < (startPiece + noOfPieces); fileno++) {
+            for (fileno = firstPieceToProcess; fileno < (startPiece + noOfPieces); fileno++) {
+                setProgress((float) (100.0 * (fileno - firstPieceToProcess)
+                        / (startPiece + noOfPieces - firstPieceToProcess + 24)));
                 ii++;
                 l.add("--rxc");
                 l.add("file=" + Osm2garmin.userdir + updateName(fileno));
@@ -218,6 +222,8 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
                 }
             }
             if (!l.isEmpty()) {
+                setProgress((float) (100.0 * (fileno - firstPieceToProcess)
+                        / (startPiece + noOfPieces - firstPieceToProcess + 24)));
                 l.add("--apc");
                 l.add("sourceCount=" + ii);
                 l.add("--sc");
@@ -235,6 +241,7 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
                 }
             }
             // download latest osmosiswork/state.txt
+            setStatus("Downloading current state.txt");
             String[] mirrors = parameters.getProperty("planet_file_update_urls").split(",");
             boolean ok = false;
             while (!ok) {
@@ -252,10 +259,12 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
                     setState(ERROR);
                     return;
                 }
-                Downloader downloader = new Downloader(surl, Osm2garmin.userdir + "osmosiswork/state.txt");
+                String state = Osm2garmin.userdir + "osmosiswork/state.txt";
+                new File(state).delete();
+                Downloader downloader = new Downloader(surl, state);
                 while (downloader.getStatus() != Downloader.COMPLETE) {
                     if (downloader.getStatus() == Downloader.ERROR) {
-                        continue;
+                        break;
                     }
                     try {
                         Thread.sleep(1000);
@@ -266,6 +275,9 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
                         setState(ERROR);
                         return;
                     }
+                }
+                if (downloader.getStatus() == Downloader.COMPLETE) {
+                    ok = true;
                 }
             }
 
@@ -324,18 +336,39 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
          */
         @Override
         public boolean verify(byte[] data) {
+            InputStream is = null;
             try {
-                InputStream is = new GZIPInputStream(new ByteArrayInputStream(data));
+                is = new GZIPInputStream(new ByteArrayInputStream(data));
                 DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
                 DocumentBuilder db = dbf.newDocumentBuilder();
                 db.parse(is);
+                is.close();
             } catch (SAXException ex) {
+                if (is != null) {
+                    try {
+                        is.close();
+                    } catch (IOException ex1) {
+                        return false;
+                    }
+                }
                 return false;
             } catch (ParserConfigurationException ex) {
                 setStatus(ex.getMessage());
                 setState(ERROR);
+                try {
+                    is.close();
+                } catch (IOException ex1) {
+                    return false;
+                }
                 return false;
             } catch (IOException ex) {
+                if (is != null) {
+                    try {
+                        is.close();
+                    } catch (IOException ex1) {
+                        return false;
+                    }
+                }
                 return false;
             }
             return true;
@@ -438,6 +471,7 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
         sequence = firstPieceToProcess;
         size = 1;
         while (size > 0) {
+            setStatus("Searching for updates - " + updateName(sequence));
             String url = mirror + updateName(sequence);
             try {
                 size = (int) tryGetFileSize(new URL(url));

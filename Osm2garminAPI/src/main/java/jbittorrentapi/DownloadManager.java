@@ -139,7 +139,7 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
         int file = 0;
         long fileoffset = 0;
         for (int i = 0; i < (startPiece + nbPieces); i++) {
-            initProgress = 100 * i / (startPiece + nbPieces);
+            initProgress = 100 * Math.max(0, i - startPiece) / (nbPieces);
             TreeMap<Integer, Long> tm = new TreeMap<Integer, Long>();
             int pieceoffset = 0;
             do {
@@ -438,6 +438,9 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
      * @return boolean
      */
     public synchronized boolean isPieceComplete(int piece) {
+        if (piece >= isComplete.size()) {
+            return false;
+        }
         return this.isComplete.get(piece);
     }
 
@@ -448,6 +451,9 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
      * @return boolean
      */
     public synchronized boolean isPieceRequested(int piece) {
+        if (piece >= isRequested.size()) {
+            return false;
+        }
         return this.isRequested.get(piece);
     }
 
@@ -831,6 +837,7 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
         this.peerAvailabilies.put(peerID, has);
         BitSet interest = (BitSet) (has.clone());
         interest.andNot(this.isComplete);
+        interest = interest.get(0, isComplete.size());
         DownloadTask dt = this.task.get(peerID);
         if (dt != null) {
             if (interest.cardinality() > 0
@@ -949,7 +956,7 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
     public float getCompleted() {
         try {
             return (float) (((float) (100.0)) * ((float) (this.isComplete.cardinality()))
-                    / ((float) (startPiece + nbPieces)));
+                    / ((float) (nbPieces)));
         } catch (Exception e) {
             return 0.00f;
         }

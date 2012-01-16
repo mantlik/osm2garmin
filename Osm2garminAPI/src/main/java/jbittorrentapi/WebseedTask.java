@@ -65,8 +65,9 @@ public class WebseedTask extends DownloadTask {
     public void run() {
         while (run) {
             try {
-                if ((System.currentTimeMillis() - manager.lastPieceReceived) > MAX_IDLE_TIME) {
+                if (! manager.isComplete() && (System.currentTimeMillis() - manager.lastPieceReceived) > MAX_IDLE_TIME) {
                     webseedActive = true;
+                    downloadPiece = null;
                     manager.peerReady(DownloadManager.WEBSEED_ID);
                     if (downloadPiece != null) {
                         boolean breakDownload = false;
