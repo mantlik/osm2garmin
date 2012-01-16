@@ -120,8 +120,13 @@ public class TorrentDownloader extends ThreadProcessor {
             return "Torrent download completed. Seeding started.";
         }
         if (dm.init_progress() > -1) {
-            return "Checking file " + torrent.saveAs
-                    + " (" + dm.init_progress() + " %)";
+            if (torrent.name.size() > 1) {
+                return "Checking files "
+                        + " (" + dm.init_progress() + " %)";
+            } else {
+                return "Checking file " + torrent.saveAs
+                        + " (" + dm.init_progress() + " %)";
+            }
         }
         DecimalFormat df = new DecimalFormat("0.00");
         long dl = dm.downloaded() / 1024 / 1024;
