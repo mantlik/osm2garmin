@@ -163,7 +163,6 @@
                         <developmentVersion>1.1-SNAPSHOT</developmentVersion>
                         <releaseVersion>1.0</releaseVersion>
                         <tag>RELEASE_1-0-0</tag>
-                        <tagBase>http://10.168.68.1/svn/FSurveyApplication/tags</tagBase>
                     </configuration>
                 </plugin>
                 <plugin>
