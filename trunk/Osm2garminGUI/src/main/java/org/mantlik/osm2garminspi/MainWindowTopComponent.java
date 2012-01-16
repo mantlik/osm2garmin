@@ -800,7 +800,7 @@ public final class MainWindowTopComponent extends TopComponent implements Proper
         int pieces = downloader.getNoOfPieces();
         graphics.setColor(BGCOLORS[downloader.getState()]);
         double factor = 1.0 * width / pieces;
-        int d = (int) factor;
+        int d = (int) factor + 1;
         if (d == 0) {
             d = 1;
         }

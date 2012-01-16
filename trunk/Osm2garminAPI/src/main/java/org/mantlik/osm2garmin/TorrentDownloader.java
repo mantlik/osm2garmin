@@ -101,6 +101,7 @@ public class TorrentDownloader extends ThreadProcessor {
             return super.getState();
         }
         if (dm.isComplete()) {
+            dm.closeTempFiles();
             return COMPLETED;
         }
         return RUNNING;

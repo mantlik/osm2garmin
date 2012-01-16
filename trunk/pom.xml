@@ -132,7 +132,7 @@
                     </executions>
                     <configuration>
                         <doCheck>false</doCheck>
-                        <doUpdate>false</doUpdate>
+                        <doUpdate>true</doUpdate>
                         <useLastCommittedRevision>true</useLastCommittedRevision>
                     </configuration>
                 </plugin>
