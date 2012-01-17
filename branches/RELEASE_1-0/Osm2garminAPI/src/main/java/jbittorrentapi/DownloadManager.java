@@ -397,6 +397,8 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
                 remainingData -= remaining;
             } catch (IOException ioe) {
                 System.err.println(ioe.getMessage());
+                closeTempFiles();
+                checkTempFiles();
             }
         }
         data = null;
@@ -653,10 +655,18 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
 
         for (Iterator it = l.iterator(); it.hasNext();) {
             Peer p = (Peer) it.next();
-            if (p.getDLRate(false) > 0) {
-                System.out.println(p + " rate: "
-                        + new DecimalFormat("0.0").format(p.getDLRate(true) / (1024))
-                        + " kb/s");
+            if (!isComplete()) {
+                if (p.getDLRate(false) > 0) {
+                    System.out.println(p + " download rate: "
+                            + new DecimalFormat("0.0").format(p.getDLRate(true) / (1024))
+                            + " kb/s");
+                }
+            } else {
+                if (p.getULRate(false) > 0) {
+                    System.out.println(p + " upload rate: "
+                            + new DecimalFormat("0.0").format(p.getULRate(true) / (1024))
+                            + " kb/s");
+                }
             }
 
             DownloadTask dt = this.task.get(p.toString());
@@ -795,20 +805,41 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
     public byte[] getPieceFromFiles(int piece) {
         byte[] data = new byte[this.pieceList.get(piece).getLength()];
         int remainingData = data.length;
+        String saveas = Constants.SAVEPATH; // Should be configurable
+        if (this.nbOfFiles > 1) {
+            saveas += this.torrent.saveAs + "/";
+        }
         for (Iterator it = this.pieceList.get(piece).getFileAndOffset().keySet().
                 iterator(); it.hasNext();) {
-            try {
+            boolean closeAfterRead = false;
+            boolean success = false;
+            while (!success) {
                 Integer file = (Integer) (it.next());
-                long remaining = ((Long) this.torrent.length.get(file.intValue())).longValue()
-                        - ((Long) (this.pieceList.get(piece).getFileAndOffset().
-                        get(file))).longValue();
-                this.output_files[file.intValue()].seek(((Long) (this.pieceList.get(piece).getFileAndOffset().get(file))).longValue());
-                this.output_files[file.intValue()].read(data,
-                        data.length - remainingData,
-                        (remaining < remainingData) ? (int) remaining : remainingData);
-                remainingData -= remaining;
-            } catch (IOException ioe) {
-                System.err.println(ioe.getMessage());
+                try {
+                    if (closeAfterRead) {
+                        File temp = new File(saveas + ((String) (this.torrent.name.get(file))));
+                        this.output_files[file] = new RandomAccessFile(temp, "r");
+                    }
+                    long remaining = ((Long) this.torrent.length.get(file.intValue())).longValue()
+                            - ((Long) (this.pieceList.get(piece).getFileAndOffset().
+                            get(file))).longValue();
+                    this.output_files[file.intValue()].seek(((Long) (this.pieceList.get(piece).getFileAndOffset().get(file))).longValue());
+                    this.output_files[file.intValue()].read(data,
+                            data.length - remainingData,
+                            (remaining < remainingData) ? (int) remaining : remainingData);
+                    remainingData -= remaining;
+                    if (closeAfterRead) {
+                        output_files[file].close();
+                    }
+                    success = true;
+                } catch (IOException ioe) {
+                    if (closeAfterRead) {
+                        System.err.println(ioe.getMessage());  // second attempt failed
+                        break;
+                    } else {  // first attempt - maybe file was closed
+                        closeAfterRead = true;
+                    }
+                }
             }
         }
         return data;
