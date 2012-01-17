@@ -261,9 +261,11 @@ public class OsmMaker extends ThreadProcessor {
         ArrayList<String> aa = new ArrayList<String>();
         aa.add("--output-dir=" + region.dir.getPath());
         aa.add("--gmapsupp");
+        aa.add("--tdbfile");
         aa.add("--nsis");
         aa.add("--index");
         aa.add("--family-id=" + region.familyID);
+        aa.add("--family-name=" + region.name);
         aa.add("--series-name=\"" + region.name + "\"");
         aa.add("--product-id=1");
         aa.addAll(osmMaps);

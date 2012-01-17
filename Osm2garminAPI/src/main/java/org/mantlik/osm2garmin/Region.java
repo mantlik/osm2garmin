@@ -155,9 +155,11 @@ public class Region {
             installer.print(":key_ok\r\n\r\n");
 
             installer.print("reg ADD %KEY%\\Families\\FAMILY_" + familyID + " /v ID /t REG_BINARY /d " + hexid + " /f\r\n");
-            installer.print("reg ADD %KEY%\\Families\\FAMILY_" + familyID + "\\1 /v Loc /t REG_SZ /d \"%~dp0\\\" /f\r\n");
-            installer.print("reg ADD %KEY%\\Families\\FAMILY_" + familyID + "\\1 /v Bmap /t REG_SZ /d \"%~dp0osmmap.img\" /f\r\n");
-            installer.print("reg ADD %KEY%\\Families\\FAMILY_" + familyID + "\\1 /v Tdb /t REG_SZ /d \"%~dp0osmmap.tdb\" /f\r\n");
+            installer.print("reg ADD %KEY%\\Families\\FAMILY_" + familyID + " /v IDX /t REG_SZ /d \"%~dp0osmmap.mdx\" /f\r\n");
+            installer.print("reg ADD %KEY%\\Families\\FAMILY_" + familyID + " /v MDR /t REG_SZ /d \"%~dp0osmmap_mdr.img\" /f\r\n");
+            installer.print("reg ADD %KEY%\\Families\\FAMILY_" + familyID + "\\1 /v LOC /t REG_SZ /d \"%~dp0\\\" /f\r\n");
+            installer.print("reg ADD %KEY%\\Families\\FAMILY_" + familyID + "\\1 /v BMAP /t REG_SZ /d \"%~dp0osmmap.img\" /f\r\n");
+            installer.print("reg ADD %KEY%\\Families\\FAMILY_" + familyID + "\\1 /v TDB /t REG_SZ /d \"%~dp0osmmap.tdb\" /f\r\n");
             installer.close();
 
             uninstaller.print("set KEY=HKLM\\SOFTWARE\\Wow6432Node\\Garmin\\MapSource\r\n");
