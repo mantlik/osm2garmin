@@ -813,16 +813,16 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
                 iterator(); it.hasNext();) {
             boolean closeAfterRead = false;
             boolean success = false;
+            Integer file = (Integer) (it.next());
+            long remaining = ((Long) this.torrent.length.get(file.intValue())).longValue()
+                    - ((Long) (this.pieceList.get(piece).getFileAndOffset().
+                    get(file))).longValue();
             while (!success) {
-                Integer file = (Integer) (it.next());
                 try {
                     if (closeAfterRead) {
                         File temp = new File(saveas + ((String) (this.torrent.name.get(file))));
                         this.output_files[file] = new RandomAccessFile(temp, "r");
                     }
-                    long remaining = ((Long) this.torrent.length.get(file.intValue())).longValue()
-                            - ((Long) (this.pieceList.get(piece).getFileAndOffset().
-                            get(file))).longValue();
                     this.output_files[file.intValue()].seek(((Long) (this.pieceList.get(piece).getFileAndOffset().get(file))).longValue());
                     this.output_files[file.intValue()].read(data,
                             data.length - remainingData,

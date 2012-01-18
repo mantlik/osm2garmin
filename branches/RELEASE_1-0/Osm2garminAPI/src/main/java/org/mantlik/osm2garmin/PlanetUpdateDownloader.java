@@ -65,8 +65,8 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
     @Override
     public void run() {
         String osmosiswork = parameters.getProperty("osmosiswork");
-        File osmosisState = new File(osmosiswork + "state.txt");
-        File osmosisStateBackup = new File(osmosiswork + "state_old.txt");
+        File osmosisState = new File(osmosiswork, "state.txt");
+        File osmosisStateBackup = new File(osmosiswork, "state_old.txt");
 
         // recover or make planet file backup
         File planetFile = new File(parameters.getProperty("planet_file"));
@@ -259,7 +259,7 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
                     setState(ERROR);
                     return;
                 }
-                String state = Osm2garmin.userdir + "osmosiswork/state.txt";
+                String state = osmosiswork + "state.txt";
                 new File(state).delete();
                 Downloader downloader = new Downloader(surl, state);
                 while (downloader.getStatus() != Downloader.COMPLETE) {
@@ -335,8 +335,23 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
          * Verify gzip file readibility
          */
         @Override
-        public boolean verify(byte[] data) {
+        public boolean verify(int index, byte[] data) {
             InputStream is = null;
+            File hashfile = new File(Osm2garmin.userdir + updateName(index) + ".sha1");
+            if (hashfile.exists()) {
+                int l = (int)hashfile.length();
+                byte[] hexhash = new byte[l];
+                try {
+                    is = new FileInputStream(hashfile);
+                    is.read(hexhash);
+                    is.close();
+                } catch (IOException ex) {
+                    hashfile.delete();
+                    return false;
+                }
+                return Utils.byteArrayToByteString(Utils.hash(data)).
+                        matches(Utils.byteArrayToByteString(Utils.hexStringToByteArray(new String(hexhash))));
+            }
             try {
                 is = new GZIPInputStream(new ByteArrayInputStream(data));
                 DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -369,6 +384,14 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
                         return false;
                     }
                 }
+                return false;
+            }
+            try {
+                OutputStream os = new FileOutputStream(hashfile);
+                os.write(Utils.bytesToHex(Utils.hash(data)).getBytes());
+                os.close();
+            } catch (IOException ex) {
+                Logger.getLogger(Osm2garmin.class.getName()).log(Level.SEVERE, null, ex);
                 return false;
             }
             return true;
@@ -448,12 +471,26 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
         int size = 1;
         firstPieceToProcess = sequence;
         // search for existing older files to seed
-        sequence--;
         while (size > 0) {
+            sequence--;
             String fname = Osm2garmin.userdir + updateName(sequence);
             size = (int) (new File(fname).length());
-            if (size <= 0) {
-                break;
+        }
+        sequence++;
+        startPiece = sequence;
+        while (sequence < firstPieceToProcess) {
+            String fname = Osm2garmin.userdir + updateName(sequence);
+            String hashname = fname + ".sha1";
+            if (!new File(hashname).exists()) {
+                setStatus("Checking existing " + updateName(sequence));
+                String url = mirror + updateName(sequence);
+                try {
+                    size = (int) tryGetFileSize(new URL(url));
+                } catch (MalformedURLException ex) {
+                    startPiece = sequence + 1;
+                }
+            } else {
+                size = (int) (new File(fname).length());
             }
             torrent.setPieceLength(sequence, size);
             byte[] temp = Utils.hash(("Piece " + sequence + " length " + size).getBytes());
@@ -465,9 +502,8 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
             torrent.length.add(((long) size));
             torrent.total_length += size;
             torrent.name.add(updateName(sequence));
-            sequence--;
+            sequence++;
         }
-        startPiece = sequence + 1;
         sequence = firstPieceToProcess;
         size = 1;
         while (size > 0) {
