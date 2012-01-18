@@ -80,7 +80,7 @@ public class Osm2garmin implements PropertyChangeListener {
     /**
      *
      */
-    public static String userdir = ""; // used by GUI to save temporary info
+    public static String userdir = "./"; // used by GUI to save temporary info
     private static ArrayList<String> runningClasses = new ArrayList<String>();
 
     /**
@@ -155,7 +155,7 @@ public class Osm2garmin implements PropertyChangeListener {
                 if (l.length >= 5 && !(l[0].startsWith("#") || l[0].startsWith("x"))) {
                     Region region = new Region(l[4], parameters.getProperty("maps_dir"),
                             parameters.getProperty("delete_old_maps", "false").equals("true"), familyID);
-                    familyID ++;
+                    familyID++;
                     region.lon1 = Float.parseFloat(l[0]);
                     region.lat1 = Float.parseFloat(l[1]);
                     region.lon2 = Float.parseFloat(l[2]);
@@ -593,7 +593,9 @@ public class Osm2garmin implements PropertyChangeListener {
         long interval = 10000;
         processor.parameters.setProperty("wait_status", processor.getStatus());
         while (isExclusive(extclass)) {
-            Thread.sleep(interval);
+            synchronized (processor) {
+                processor.wait(interval);
+            }
             if (!isExclusive(extclass)) {
                 if (setExclusive(extclass)) {
                     processor.setStatus(processor.parameters.getProperty("wait_status"));
