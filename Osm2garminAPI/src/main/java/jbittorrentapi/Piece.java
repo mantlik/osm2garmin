@@ -153,7 +153,7 @@ public class Piece {
      */
     public synchronized boolean verify(){
         if (verifier != null) {
-            return verifier.verify(this.data());
+            return verifier.verify(index, this.data());
         }
         return Utils.byteArrayToByteString(Utils.hash(this.data())).matches(Utils.byteArrayToByteString(this.sha1));
     }

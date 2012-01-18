@@ -44,6 +44,6 @@ package jbittorrentapi;
  */
 public interface DataVerifier {
     
-    public boolean verify(byte[] data);
+    public boolean verify(int index, byte[] data);
     
 }
