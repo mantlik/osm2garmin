@@ -71,12 +71,15 @@
                     <installerLicenseFile>../LICENSE.txt</installerLicenseFile>
                     <installersFilePrefix>${project.name}-${project.version}-build-${buildNumber}</installersFilePrefix>
                     <installDirName>${brandingToken}_${project.version.short}</installDirName>
-                    <appIcon>../Globe48.png</appIcon>
-                    <icon16>../Globe.png</icon16>
-                    <instLeftCorner>../ilc.png</instLeftCorner>
-                    <instRightCorner>../irc.png</instRightCorner>
-                    <instWelcomeTop>../wlt.png</instWelcomeTop>
-                    <instWelcomeBottom>../wlb.png</instWelcomeBottom>
+                    <templateFile>../template.xml</templateFile>
+                    <userSettings>
+                        <nbi.icon.file>${basedir}/../Globe48.png</nbi.icon.file>
+                        <nbi.icon16.file>${basedir}/../Globe.png</nbi.icon16.file>
+                        <nbi.instleftcorner.file>${basedir}/../ilc.png</nbi.instleftcorner.file>
+                        <nbi.instrightcorner.file>${basedir}/../irc.png</nbi.instrightcorner.file>
+                        <nbi.instwelcometop.file>${basedir}/../wlt.png</nbi.instwelcometop.file>
+                        <nbi.instwelcomebottom.file>${basedir}/../wlb.png</nbi.instwelcomebottom.file>
+                    </userSettings>
                 </configuration>
             </plugin>
             <plugin>
