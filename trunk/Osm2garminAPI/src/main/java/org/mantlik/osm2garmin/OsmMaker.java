@@ -112,14 +112,14 @@ public class OsmMaker extends ThreadProcessor {
         if (!new File(splitFile).exists()) {
             args = new String[]{
                 "--output-dir=" + region.dir.getPath(), "--max-areas=" + max_areas, "--mapid=" + MAPID, "--output=pbf",
-                "--geonames-file=" + Osm2garmin.userdir + "cities15000.zip", "--bottom=" + region.lat1,
+                "--geonames-file=" + Utilities.getUserdir(this) + "cities15000.zip", "--bottom=" + region.lat1,
                 "--top=" + region.lat2, "--left=" + region.lon1, "--right=" + region.lon2, "--status-freq=0",
                 "--max-threads=1", "--max-nodes=1200000", region.dir.getPath() + "/" + region.name + ".osm.pbf"
             };
         } else {
             args = new String[]{
                 "--output-dir=" + region.dir.getPath(), "--max-areas=" + max_areas, "--mapid=" + MAPID,
-                "--geonames-file=" + Osm2garmin.userdir + "cities15000.zip", "--status-freq=0",
+                "--geonames-file=" + Utilities.getUserdir(this) + "cities15000.zip", "--status-freq=0",
                 "--split-file=" + splitFile, "--output=pbf",
                 "--max-threads=1", region.dir.getPath() + "/" + region.name + ".osm.pbf"
             };
@@ -128,9 +128,8 @@ public class OsmMaker extends ThreadProcessor {
         //uk.me.parabola.splitter.Main.main(args);
         try {
 
-            splitterLoader = Osm2garmin.libClassLoader("splitter", getClass().getClassLoader());
-            Osm2garmin.runExternal("uk.me.parabola.splitter.Main", "main", "splitter",
-                    splitterLoader, args, this);
+            Utilities.getInstance().runExternal("uk.me.parabola.splitter.Main", "main", "splitter",
+                    args, this);
         } catch (InvocationTargetException ex) {
             Throwable exx = ex.getTargetException();
             region.splitterMaxAreas = Math.max(1, region.splitterMaxAreas / 2);
@@ -180,7 +179,7 @@ public class OsmMaker extends ThreadProcessor {
         }
         try {
             //uk.me.parabola.mkgmap.main.Main.main(args);
-            Osm2garmin.runExternal("uk.me.parabola.mkgmap.main.Main", "main", "mkgmap", null, args, this);
+            Utilities.getInstance().runExternal("uk.me.parabola.mkgmap.main.Main", "main", "mkgmap", args, this);
         } catch (Exception ex) {
             Logger.getLogger(OsmMaker.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -194,15 +193,14 @@ public class OsmMaker extends ThreadProcessor {
                 setStatus(region.name + " splitting area (" + id + ".img) - " + getProgress() + " %");
                 args = new String[]{
                     "--output-dir=" + region.dir.getPath(), "--max-areas=20", "--mapid=" + (maxid + 1),
-                    "--geonames-file=" + Osm2garmin.userdir + "cities15000.zip", "--output=pbf",
+                    "--geonames-file=" + Utilities.getUserdir(this) + "cities15000.zip", "--output=pbf",
                     "--max-nodes=800000", "--status-freq=0",
                     region.dir.getPath() + "/" + id + ".osm.pbf"
                 };
                 try {
                     //uk.me.parabola.splitter.Main.main(args);
-                    splitterLoader = Osm2garmin.libClassLoader("splitter", getClass().getClassLoader());
-                    Osm2garmin.runExternal("uk.me.parabola.splitter.Main", "main", "splitter",
-                            splitterLoader, args, this);
+                    Utilities.getInstance().runExternal("uk.me.parabola.splitter.Main", "main", "splitter",
+                            args, this);
                 } catch (Exception ex) {
                     Logger.getLogger(OsmMaker.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -230,7 +228,7 @@ public class OsmMaker extends ThreadProcessor {
                 }
                 try {
                     //uk.me.parabola.mkgmap.main.Main.main(args);
-                    Osm2garmin.runExternal("uk.me.parabola.mkgmap.main.Main", "main", "mkgmap", null, args, this);
+                    Utilities.getInstance().runExternal("uk.me.parabola.mkgmap.main.Main", "main", "mkgmap", args, this);
                 } catch (Exception ex) {
                     Logger.getLogger(OsmMaker.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -277,7 +275,7 @@ public class OsmMaker extends ThreadProcessor {
         args = aa.toArray(new String[0]);
         try {
             //uk.me.parabola.mkgmap.main.Main.main(args);
-            Osm2garmin.runExternal("uk.me.parabola.mkgmap.main.Main", "main", "mkgmap", null, args, this);
+            Utilities.getInstance().runExternal("uk.me.parabola.mkgmap.main.Main", "main", "mkgmap", args, this);
         } catch (Exception ex) {
             Logger.getLogger(OsmMaker.class.getName()).log(Level.SEVERE, null, ex);
             setState(ERROR);
@@ -302,5 +300,9 @@ public class OsmMaker extends ThreadProcessor {
         setStatus(" completed.");
         setProgress(100);
         setState(COMPLETED);
+    }
+    
+    public void setSplitterLoader(ClassLoader splitterLoader) {
+        this.splitterLoader = splitterLoader;
     }
 }

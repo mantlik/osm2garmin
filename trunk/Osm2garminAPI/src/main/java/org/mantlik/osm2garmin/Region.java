@@ -108,7 +108,7 @@ public class Region {
         }
         dir = new File(mapsdir + this.name);
         if (dir.exists() && deleteOldMap) {
-            Osm2garmin.deleteFile(dir);
+            Utilities.deleteFile(dir);
         }
         if (!dir.exists()) {
             dir.mkdirs();

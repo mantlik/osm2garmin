@@ -61,27 +61,27 @@ public class PlanetUpdater extends ThreadProcessor {
      */
     @Override
     public String getStatus() {
-        if (this.getState()==COMPLETED) {
+        if (this.getState() == COMPLETED) {
             setStatus("Completed.");
             setProgress(100);
             return super.getStatus();
         }
         int npasses = (regions.size() + max_regions_pass - 1) / max_regions_pass + 1;
         double pass_progress = 0;
-        File uf = new File(Osm2garmin.userdir + "update.osc.gz");
+        File uf = new File(Utilities.getUserdir(this) + "update.osc.gz");
         if (uf.exists()) {
             uflen = uf.length();
         }
         if (oldPlanetFile.exists()) {
             oldPlanetLen = oldPlanetFile.length();
         }
-        if (planetFile.exists() && pass<=1) {
+        if (planetFile.exists() && pass <= 1) {
             planetlen = planetFile.length();
             setStatus("Updating planet file - " + planetlen + " bytes written" + regions_in_progress);
             if ((oldPlanetLen + uflen > 0) && (pass == 1)) {
                 pass_progress = Math.min(1, 1.0 * planetlen / (oldPlanetLen + uflen));
             }
-        } else if (uf.exists() && pass==0) {
+        } else if (uf.exists() && pass == 0) {
             setStatus("Processing updates - " + uf.length() + " bytes written");
         } else if (pass == 0) {
             setStatus("Preparing updates.");
@@ -95,13 +95,13 @@ public class PlanetUpdater extends ThreadProcessor {
     @Override
     public void run() {
         try {
-            File f = new File(Osm2garmin.userdir + "update.osc.gz");
+            File f = new File(Utilities.getUserdir(this) + "update.osc.gz");
             if (f.exists()) {
                 f.delete();
             }
             ArrayList<String> l = new ArrayList<String>();
             int i = 0;
-            File upd = new File(Osm2garmin.userdir + "update" + i + ".osc.gz");
+            File upd = new File(Utilities.getUserdir(this) + "update" + i + ".osc.gz");
             int nchanges = 0;
             while (upd.exists()) {
                 l.add("--rxc");
@@ -110,7 +110,7 @@ public class PlanetUpdater extends ThreadProcessor {
                 l.add("bufferCapacity=10000");
                 nchanges++;
                 i++;
-                upd = new File(Osm2garmin.userdir + "update" + i + ".osc.gz");
+                upd = new File(Utilities.getUserdir(this) + "update" + i + ".osc.gz");
             }
             if (i == 0) {
                 oldPlanetFile.renameTo(planetFile);
@@ -126,10 +126,10 @@ public class PlanetUpdater extends ThreadProcessor {
                 l.add("--sc");
                 l.add("--simc");
                 l.add("--wxc");
-                l.add("file=" + Osm2garmin.userdir + "update.osc.gz");
+                l.add("file=" + Utilities.getUserdir(this) + "update.osc.gz");
                 args = l.toArray(new String[0]);
-                Osm2garmin.runExternal("org.openstreetmap.osmosis.core.Osmosis", "run", "osmosis",
-                        Osm2garmin.libClassLoader("osmosis", getClass().getClassLoader()), args, this);
+                Utilities.getInstance().runExternal("org.openstreetmap.osmosis.core.Osmosis", "run", "osmosis",
+                        args, this);
             }
 
             File torrentFile = new File(parameters.getProperty("planet_file").replace(".osm.pbf", ".osm.bz2"));
@@ -158,7 +158,7 @@ public class PlanetUpdater extends ThreadProcessor {
                     String[] args1;
                     if (nchanges > 0) {
                         args1 = new String[]{
-                            "--rxc", "file=" + Osm2garmin.userdir + "update.osc.gz", //"--buffer-change", "bufferCapacity=10000",
+                            "--rxc", "file=" + Utilities.getUserdir(this) + "update.osc.gz", //"--buffer-change", "bufferCapacity=10000",
                             //"--buffer", "bufferCapacity=10000",
                             "outPipe.0=ac1",
                             "--ac", //"--buffer", "bufferCapacity=10000",
@@ -201,8 +201,8 @@ public class PlanetUpdater extends ThreadProcessor {
                 }
                 args = largs.toArray(new String[0]);
 
-                Osm2garmin.runExternal("org.openstreetmap.osmosis.core.Osmosis", "run", "osmosis",
-                        Osm2garmin.libClassLoader("osmosis", getClass().getClassLoader()), args, this);
+                Utilities.getInstance().runExternal("org.openstreetmap.osmosis.core.Osmosis", "run", "osmosis",
+                        args, this);
             }
 
             if ((!planetFile.exists()) || (planetFile.length() < oldPlanetFile.length())) {
@@ -223,13 +223,13 @@ public class PlanetUpdater extends ThreadProcessor {
 
             // delete diff files
             i = 0;
-            upd = new File(Osm2garmin.userdir + "update" + i + ".osc.gz");
+            upd = new File(Utilities.getUserdir(this) + "update" + i + ".osc.gz");
             while (upd.exists()) {
                 if (upd.exists()) {
                     upd.delete();
                 }
                 i++;
-                upd = new File(Osm2garmin.userdir + "update" + i + ".osc.gz");
+                upd = new File(Utilities.getUserdir(this) + "update" + i + ".osc.gz");
             }
 
             setStatus("Completed.");

@@ -70,7 +70,7 @@ public class PlanetDownloader extends ThreadProcessor {
         }
         planetFile = new File(parameters.getProperty("planet_file"));
         oldPlanetFile = new File(parameters.getProperty("old_planet_file"));
-        File downloadParmsFile = new File(Osm2garmin.userdir + "planetdownload.properties");
+        File downloadParmsFile = new File(Utilities.getUserdir(this) + "planetdownload.properties");
         if (downloadParmsFile.exists()) {
             try {
                 downloadParameters.load(new FileInputStream(downloadParmsFile));
@@ -157,7 +157,7 @@ public class PlanetDownloader extends ThreadProcessor {
         downloadParameters.put("planet_date", sdf.format(planetDate));
         downloadParameters.put("start_date_osmosis", new SimpleDateFormat("yyyy-MM-dd").format(planetDate));
         try {
-            downloadParameters.store(new FileOutputStream(new File(Osm2garmin.userdir + "planetdownload.properties")), "");
+            downloadParameters.store(new FileOutputStream(new File(Utilities.getUserdir(this) + "planetdownload.properties")), "");
         } catch (IOException ex) {
             Logger.getLogger(Osm2garmin.class.getName()).log(Level.SEVERE, "Can not save download parameters.", ex);
             return false;
@@ -176,8 +176,8 @@ public class PlanetDownloader extends ThreadProcessor {
             String[] osargs = new String[]{"--rrii", "-v 9", "workingDirectory=" + osmosiswork};
             new File(osmosiswork + "configuration.txt").delete();
             try {
-                Osm2garmin.runExternal("org.openstreetmap.osmosis.core.Osmosis", "run", "osmosis",
-                        Osm2garmin.libClassLoader("osmosis", getClass().getClassLoader()), osargs, this);
+                Utilities.getInstance().runExternal("org.openstreetmap.osmosis.core.Osmosis", "run", "osmosis",
+                        osargs, this);
             } catch (Exception ex) {
                 Logger.getLogger(Osm2garmin.class.getName()).log(Level.SEVERE, "Osmosis error.", ex);
                 setState(ERROR);
@@ -185,7 +185,7 @@ public class PlanetDownloader extends ThreadProcessor {
             }
             try {
                 //org.openstreetmap.osmosis.core.Osmosis.run(osargs);
-                Osm2garmin.copyFile(this.getClass().getResourceAsStream("configuration.txt"), new File(osmosiswork + "configuration.txt"));
+                Utilities.copyFile(this.getClass().getResourceAsStream("configuration.txt"), new File(osmosiswork + "configuration.txt"));
             } catch (Exception ex) {
                 Logger.getLogger(Osm2garmin.class.getName()).log(Level.SEVERE, "Error while copying osmosis configuration.", ex);
                 setState(ERROR);
@@ -362,7 +362,7 @@ public class PlanetDownloader extends ThreadProcessor {
             File torrentDownloadFile = new File(parent + torrentName);
             File planetBzFile = new File(planetFile.getPath().replace(".osm.pbf", ".osm.bz2"));
             try {
-                Osm2garmin.copyFile(new File(parent + torrentName), planetBzFile);
+                Utilities.copyFile(new File(parent + torrentName), planetBzFile);
             } catch (IOException ex) {
                 setStatus("Can not copy " + torrentDownloadFile.getName() + " to "
                         + planetBzFile.getName());
@@ -371,7 +371,7 @@ public class PlanetDownloader extends ThreadProcessor {
         }
 
         // remove download properties
-        new File(Osm2garmin.userdir + "planetdownload.properties").delete();
+        new File(Utilities.getUserdir(this) + "planetdownload.properties").delete();
         return true;
     }
 
