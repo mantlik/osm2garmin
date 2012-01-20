@@ -28,12 +28,10 @@ import java.util.Arrays;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 import org.mantlik.osm2garmin.srtm2osm.Srtm;
-import org.openide.util.Exceptions;
 
 /**
  *
@@ -161,7 +159,7 @@ public class ContoursUpdater extends ThreadProcessor {
                         setStatus(coords + "Splitting contour data "
                                 + " - " + region.name + " " + perc + " % completed.");
                         //uk.me.parabola.splitter.Main.main(args);
-                        Osm2garmin.runExternal("uk.me.parabola.splitter.Main", "main", "splitter", null, args, this);
+                        Utilities.getInstance().runExternal("uk.me.parabola.splitter.Main", "main", "splitter", args, this);
                     } catch (Exception ex) {
                         Logger.getLogger(ContoursUpdater.class.getName()).log(Level.SEVERE, null, ex);
                         setState(ERROR);
@@ -201,7 +199,7 @@ public class ContoursUpdater extends ThreadProcessor {
                     args = aa.toArray(new String[0]);
                     try {
                         //uk.me.parabola.mkgmap.main.Main.main(args);
-                        Osm2garmin.runExternal("uk.me.parabola.mkgmap.main.Main", "main", "mkgmap", null, args, this);
+                        Utilities.getInstance().runExternal("uk.me.parabola.mkgmap.main.Main", "main", "mkgmap", args, this);
                     } catch (Exception ex) {
                         Logger.getLogger(ContoursUpdater.class.getName()).log(Level.SEVERE, null, ex);
                         setState(ERROR);
@@ -270,6 +268,7 @@ public class ContoursUpdater extends ThreadProcessor {
             }
         }
         setStatus(region.name + " contours update completed.");
+        setProgress(100);
         setState(COMPLETED);
     }
 

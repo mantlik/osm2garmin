@@ -613,7 +613,7 @@ public final class MainWindowTopComponent extends TopComponent implements Proper
             }
         }
         String text = "";
-        if (Osm2garmin.parameters.getProperty("download_method", "").equals("torrent")) {
+        if (osm2Garmin.getParameters().getProperty("download_method", "").equals("torrent")) {
             DownloadManager[] downloads = TorrentDownloader.getDownloads();
             if (downloads.length > 0) {
                 long downloaded = 0;
@@ -721,7 +721,7 @@ public final class MainWindowTopComponent extends TopComponent implements Proper
     public void run() {
         io.select();
         osm2Garmin.start(getParameters(new Properties()));
-        saveParameters(Osm2garmin.parameters);
+        saveParameters(osm2Garmin.getParameters());
         cancelButton.setEnabled(false);
         startButton.setEnabled(true);
         Installer.setCanClose(true);

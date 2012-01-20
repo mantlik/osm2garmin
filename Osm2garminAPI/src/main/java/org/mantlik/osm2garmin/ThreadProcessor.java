@@ -56,6 +56,7 @@ public abstract class ThreadProcessor implements Runnable {
      * 
      */
     public Thread thread;
+    public ClassLoader classLoader;
     /**
      * 
      */
@@ -84,6 +85,7 @@ public abstract class ThreadProcessor implements Runnable {
     private void process() {
         if (commandline) {
             thread = new Thread(this);
+            classLoader = thread.getContextClassLoader();
             thread.start();
         } else {
             processor = new RequestProcessor(getClass().getSimpleName(), 1, true);
