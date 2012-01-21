@@ -54,7 +54,6 @@ public class Utilities {
      * @param extclass external class to run
      * @param method main method in the extclass
      * @param library library folder to load classes from
-     * @param loader classloader to use
      * @param args parameters to pass to the method
      * @param processor instance invoking the process (used for wait status
      * display)
@@ -84,7 +83,6 @@ public class Utilities {
     /**
      *
      * @param library
-     * @param loader
      * @param processor
      * @return
      * @throws Exception
@@ -117,7 +115,7 @@ public class Utilities {
     /*
      * Waits until no running instance of the same class runs
      */
-    private void waitExclusive(String extclass, ThreadProcessor processor) throws InterruptedException {
+    public void waitExclusive(String extclass, ThreadProcessor processor) throws InterruptedException {
         long interval = 10000;
         String wait_status = processor.getStatus();
         while (isNotExclusive(extclass, processor)) {
@@ -168,7 +166,7 @@ public class Utilities {
         return runningClasses.contains(extclass);
     }
 
-    private synchronized void endExclusive(String extclass) {
+    public synchronized void endExclusive(String extclass) {
         while (runningClasses.contains(extclass)) {
             runningClasses.remove(extclass);
         }
