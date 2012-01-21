@@ -97,22 +97,23 @@ public class ContoursUpdater extends ThreadProcessor {
                     zipFile3.renameTo(zipfile);
                     continue;
                 }
-
-                /*
-                 * if (!Srtm.exists(lo, la, parameters)) {
-                 * // System.out.println(coords+" no srtm data.");
-                 * continue;
-                 * }
-                 */
-
-
-                //String name = d000.format(Math.abs(lo)) + (lo >= 0 ? "E" : "W") + d00.format(Math.abs(la)) + (la >= 0 ? "N" : "S");
+                
+                Utilities utils = Utilities.getInstance();
+                try {
+                    utils.waitExclusive(Srtm2Osm.class.getName(), this);
+                } catch (InterruptedException ex) {
+                        setState(ERROR);
+                        setStatus("Interrupted.");
+                        region.setState(Region.ERROR);
+                        return;
+                }
                 String outputName = contoursDir + name + ".osm.gz";
                 srtm2osm = new Srtm2Osm(parameters, la, lo, outputName);
                 while (srtm2osm.getState() == Srtm2Osm.RUNNING) {
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException ex) {
+                        utils.endExclusive(Srtm2Osm.class.getName());
                         setState(ERROR);
                         setStatus("Interrupted.");
                         region.setState(Region.ERROR);
@@ -120,6 +121,7 @@ public class ContoursUpdater extends ThreadProcessor {
                     }
                     setStatus(srtm2osm.getStatus() + " - " + region.name + " " + perc + " % completed.");
                 }
+                utils.endExclusive(Srtm2Osm.class.getName());
                 if (srtm2osm.getState() == Srtm2Osm.ERROR) {
                     setState(ERROR);
                     setStatus(srtm2osm.getStatus());
@@ -127,10 +129,6 @@ public class ContoursUpdater extends ThreadProcessor {
                     return;
                 }
                 File f = new File(outputName);
-                //if (f.exists() && f.length() < 30) {
-                //    f.delete();  // gzip header only
-                //    continue;
-                //}
                 if (!f.exists()) {
                     continue;
                 }
