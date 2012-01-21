@@ -264,7 +264,7 @@ public class OsmMaker extends ThreadProcessor {
         aa.add("--index");
         aa.add("--family-id=" + region.familyID);
         aa.add("--family-name=" + region.name);
-        aa.add("--series-name=\"" + region.name + "\"");
+        aa.add("--series-name=" + region.name);
         aa.add("--product-id=1");
         aa.addAll(osmMaps);
         //aa.add("--family-id=" + (region.familyID));
