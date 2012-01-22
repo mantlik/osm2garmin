@@ -35,6 +35,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.prefs.BackingStoreException;
 import javax.swing.JTextField;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
 import jbittorrentapi.DownloadManager;
 import jbittorrentapi.WebseedTask;
 import org.mantlik.osm2garmin.*;
@@ -91,7 +93,32 @@ public final class MainWindowTopComponent extends TopComponent implements Proper
         putClientProperty(TopComponent.PROP_DRAGGING_DISABLED, Boolean.TRUE);
         putClientProperty(TopComponent.PROP_UNDOCKING_DISABLED, Boolean.TRUE);
 
+        torrentStatusItem.setContentType("text/html");
+        torrentStatusItem.getDocument().putProperty("IgnoreCharsetDirective", Boolean.TRUE);
+        torrentStatusItem.addHyperlinkListener(new HyperlinkListener() {
+
+            @Override
+            public void hyperlinkUpdate(HyperlinkEvent e) {
+                if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+                    torrentStatusEventDesc = e.getDescription();
+                    torrentStatusItem.setText("<html><head></head><body>Please wait...</body></html>");
+                    RequestProcessor.getDefault().post(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            String s = torrentStatusEventDesc;
+                            if (s.equals("pause")) {
+                                pauseDownloads(true);
+                            } else if (s.equals("resume")) {
+                                pauseDownloads(false);
+                            }
+                        }
+                    });
+                }
+            }
+        });
     }
+    private String torrentStatusEventDesc;
 
     @Override
     public HelpCtx getHelpCtx() {
@@ -137,7 +164,7 @@ public final class MainWindowTopComponent extends TopComponent implements Proper
         jPanel1 = new javax.swing.JPanel();
         planetDownloadStatus = new JTextFieldImage();
         jLabel1 = new javax.swing.JLabel();
-        torrentStatusItem = new javax.swing.JLabel();
+        torrentStatusItem = new javax.swing.JEditorPane();
         jPanel9 = new javax.swing.JPanel();
         jPanel4 = new javax.swing.JPanel();
         regionsStatus = new JTextFieldImage();
@@ -188,9 +215,9 @@ public final class MainWindowTopComponent extends TopComponent implements Proper
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 146, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(7, 7, 7)
-                .addComponent(planetUpdateDownloadStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 402, Short.MAX_VALUE)
-                .addContainerGap())
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(planetUpdateDownloadStatus)
+                .addGap(14, 14, 14))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -215,7 +242,7 @@ public final class MainWindowTopComponent extends TopComponent implements Proper
                 .addContainerGap()
                 .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 146, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(7, 7, 7)
-                .addComponent(planetUpdateStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE)
+                .addComponent(planetUpdateStatus)
                 .addGap(14, 14, 14))
         );
         jPanel3Layout.setVerticalGroup(
@@ -233,8 +260,11 @@ public final class MainWindowTopComponent extends TopComponent implements Proper
 
         org.openide.awt.Mnemonics.setLocalizedText(jLabel1, org.openide.util.NbBundle.getMessage(MainWindowTopComponent.class, "MainWindowTopComponent.jLabel1.text")); // NOI18N
 
-        torrentStatusItem.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
-        org.openide.awt.Mnemonics.setLocalizedText(torrentStatusItem, org.openide.util.NbBundle.getMessage(MainWindowTopComponent.class, "MainWindowTopComponent.torrentStatusItem.text")); // NOI18N
+        torrentStatusItem.setEditable(false);
+        torrentStatusItem.setText("<html><head></head><body>&nbsp;</body></html>"); // NOI18N
+        torrentStatusItem.setToolTipText(org.openide.util.NbBundle.getMessage(MainWindowTopComponent.class, "MainWindowTopComponent.torrentStatusItem.toolTipText")); // NOI18N
+        torrentStatusItem.setName(org.openide.util.NbBundle.getMessage(MainWindowTopComponent.class, "MainWindowTopComponent.torrentStatusItem.name")); // NOI18N
+        torrentStatusItem.setOpaque(false);
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -245,19 +275,22 @@ public final class MainWindowTopComponent extends TopComponent implements Proper
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 146, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(planetDownloadStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 402, Short.MAX_VALUE)
-                    .addComponent(torrentStatusItem, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(planetDownloadStatus)
+                    .addComponent(torrentStatusItem))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addComponent(torrentStatusItem)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(0, 0, 0)
+                .addComponent(torrentStatusItem, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap(29, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(planetDownloadStatus, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel1))
-                .addGap(0, 11, Short.MAX_VALUE))
+                    .addComponent(jLabel1)
+                    .addComponent(planetDownloadStatus, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
         );
 
         javax.swing.GroupLayout jPanel8Layout = new javax.swing.GroupLayout(jPanel8);
@@ -298,7 +331,7 @@ public final class MainWindowTopComponent extends TopComponent implements Proper
                 .addContainerGap()
                 .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 146, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(7, 7, 7)
-                .addComponent(regionsStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 414, Short.MAX_VALUE)
+                .addComponent(regionsStatus)
                 .addContainerGap())
         );
         jPanel4Layout.setVerticalGroup(
@@ -328,7 +361,7 @@ public final class MainWindowTopComponent extends TopComponent implements Proper
                     .addGroup(jPanel5Layout.createSequentialGroup()
                         .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 146, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(contoursStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 416, Short.MAX_VALUE))
+                        .addComponent(contoursStatus))
                     .addComponent(regionLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -388,7 +421,7 @@ public final class MainWindowTopComponent extends TopComponent implements Proper
                 .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel7Layout.createSequentialGroup()
                         .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(overallProgress, javax.swing.GroupLayout.DEFAULT_SIZE, 413, Short.MAX_VALUE)
+                            .addComponent(overallProgress, javax.swing.GroupLayout.DEFAULT_SIZE, 343, Short.MAX_VALUE)
                             .addComponent(jLabel5))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(startButton, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -421,7 +454,7 @@ public final class MainWindowTopComponent extends TopComponent implements Proper
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jPanel7, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -483,7 +516,7 @@ public final class MainWindowTopComponent extends TopComponent implements Proper
     private javax.swing.JLabel regionLabel;
     private javax.swing.JTextField regionsStatus;
     private javax.swing.JButton startButton;
-    private javax.swing.JLabel torrentStatusItem;
+    private javax.swing.JEditorPane torrentStatusItem;
     // End of variables declaration//GEN-END:variables
 
     @Override
@@ -621,12 +654,20 @@ public final class MainWindowTopComponent extends TopComponent implements Proper
                 float downSpeed = 0;
                 float upSpeed = 0;
                 int peers = 0;
+                boolean running = false;
+                boolean init = false;
                 for (DownloadManager dm : downloads) {
                     downloaded += dm.downloaded();
                     uploaded += dm.uploaded();
                     downSpeed += dm.getDLRate();
                     upSpeed += dm.getULRate();
                     peers += dm.noOfPeers();
+                    if (!dm.isPaused()) {
+                        running = true;
+                    }
+                    if (dm.init_progress() >= 0) {
+                        init = true;
+                    }
                 }
                 int idx = (int) (ulsp.length * Math.random());
                 ulsp[idx] = upSpeed;
@@ -639,17 +680,40 @@ public final class MainWindowTopComponent extends TopComponent implements Proper
                 }
                 upSpeed = upSpeed / ulsp.length;
                 downSpeed = downSpeed / dlsp.length;
+                String action = "<a href=\"pause\">Pause</a>";
+                if (!running) {
+                    action = "<a href=\"resume\">Resume</a>";
+                }
+                if (init) {
+                    action = "";
+                }
                 String webseed = WebseedTask.webseedActive ? "+webseed" : "";
                 text = peers + webseed + " peers, downloaded " + downloaded / 1024 / 1024
                         + " mb / uploaded " + uploaded / 1024 / 1024 + " mb, D/U rate "
-                        + df1.format(downSpeed) + " / " + df1.format(upSpeed) + " kb/s";
+                        + df1.format(downSpeed) + " / " + df1.format(upSpeed) + " kb/s " + action;
             } else {
                 text = "No active downloads.";
             }
-
         }
-        torrentStatusItem.setText(text);
+        torrentStatusItem.setText("<html><head></head><body>" + text + "</body></html>");
         this.validate();
+    }
+
+    private void pauseDownloads(boolean pause) {
+        DownloadManager[] downloads = TorrentDownloader.getDownloads();
+        for (DownloadManager dm : downloads) {
+            if (pause) {
+                if (!dm.isPaused()) {
+                    dm.stopTrackerUpdate();
+                    dm.closeTempFiles();
+                }
+            } else {
+                if (dm.isPaused()) {
+                    dm.checkTempFiles();
+                    dm.startTrackerUpdate();
+                }
+            }
+        }
     }
 
     private Properties getParameters(Properties par) {

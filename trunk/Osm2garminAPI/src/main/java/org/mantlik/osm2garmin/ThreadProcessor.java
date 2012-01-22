@@ -32,19 +32,19 @@ import org.openide.util.RequestProcessor;
 public abstract class ThreadProcessor implements Runnable {
 
     /**
-     * 
+     *
      */
     public static final int RUNNING = 1;
     /**
-     * 
+     *
      */
     public static final int COMPLETED = 2;
     /**
-     * 
+     *
      */
     public static final int ERROR = 3;
     /**
-     * 
+     *
      */
     public static final String BLANKLINE = "                                                                               \r";
     Properties parameters;
@@ -53,19 +53,20 @@ public abstract class ThreadProcessor implements Runnable {
     private String status = "";
     private float progress = 0;
     /**
-     * 
+     *
      */
     public Thread thread;
     public ClassLoader classLoader;
     /**
-     * 
+     *
      */
     public PropertyChangeSupport changeSupport;
     boolean commandline = true;
     RequestProcessor processor;
+    long waitFrom = -1;
 
     /**
-     * 
+     *
      * @param parameters
      */
     public ThreadProcessor(Properties parameters) {
@@ -94,15 +95,15 @@ public abstract class ThreadProcessor implements Runnable {
     }
 
     /**
-     * 
+     *
      * @return
      */
     public String getStatus() {
-        return status;
+        return status + waitingString();
     }
 
     /**
-     * 
+     *
      * @return
      */
     public int getState() {
@@ -110,7 +111,7 @@ public abstract class ThreadProcessor implements Runnable {
     }
 
     /**
-     * 
+     *
      * @return
      */
     public float getProgress() {
@@ -118,7 +119,7 @@ public abstract class ThreadProcessor implements Runnable {
     }
 
     /**
-     * 
+     *
      * @param progress
      */
     public void setProgress(float progress) {
@@ -131,7 +132,7 @@ public abstract class ThreadProcessor implements Runnable {
     }
 
     /**
-     * 
+     *
      * @param state
      */
     public void setState(int state) {
@@ -144,7 +145,7 @@ public abstract class ThreadProcessor implements Runnable {
     }
 
     /**
-     * 
+     *
      * @param status
      */
     public void setStatus(String status) {
@@ -160,7 +161,7 @@ public abstract class ThreadProcessor implements Runnable {
      * Returns true if completed. Prints lifecycle info.
      */
     /**
-     * 
+     *
      * @param processName
      * @return
      */
@@ -209,6 +210,24 @@ public abstract class ThreadProcessor implements Runnable {
             }
         }
         return false;
+    }
 
+    public String waitingString() {
+        if (waitFrom < 0) {
+            return "";
+        }
+        long sleep = System.currentTimeMillis() - this.waitFrom;
+        int sec = (int) ((sleep / 1000) % 60);
+        int min = (int) ((sleep / 1000 / 60) % 60);
+        int hour = (int) ((sleep / 1000 / 60 / 60) % 24);
+        int day = (int) (sleep / 1000 / 60 / 60 / 24);
+        String wait = "";
+        if (day == 1) {
+            wait = "1 day ";
+        } else if (day > 1) {
+            wait = day + " days ";
+        }
+        wait += hour + ":" + min + ":" + sec;
+        return " (waiting " + wait + ")";
     }
 }
