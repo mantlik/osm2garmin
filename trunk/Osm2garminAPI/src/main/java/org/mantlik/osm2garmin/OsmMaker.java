@@ -94,7 +94,7 @@ public class OsmMaker extends ThreadProcessor {
                 String status = region.name + " splitting " + astatus;
                 setStatus(status);
                 setProgress(getProgress());
-                return status;
+                return status + waitingString();
             } catch (Exception ex) {
                 Logger.getLogger(OsmMaker.class.getName()).log(Level.SEVERE, null, ex);
                 return super.getStatus();

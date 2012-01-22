@@ -60,6 +60,7 @@ public class PlanetDownloader extends ThreadProcessor {
     @Override
     public void run() {
         setState(RUNNING);
+        setStatus("Preparing download");
         downloadParameters = new Properties();
         sdf = new SimpleDateFormat("yyMMdd");
         df = new DecimalFormat("0.00");
