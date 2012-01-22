@@ -67,7 +67,7 @@ public class Utilities {
         if (processor.getClass().isAssignableFrom(OsmMaker.class)) {
             ((OsmMaker) processor).setSplitterLoader(loader);
         }
-        System.err.println("running " + library);
+        //System.err.println("running " + library);
         Thread.currentThread().setContextClassLoader(loader);
         Class clazz = loader.loadClass(extclass);
         Method m = clazz.getDeclaredMethod(method, String[].class);
@@ -115,40 +115,16 @@ public class Utilities {
     /*
      * Waits until no running instance of the same class runs
      */
-    public void waitExclusive(String extclass, ThreadProcessor processor) throws InterruptedException {
-        long interval = 10000;
-        String wait_status = processor.getStatus();
-        while (isNotExclusive(extclass, processor)) {
-            synchronized (processor) {
-                processor.wait(interval);
-            }
-            if (setExclusive(extclass, processor)) {
-                processor.setStatus(wait_status);
-                processor.parameters.remove("wait_sleep");
-                return;
-            }
-            long sleep = Long.parseLong(processor.parameters.getProperty("wait_sleep", "0"));
-            sleep += interval;
-            processor.parameters.setProperty("wait_sleep", "" + sleep);
-            int sec = (int) ((sleep / 1000) % 60);
-            int min = (int) ((sleep / 1000 / 60) % 60);
-            int hour = (int) ((sleep / 1000 / 60 / 60) % 24);
-            int day = (int) (sleep / 1000 / 60 / 60 / 24);
-            String wait = "";
-            if (day == 1) {
-                wait = "1 day ";
-            } else if (day > 1) {
-                wait = day + " days ";
-            }
-            wait += hour + ":" + min + ":" + sec;
-            processor.setStatus(wait_status + " (waiting " + wait + ")");
+    public synchronized void waitExclusive(String extclass, ThreadProcessor processor) throws InterruptedException {
+        if (isNotExclusive(extclass, processor)) {
+            processor.waitFrom = System.currentTimeMillis();
+            wait();
         }
-        processor.setStatus(wait_status);
         if (!setExclusive(extclass, processor)) {
+            System.err.println("Cannot run " + extclass + " exclusively. Retrying.");
             waitExclusive(extclass, processor);
-        } else {
-            processor.parameters.remove("wait_sleep");
         }
+        processor.waitFrom = -1;
     }
 
     private synchronized boolean setExclusive(String extclass, ThreadProcessor processor) {
@@ -170,6 +146,7 @@ public class Utilities {
         while (runningClasses.contains(extclass)) {
             runningClasses.remove(extclass);
         }
+        notify();
     }
 
     /*
