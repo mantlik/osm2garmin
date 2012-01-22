@@ -505,6 +505,10 @@ public class PeerUpdater extends Thread {
         this.contactTracker(this.id, this.torrent, this.downloaded,
                 this.uploaded, this.left, "&event=stopped");
     }
+    
+    public boolean stopped() {
+        return end;
+    }
 
     /**
      * Adds a PeerUpdateListener to the list of listeners, enabling
