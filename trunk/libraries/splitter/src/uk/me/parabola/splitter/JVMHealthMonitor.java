@@ -46,19 +46,19 @@ public class JVMHealthMonitor {
 				while (true) {
 					iter++;
 					if (iter%10 == 0) {
-						System.err.println("***** Full GC *****");
+						System.out.println("***** Full GC *****");
 						System.gc();
 					}
 					long maxMem = Runtime.getRuntime().maxMemory() / 1024 / 1024;
 					long totalMem = Runtime.getRuntime().totalMemory() / 1024 / 1024;
 					long freeMem = Runtime.getRuntime().freeMemory() / 1024 / 1024;
 					long usedMem = totalMem - freeMem;
-					System.err.println("Elapsed time: " + getElapsedTime() + "   Memory: Current " + totalMem + "MB (" + usedMem + "MB used, " + freeMem + "MB free) Max " + maxMem + "MB");
+					System.out.println("Elapsed time: " + getElapsedTime() + "   Memory: Current " + totalMem + "MB (" + usedMem + "MB used, " + freeMem + "MB free) Max " + maxMem + "MB");
 					try {
 						Thread.sleep(statusFrequency * 1000L);
 					}
 					catch (InterruptedException e) {
-						System.err.println("JVMHealthMonitor sleep was interrupted. Ignoring.");
+						System.out.println("JVMHealthMonitor sleep was interrupted. Ignoring.");
 					}
 				}
 			}

@@ -167,17 +167,17 @@ class SplitProcessor implements MapProcessor {
 
 	@Override
 	public void endMap() {
-		System.err.println("***********************************************************");
-		System.err.println("Final statistics");
-		System.err.println("***********************************************************");
-		System.err.println("Needed dictionary entries: " + writerDictionary.size() + " of " + ((1<<16) - 1));
-		System.err.println("coords occupancy");
-		System.err.println("MAP occupancy: " + Utils.format(countCoords));
+		System.out.println("***********************************************************");
+		System.out.println("Final statistics");
+		System.out.println("***********************************************************");
+		System.out.println("Needed dictionary entries: " + writerDictionary.size() + " of " + ((1<<16) - 1));
+		System.out.println("coords occupancy");
+		System.out.println("MAP occupancy: " + Utils.format(countCoords));
 		coords.stats(1);
-		System.err.println("ways occupancy");
-		System.err.println("MAP occupancy: " + Utils.format(countWays));
+		System.out.println("ways occupancy");
+		System.out.println("MAP occupancy: " + Utils.format(countWays));
 		ways.stats(1);
-		System.err.println();
+		System.out.println();
 		//System.out.println("Full Node tests:  " + Util.format(countFullTest));
 		//System.out.println("Quick Node tests: " + Util.format(countQuickTest));
 		for (int i = 0; i < writerInputQueues.length; i++) {
@@ -252,7 +252,7 @@ class SplitProcessor implements MapProcessor {
 			coords.put(currentNode.getId(), writersID);
 			++countCoords;
 			if (countCoords % 1000000 == 0){
-				System.err.println("MAP occupancy: " + Utils.format(countCoords) + ", number of area dictionary entries: " + writerDictionary.size() + " of " + ((1<<16) - 1));
+				System.out.println("MAP occupancy: " + Utils.format(countCoords) + ", number of area dictionary entries: " + writerDictionary.size() + " of " + ((1<<16) - 1));
 				coords.stats(0);
 	}
 		}
