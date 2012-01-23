@@ -205,6 +205,9 @@ public class Srtm2Osm extends ThreadProcessor {
             Contour cc = null;
             Point newstart = c.getData().get(0);
             Point newend = c.getData().get(c.getData().size() - 1);
+            if (newstart == null || newend == null) {
+                continue;
+            }
             if (starts.containsKey(newend)) {
                 cc = contours.get(starts.get(newend));
             } else if (ends.containsKey(newstart)) {
@@ -214,8 +217,11 @@ public class Srtm2Osm extends ThreadProcessor {
                 Point start = cc.getData().get(0);
                 Point end = cc.getData().get(cc.getData().size() - 1);
                 if (end.equals(newstart)) {
-                    int j = ends.remove(newstart);
-                    ends.put(newend, j);
+                    int j;
+                    if (ends.containsKey(newstart)) {
+                        j = ends.remove(newstart);
+                        ends.put(newend, j);
+                    }
                     j = contours.indexOf(cc);
                     contours.remove(cc);
                     contours.add(j, joinContours(cc, c));
@@ -248,9 +254,9 @@ public class Srtm2Osm extends ThreadProcessor {
      * checked)
      */
     private Contour joinContours(Contour c1, Contour c2) {
-        Point end = c1.getData().get(c1.getData().size()-1);
+        Point end = c1.getData().get(c1.getData().size() - 1);
         Point start = c2.getData().get(0);
-        if (!end.equals(start)){
+        if (!end.equals(start)) {
             System.err.println("Joining contours with non-equal ends: " + end + " and " + start);
         }
         for (int i = 1; i < c2.getData().size(); i++) {
