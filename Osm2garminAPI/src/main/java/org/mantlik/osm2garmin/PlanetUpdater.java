@@ -34,7 +34,7 @@ import java.util.logging.Logger;
  */
 public class PlanetUpdater extends ThreadProcessor {
 
-    private int max_regions_pass = 2;
+    private static int MAX_REGIONS_PASS = 5;
     private int pass = 0;
     File planetFile;
     File oldPlanetFile;
@@ -66,7 +66,7 @@ public class PlanetUpdater extends ThreadProcessor {
             setProgress(100);
             return super.getStatus();
         }
-        int npasses = (regions.size() + max_regions_pass - 1) / max_regions_pass + 1;
+        int npasses = (regions.size() + MAX_REGIONS_PASS - 1) / MAX_REGIONS_PASS + 1;
         double pass_progress = 0;
         File uf = new File(Utilities.getUserdir(this) + "update.osc.gz");
         if (uf.exists()) {
@@ -147,7 +147,7 @@ public class PlanetUpdater extends ThreadProcessor {
 
             while (currRegion < regions.size()) {
                 pass++;
-                int nregions = Math.min(max_regions_pass, regions.size() - currRegion);
+                int nregions = Math.min(MAX_REGIONS_PASS, regions.size() - currRegion);
                 int procregions = nregions;
                 if (currRegion == 0) {
                     procregions++;
@@ -185,10 +185,11 @@ public class PlanetUpdater extends ThreadProcessor {
                 }
                 ArrayList<String> largs = new ArrayList<String>();
                 largs.addAll(Arrays.asList(args));
-                regions_in_progress = " processing";
+                regions_in_progress = " processing " + nregions + " regions (" + 
+                        (currRegion + 1) + "-" + (currRegion + nregions) + "/" +
+                        regions.size() + ")";
                 for (int j = 0; j < nregions; j++) {
                     Region region = regions.get(currRegion);
-                    regions_in_progress += " " + region.name;
                     currRegion++;
                     largs.add("--bb");
                     largs.add("left=" + region.lon1);

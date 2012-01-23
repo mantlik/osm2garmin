@@ -186,7 +186,6 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
                     return;
                 }
             }
-            setStatus("Processing updates...");
             int sequence = 0;
             String[] args;
             ArrayList<String> l = new ArrayList<String>();
@@ -196,6 +195,7 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
             for (fileno = firstPieceToProcess; fileno < (startPiece + noOfPieces); fileno++) {
                 setProgress((float) (100.0 * (fileno - firstPieceToProcess)
                         / (startPiece + noOfPieces - firstPieceToProcess + 24)));
+                setStatus("Processing updates (" + ((int)getProgress()) + " %)...");
                 ii++;
                 l.add("--rxc");
                 l.add("file=" + Utilities.getUserdir(this) + updateName(fileno));

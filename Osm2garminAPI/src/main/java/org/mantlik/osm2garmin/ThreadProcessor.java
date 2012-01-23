@@ -217,6 +217,10 @@ public abstract class ThreadProcessor implements Runnable {
             return "";
         }
         long sleep = System.currentTimeMillis() - this.waitFrom;
+        // delay wait show
+        if (sleep < Utilities.REFRESH_INTERVAL) {
+            return "";
+        }
         int sec = (int) ((sleep / 1000) % 60);
         int min = (int) ((sleep / 1000 / 60) % 60);
         int hour = (int) ((sleep / 1000 / 60 / 60) % 24);

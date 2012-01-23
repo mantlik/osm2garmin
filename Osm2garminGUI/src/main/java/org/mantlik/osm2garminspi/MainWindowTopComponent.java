@@ -35,7 +35,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.prefs.BackingStoreException;
 import javax.swing.JTextField;
-import javax.swing.UIManager;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 import jbittorrentapi.DownloadManager;
