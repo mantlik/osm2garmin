@@ -39,8 +39,38 @@ import java.util.zip.GZIPInputStream;
  */
 public class Utilities {
 
+    public static final long REFRESH_INTERVAL = 1000;
     private static ArrayList<String> runningClasses = new ArrayList<String>();
     private static Utilities instance = null;
+    private static ArrayList<ThreadProcessor> processesToMonitor = new ArrayList<ThreadProcessor>();
+    private static ThreadProcessor monitor;
+
+    public Utilities() {
+        Properties monitorParams = new Properties();
+        monitor = new ThreadProcessor(monitorParams) {
+
+            @Override
+            public void run() {
+                while (true) {
+                    if (!processesToMonitor.isEmpty()) {
+                        for (int i = 0; i < processesToMonitor.size(); i ++) {
+                            ThreadProcessor process = processesToMonitor.get(i);
+                            if (process != null) {
+                                process.changeSupport.firePropertyChange("status", null, process.getStatus());
+                                process.changeSupport.firePropertyChange("progress", -1, process.getProgress());
+                                process.changeSupport.firePropertyChange("state", -1, process.getState());
+                            }
+                        }
+                    }
+                    try {
+                        Thread.sleep(REFRESH_INTERVAL);
+                    } catch (InterruptedException ex) {
+                        break;
+                    }
+                }
+            }
+        };
+    }
 
     public static Utilities getInstance() {
         if (instance == null) {
@@ -118,7 +148,9 @@ public class Utilities {
     public synchronized void waitExclusive(String extclass, ThreadProcessor processor) throws InterruptedException {
         if (isNotExclusive(extclass, processor)) {
             processor.waitFrom = System.currentTimeMillis();
+            processesToMonitor.add(processor);
             wait();
+            processesToMonitor.remove(processor);
         }
         if (!setExclusive(extclass, processor)) {
             System.err.println("Cannot run " + extclass + " exclusively. Retrying.");
