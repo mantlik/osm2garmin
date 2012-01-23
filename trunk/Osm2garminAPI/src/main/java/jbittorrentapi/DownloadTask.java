@@ -61,7 +61,7 @@ public class DownloadTask extends Thread implements IncomingListener,
     public static final int BAD_HANDSHAKE = 3;
     public static final int MALFORMED_MESSAGE = 4;
     public static final int TIMEOUT = 5;
-    public static final String[] REASON = new String[] {"TASK COMPLETED", "UNKNOWN HOST",
+    public static final String[] REASON = new String[]{"TASK COMPLETED", "UNKNOWN HOST",
         "CONNECTION REFUSED", "BAD HANDSHAKE", "MALFORMED MESSAGE", "TIMEOUT"};
     private static int nextId = 0;
     private int taskid;
@@ -534,10 +534,12 @@ public class DownloadTask extends Thread implements IncomingListener,
                     if (length >= PeerProtocol.BLOCK_SIZE) {
                         length = PeerProtocol.BLOCK_SIZE;
                     }
-                    ms.addMessageToQueue(new Message_PP(PeerProtocol.REQUEST,
-                            Utils.concat(pieceIndex,
-                            Utils.concat(begin,
-                            Utils.intToByteArray(length))), 2));
+                    if (ms != null) {
+                        ms.addMessageToQueue(new Message_PP(PeerProtocol.REQUEST,
+                                Utils.concat(pieceIndex,
+                                Utils.concat(begin,
+                                Utils.intToByteArray(length))), 2));
+                    }
                     if (this.updateTime == 0) {
                         this.updateTime = System.currentTimeMillis();
                     }
@@ -552,7 +554,7 @@ public class DownloadTask extends Thread implements IncomingListener,
     }
 
     public synchronized void addDTListener(DTListener listener) {
-        removeDTListener (listener);  // avoid duplicate listener
+        removeDTListener(listener);  // avoid duplicate listener
         listeners.add(DTListener.class, listener);
     }
 
