@@ -45,7 +45,7 @@ public class OsmMaker extends ThreadProcessor {
     private Region region;
     private boolean isSplitting;
     private ClassLoader splitterLoader;
-    private int max_areas = 25;
+    private int max_areas = 50;
 
     /**
      *

@@ -58,7 +58,7 @@ public class Utilities {
                             if (process != null) {
                                 process.changeSupport.firePropertyChange("status", null, process.getStatus());
                                 process.changeSupport.firePropertyChange("progress", -1, process.getProgress());
-                                process.changeSupport.firePropertyChange("state", -1, process.getState());
+                                //process.changeSupport.firePropertyChange("state", -1, process.getState());
                                 process.lifeCycleCheck(process.getClass().getSimpleName());
                             }
                         }
