@@ -181,95 +181,140 @@ public class Osm2garmin implements PropertyChangeListener {
             contoursDir.mkdirs();
         }
 
-        // download planet file if needed
         Utilities.loadProperties();
+
+        // start contours updates
+        ThreadProcessor contoursProcessor = new ThreadProcessor(parameters) {
+
+            @Override
+            public void run() {
+                for (int reg = 0; reg < regions.size(); reg++) {
+                    Region region = regions.get(reg);
+                    region.processor = new ContoursUpdater(region, parameters);
+                    Utilities.getInstance().addProcessToMonitor(region.processor);
+                    region.processor.changeSupport.addPropertyChangeListener(Osm2garmin.this);
+                    System.out.println(region.name + " contours update started.");
+                    region.setState(Region.MAKING_CONTOURS);
+                    final ThreadProcessor preg = region.processor;
+                    try {
+                        synchronized (preg) {
+                            preg.wait();
+                        }
+                    } catch (InterruptedException ex) {
+                        region.processor.setStatus("Interrupted.");
+                        region.processor.setState(ContoursUpdater.ERROR);
+                        synchronized (Osm2garmin.this) {
+                            Osm2garmin.this.notify();
+                        }
+                        return;
+                    }
+                    Utilities.getInstance().removeMonitoredProcess(region.processor);
+                    region.setState(Region.CONTOURS_READY);
+                    synchronized (Osm2garmin.this) {
+                        Osm2garmin.this.notify();
+                    }
+                }
+            }
+        };
+
+        // download planet file if needed
         planetDownloader = new PlanetDownloader(parameters);
         planetDownloader.changeSupport.addPropertyChangeListener(this);
+        Utilities.getInstance().addProcessToMonitor(planetDownloader);
         System.out.println("Planet file download started.");
-        while (!allDone) {
-            Utilities.loadProperties();
-            if (planetDownloadReady && planetUpdateDownloader == null) {
-                // start Planet Update Downloader
-                planetUpdateDownloader = new PlanetUpdateDownloader(parameters);
-                planetUpdateDownloader.changeSupport.addPropertyChangeListener(this);
-                System.out.println("Planet updates download started.");
-            }
-            // check planet download status
-            if (!planetDownloadReady) {
-                planetDownloadReady = planetDownloader.lifeCycleCheck("Planet file download");
-            }
-            if ((!planetUpdateDownloaded) && (planetUpdateDownloader != null)) {
-                planetUpdateDownloaded = planetUpdateDownloader.lifeCycleCheck("Planet updates download");
-            }
-
-            if (planetDownloadReady && planetUpdateDownloaded && (!planetUpdated)) {
-                // update planet file from downloaded updates
-                if (planetUpdater == null) {
-                    planetUpdater = new PlanetUpdater(parameters, regions);
-                    planetUpdater.changeSupport.addPropertyChangeListener(this);
-                    System.out.println("Planet file update started.");
-                }
-                planetUpdated = planetUpdater.lifeCycleCheck("Planet file update");
-            }
-
-            // Regions processing
-            regionsReady = true;
-            boolean nextSplitterBusy = false;
-            boolean nextContoursSplitterBusy = false;
-            for (int reg = 0; reg < regions.size(); reg++) {
-                Region region = regions.get(reg);
-                // Check and create contours
-                if (region.getState() == Region.NEW) {
-                    if (!contoursSplitterBusy) {
-                        contoursSplitterBusy = true;
-                        nextContoursSplitterBusy = true;
-                        region.setState(Region.MAKING_CONTOURS);
-                        region.processor = new ContoursUpdater(region, parameters);
-                        region.processor.changeSupport.addPropertyChangeListener(this);
-                        System.out.println(region.name + " contours update started.");
-                    }
-                } else if (region.getState() == Region.MAKING_CONTOURS) {
-                    nextContoursSplitterBusy = true;
-                    if (region.processor.lifeCycleCheck(region.name + " contours update")) {
-                        if (region.processor.getState() == ThreadProcessor.ERROR) {
-                            region.setState(Region.ERROR);
-                        } else {
-                            region.setState(Region.CONTOURS_READY);
-                        }
-                    }
-                } else if (region.getState() == Region.CONTOURS_READY) {
-                    if ((!splitterBusy) && planetUpdated) {
-                        splitterBusy = true;
-                        nextSplitterBusy = true;
-                        region.setState(Region.MAKING_OSM);
-                        region.processor = new OsmMaker(region, parameters, region.splitterMaxAreas);
-                        region.processor.changeSupport.addPropertyChangeListener(this);
-                        System.out.println(region.name + " map creation started.");
-                    }
-                } else if (region.getState() == Region.MAKING_OSM) {
-                    nextSplitterBusy = true;
-                    if (region.processor.lifeCycleCheck(region.name)) {
-                        if (region.processor.getState() == ThreadProcessor.ERROR) {
-                            region.setState(Region.ERROR);
-                        } else {
-                            region.makeInstallers(reg);
-                            region.setState(Region.READY);
-                        }
-                    }
-                }
-
-                if (region.getState() < Region.READY) {
-                    regionsReady = false;
-                }
-            }
-            // start new contour creation or splitting only if none running
-            splitterBusy = nextSplitterBusy;
-            contoursSplitterBusy = nextContoursSplitterBusy;
-
-            if (planetUpdated && regionsReady) {
-                allDone = true;
+        final ThreadProcessor pd = planetDownloader;
+        synchronized (pd) {
+            try {
+                pd.wait();
+            } catch (InterruptedException ex) {
+                planetDownloader.setStatus("Interrupted.");
+                planetDownloader.setState(PlanetDownloader.ERROR);
+                return 1;
             }
         }
+        Utilities.getInstance().removeMonitoredProcess(planetDownloader);
+        if (planetDownloader.getState() != PlanetDownloader.COMPLETED) {
+            return 2;
+        }
+
+        // start Planet Update Downloader
+        planetUpdateDownloader = new PlanetUpdateDownloader(parameters);
+        planetUpdateDownloader.changeSupport.addPropertyChangeListener(this);
+        Utilities.getInstance().addProcessToMonitor(planetUpdateDownloader);
+        System.out.println("Planet updates download started.");
+        final ThreadProcessor pud = planetUpdateDownloader;
+        synchronized (pud) {
+            try {
+                pud.wait();
+            } catch (InterruptedException ex) {
+                planetUpdateDownloader.setStatus("Interrupted.");
+                planetUpdateDownloader.setState(PlanetDownloader.ERROR);
+                return 3;
+            }
+        }
+        Utilities.getInstance().removeMonitoredProcess(planetUpdateDownloader);
+        if (planetUpdateDownloader.getState() != PlanetUpdateDownloader.COMPLETED) {
+            return 4;
+        }
+
+        // start Planet updater
+        planetUpdater = new PlanetUpdater(parameters, regions);
+        planetUpdater.changeSupport.addPropertyChangeListener(this);
+        System.out.println("Planet file update started.");
+        Utilities.getInstance().addProcessToMonitor(planetUpdater);
+        final ThreadProcessor procpu = planetUpdater;
+        synchronized (procpu) {
+            try {
+                procpu.wait();
+            } catch (InterruptedException ex) {
+                planetUpdater.setStatus("Interrupted.");
+                planetUpdater.setState(PlanetDownloader.ERROR);
+                return 3;
+            }
+        }
+        Utilities.getInstance().removeMonitoredProcess(planetUpdater);
+        if (planetUpdater.getState() != PlanetUpdater.COMPLETED) {
+            return 4;
+        }
+
+        // process regions
+        for (int reg = 0; reg < regions.size(); reg++) {
+            Region region = regions.get(reg);
+            // wait for finishing contours unpacking if needed
+            while (region.getState() == Region.MAKING_CONTOURS) {
+                synchronized (this) {
+                    try {
+                        wait();
+                    } catch (InterruptedException ex) {
+                        region.processor.setStatus("Interrupted.");
+                        region.processor.setState(PlanetDownloader.ERROR);
+                        return 5;
+                    }
+                }
+            }
+            if (region.getState() != Region.CONTOURS_READY) {
+                return 6;
+            }
+            // Making map
+            region.processor = new OsmMaker(region, parameters, region.splitterMaxAreas);
+            region.processor.changeSupport.addPropertyChangeListener(this);
+            System.out.println(region.name + " map creation started.");
+            Utilities.getInstance().addProcessToMonitor(region.processor);
+            region.setState(Region.MAKING_OSM);
+            final ThreadProcessor preg = region.processor;
+            try {
+                synchronized (preg) {
+                    preg.wait();
+                }
+            } catch (InterruptedException ex) {
+                region.processor.setStatus("Interrupted.");
+                region.processor.setState(ContoursUpdater.ERROR);
+                return 7;
+            }
+            Utilities.getInstance().removeMonitoredProcess(region.processor);
+            region.setState(Region.READY);
+        }
+
         return 0;
     }
 
@@ -279,7 +324,7 @@ public class Osm2garmin implements PropertyChangeListener {
     public void stop() {
         stop = true;
     }
-    
+
     public Properties getParameters() {
         return parameters;
     }
@@ -288,5 +333,4 @@ public class Osm2garmin implements PropertyChangeListener {
     public void propertyChange(PropertyChangeEvent evt) {
         changeSupport.firePropertyChange(evt);
     }
-
 }

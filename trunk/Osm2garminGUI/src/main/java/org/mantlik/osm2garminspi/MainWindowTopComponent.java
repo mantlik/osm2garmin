@@ -30,6 +30,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.*;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
@@ -42,6 +43,7 @@ import jbittorrentapi.WebseedTask;
 import org.mantlik.osm2garmin.*;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.DialogDisplayer;
+import org.openide.LifecycleManager;
 import org.openide.NotifyDescriptor;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
@@ -50,6 +52,7 @@ import org.openide.util.*;
 import org.openide.windows.IOProvider;
 import org.openide.windows.InputOutput;
 import org.openide.windows.TopComponent;
+import org.openide.windows.WindowManager;
 
 /**
  * Top component which displays something.
@@ -77,6 +80,7 @@ public final class MainWindowTopComponent extends TopComponent implements Proper
     private String userdir = System.getProperty("netbeans.user") + "/";
     Osm2garmin osm2Garmin;
     RequestProcessor processor = new RequestProcessor("Osm2garmin", 1, true);
+    RequestProcessor changeProcessor = new RequestProcessor("MainWindowChange");
     InputOutput io;
     long outputClearTime = 0;
     private static final Color[] BGCOLORS = new Color[]{ // none, running, completed, error 
@@ -84,6 +88,7 @@ public final class MainWindowTopComponent extends TopComponent implements Proper
         new Color(255, 127, 127)
     };
     private float[] ulsp = new float[100], dlsp = new float[100];
+    private boolean stopped = false;
 
     public MainWindowTopComponent() {
         initComponents();
@@ -465,27 +470,36 @@ public final class MainWindowTopComponent extends TopComponent implements Proper
     }// </editor-fold>//GEN-END:initComponents
 
     private void startButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startButtonActionPerformed
-        cancelButton.setEnabled(true);
-        startButton.setEnabled(false);
-        Installer.setCanClose(false);
-        osm2Garmin = new Osm2garmin();
-        osm2Garmin.changeSupport.addPropertyChangeListener(WeakListeners.propertyChange(this, this));
-        clearOutput();
-        clearStatus(planetDownloadStatus);
-        clearStatus(planetUpdateDownloadStatus);
-        clearStatus(planetUpdateStatus);
-        clearStatus(regionsStatus);
-        clearStatus(contoursStatus);
-        overallProgress.setValue(0);
-        regionLabel.setText("");
-        redirectSystemStreams();
-        processor.post(this);
+        if (stopped) {  // exit the application
+            LifecycleManager.getDefault().exit();
+        } else {
+            cancelButton.setEnabled(true);
+            startButton.setEnabled(false);
+            Installer.setCanClose(false);
+            osm2Garmin = new Osm2garmin();
+            osm2Garmin.changeSupport.addPropertyChangeListener(WeakListeners.propertyChange(this, this));
+            clearOutput();
+            clearStatus(planetDownloadStatus);
+            clearStatus(planetUpdateDownloadStatus);
+            clearStatus(planetUpdateStatus);
+            clearStatus(regionsStatus);
+            clearStatus(contoursStatus);
+            overallProgress.setValue(0);
+            regionLabel.setText("");
+            redirectSystemStreams();
+            processor.post(this);
+        }
 
     }//GEN-LAST:event_startButtonActionPerformed
 
     private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed
-        cancelButton.setEnabled(false);
-        osm2Garmin.stop();
+        if (stopped) {
+            LifecycleManager.getDefault().markForRestart();
+            LifecycleManager.getDefault().exit();
+        } else {
+            cancelButton.setEnabled(false);
+            osm2Garmin.stop();
+        }
         /*
          * processor.shutdownNow(); saveParameters(osm2Garmin.parameters);
          * startButton.setEnabled(true); Installer.setCanClose(true);
@@ -543,177 +557,189 @@ public final class MainWindowTopComponent extends TopComponent implements Proper
         String version = p.getProperty("version");
         // TODO read your settings according to their version
     }
+    private ArrayList<PropertyChangeEvent> eventQueue = new ArrayList<PropertyChangeEvent>();
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        if (evt.getSource().getClass().equals(PlanetDownloader.class)) {
-            PlanetDownloader downloader = (PlanetDownloader) evt.getSource();
-            planetDownloadStatus.setText(downloader.getStatus());
-            int width = planetDownloadStatus.getWidth();
-            int height = planetDownloadStatus.getHeight();
-            Image image = progressMap(width, height, downloader);
-            TorrentDownloader torrent = downloader.torrentDownloader;
-            if (torrent != null && torrent.getState() == TorrentDownloader.RUNNING) {
-                image = torrentMap(width, height, torrent);
-            }
-            ((JTextFieldImage) planetDownloadStatus).setImage(image);
-        } else if (evt.getSource().getClass().equals(PlanetUpdateDownloader.class)) {
-            PlanetUpdateDownloader downloader = (PlanetUpdateDownloader) evt.getSource();
-            planetUpdateDownloadStatus.setText(downloader.getStatus());
-            int width = planetUpdateDownloadStatus.getWidth();
-            int height = planetUpdateDownloadStatus.getHeight();
-            TorrentDownloader torrent = downloader.torrentDownloader;
-            Image image = progressMap(width, height, downloader);
-            if (torrent != null && torrent.getState() == TorrentDownloader.RUNNING) {
-                image = torrentMap(width, height, torrent);
-            }
-            ((JTextFieldImage) planetUpdateDownloadStatus).setImage(image);
-        } else if (evt.getSource().getClass().equals(PlanetUpdater.class)) {
-            PlanetUpdater updater = (PlanetUpdater) evt.getSource();
-            planetUpdateStatus.setText(updater.getStatus());
-            int width = planetUpdateStatus.getWidth();
-            int height = planetUpdateStatus.getHeight();
-            Image image = progressMap(width, height, updater);
-            ((JTextFieldImage) planetUpdateStatus).setImage(image);
-        } else if (evt.getSource().getClass().equals(ContoursUpdater.class)) {
-            ContoursUpdater updater = (ContoursUpdater) evt.getSource();
-            contoursStatus.setText(updater.getStatus());
-            int width = contoursStatus.getWidth();
-            int height = contoursStatus.getHeight();
-            Image image = progressMap(width, height, updater);
-            ((JTextFieldImage) contoursStatus).setImage(image);
-        } else if (evt.getSource().getClass().equals(OsmMaker.class)) {
-            OsmMaker updater = (OsmMaker) evt.getSource();
-            regionsStatus.setText(updater.getStatus());
-            int width = regionsStatus.getWidth();
-            int height = regionsStatus.getHeight();
-            Image image = progressMap(width, height, updater);
-            ((JTextFieldImage) regionsStatus).setImage(image);
-        }
-        if (evt.getPropertyName().equals("state")) {
-            if ((Integer) evt.getNewValue() == ThreadProcessor.COMPLETED) {
-                clearOutput();
-            }
-        }
-        String inProgressText = "";
-        int regionsReady = 0;
-        int regionsInError = 0;
-        int inProgress = 0;
-        if (evt.getPropertyName().equals("progress")) { // count overall progress
-            float progress = 0;
-            if (osm2Garmin.planetDownloader != null) {
-                progress += osm2Garmin.planetDownloader.getProgress() / 4;
-            }
-            if (osm2Garmin.planetUpdateDownloader != null) {
-                progress += osm2Garmin.planetUpdateDownloader.getProgress() / 8;
-            }
-            if (osm2Garmin.planetUpdater != null) {
-                progress += osm2Garmin.planetUpdater.getProgress() / 8;
-            }
-            for (int regno = 0; regno < osm2Garmin.regions.size(); regno++) {
-                Region region = osm2Garmin.regions.get(regno);
-                if (region != null) {
-                    if (region.getState() >= Region.READY) {
-                        progress += 50 / osm2Garmin.regions.size();
-                        regionsReady++;
-                        if (region.getState() == Region.ERROR) {
-                            regionsInError++;
+        eventQueue.add(evt);
+        WindowManager.getDefault().invokeWhenUIReady(new Runnable() {
+
+            @Override
+            public void run() {
+                while (!eventQueue.isEmpty()) {
+                    PropertyChangeEvent evt = eventQueue.remove(0);
+                    if (evt.getSource().getClass().equals(PlanetDownloader.class)) {
+                        PlanetDownloader downloader = (PlanetDownloader) evt.getSource();
+                        planetDownloadStatus.setText(downloader.getStatus());
+                        int width = planetDownloadStatus.getWidth();
+                        int height = planetDownloadStatus.getHeight();
+                        Image image = progressMap(width, height, downloader);
+                        TorrentDownloader torrent = downloader.torrentDownloader;
+                        if (torrent != null && torrent.getState() == TorrentDownloader.RUNNING) {
+                            image = torrentMap(width, height, torrent);
                         }
-                    } else if (region.getState() == Region.MAKING_OSM) {
-                        progress += (25 + 0.25 * region.processor.getProgress()) / osm2Garmin.regions.size();
-                        inProgressText += " Processing map for region " + region.name
-                                + " (" + (regno + 1) + "/" + osm2Garmin.regions.size() + "). ";
-                        inProgress += 1;
-                        regionsStatus.setBackground(null); // clear bgcolor
-                    } else if (region.getState() == Region.MAKING_CONTOURS) {
-                        progress += 0.25 * region.processor.getProgress() / osm2Garmin.regions.size();
-                        inProgressText += " Creating contours for region: " + region.name
-                                + " (" + (regno + 1) + "/" + osm2Garmin.regions.size() + "). ";
-                        inProgress += 1;
-                        contoursStatus.setBackground(null); // clear bgcolor
+                        ((JTextFieldImage) planetDownloadStatus).setImage(image);
+                    } else if (evt.getSource().getClass().equals(PlanetUpdateDownloader.class)) {
+                        PlanetUpdateDownloader downloader = (PlanetUpdateDownloader) evt.getSource();
+                        planetUpdateDownloadStatus.setText(downloader.getStatus());
+                        int width = planetUpdateDownloadStatus.getWidth();
+                        int height = planetUpdateDownloadStatus.getHeight();
+                        TorrentDownloader torrent = downloader.torrentDownloader;
+                        Image image = progressMap(width, height, downloader);
+                        if (torrent != null && torrent.getState() == TorrentDownloader.RUNNING) {
+                            image = torrentMap(width, height, torrent);
+                        }
+                        ((JTextFieldImage) planetUpdateDownloadStatus).setImage(image);
+                    } else if (evt.getSource().getClass().equals(PlanetUpdater.class)) {
+                        PlanetUpdater updater = (PlanetUpdater) evt.getSource();
+                        planetUpdateStatus.setText(updater.getStatus());
+                        int width = planetUpdateStatus.getWidth();
+                        int height = planetUpdateStatus.getHeight();
+                        Image image = progressMap(width, height, updater);
+                        ((JTextFieldImage) planetUpdateStatus).setImage(image);
+                    } else if (evt.getSource().getClass().equals(ContoursUpdater.class)) {
+                        ContoursUpdater updater = (ContoursUpdater) evt.getSource();
+                        contoursStatus.setText(updater.getStatus());
+                        int width = contoursStatus.getWidth();
+                        int height = contoursStatus.getHeight();
+                        Image image = progressMap(width, height, updater);
+                        ((JTextFieldImage) contoursStatus).setImage(image);
+                    } else if (evt.getSource().getClass().equals(OsmMaker.class)) {
+                        OsmMaker updater = (OsmMaker) evt.getSource();
+                        regionsStatus.setText(updater.getStatus());
+                        int width = regionsStatus.getWidth();
+                        int height = regionsStatus.getHeight();
+                        Image image = progressMap(width, height, updater);
+                        ((JTextFieldImage) regionsStatus).setImage(image);
+                    } else if (evt.getSource().getClass().equals(TorrentDownloader.class)) {
+                        if (evt.getPropertyName().equals("progress")) {
+                            String text;
+                            DownloadManager[] downloads = TorrentDownloader.getDownloads();
+                            if (downloads.length > 0) {
+                                long downloaded = 0;
+                                long uploaded = 0;
+                                float downSpeed = 0;
+                                float upSpeed = 0;
+                                int peers = 0;
+                                boolean running = false;
+                                boolean init = false;
+                                for (DownloadManager dm : downloads) {
+                                    downloaded += dm.downloaded();
+                                    uploaded += dm.uploaded();
+                                    downSpeed += dm.getDLRate();
+                                    upSpeed += dm.getULRate();
+                                    peers += dm.noOfPeers();
+                                    if (!dm.isPaused()) {
+                                        running = true;
+                                    }
+                                    if (dm.init_progress() >= 0) {
+                                        init = true;
+                                    }
+                                }
+                                int idx = (int) (ulsp.length * Math.random());
+                                ulsp[idx] = upSpeed;
+                                dlsp[idx] = downSpeed;
+                                upSpeed = 0;
+                                downSpeed = 0;
+                                for (int i = 0; i < ulsp.length; i++) {
+                                    upSpeed += ulsp[i];
+                                    downSpeed += dlsp[i];
+                                }
+                                upSpeed = upSpeed / ulsp.length;
+                                downSpeed = downSpeed / dlsp.length;
+                                String action = "<a href=\"pause\">Pause</a>";
+                                if (!running) {
+                                    action = "<a href=\"resume\">Resume</a>";
+                                }
+                                if (init) {
+                                    action = "";
+                                }
+                                String webseed = WebseedTask.webseedActive ? "+webseed" : "";
+                                text = peers + webseed + " peers, downloaded " + downloaded / 1024 / 1024
+                                        + " mb / uploaded " + uploaded / 1024 / 1024 + " mb, D/U rate "
+                                        + df1.format(downSpeed) + " / " + df1.format(upSpeed) + " kb/s " + action;
+                            } else {
+                                text = "No active downloads.";
+                            }
+                            updateTorrentStatus(text);
+                        }
                     }
-                }
-            }
-            //inProgressText += " (" + (regionsReady + inProgress) + "/" + osm2Garmin.regions.size() + ")";
-            if (regionsInError == 1) {
-                inProgressText += " - " + regionsInError + " region with error.";
-            } else if (regionsInError > 1) {
-                inProgressText += " - " + regionsInError + " regions with error.";
-            }
-            this.overallProgress.setValue((int) (progress + 0));
-            this.regionLabel.setText(inProgressText);
-            if (regionsInError > 0) {
-                this.regionLabel.setForeground(Color.red);
-            } else {
-                this.regionLabel.setForeground(Color.black);
-            }
-        }
-        String text = "";
-        if (osm2Garmin.getParameters().getProperty("download_method", "").equals("torrent")) {
-            DownloadManager[] downloads = TorrentDownloader.getDownloads();
-            if (downloads.length > 0) {
-                long downloaded = 0;
-                long uploaded = 0;
-                float downSpeed = 0;
-                float upSpeed = 0;
-                int peers = 0;
-                boolean running = false;
-                boolean init = false;
-                for (DownloadManager dm : downloads) {
-                    downloaded += dm.downloaded();
-                    uploaded += dm.uploaded();
-                    downSpeed += dm.getDLRate();
-                    upSpeed += dm.getULRate();
-                    peers += dm.noOfPeers();
-                    if (!dm.isPaused()) {
-                        running = true;
+                    if (evt.getPropertyName().equals("state")) {
+                        if ((Integer) evt.getNewValue() == ThreadProcessor.COMPLETED) {
+                            clearOutput();
+                        }
                     }
-                    if (dm.init_progress() >= 0) {
-                        init = true;
+                    String inProgressText = "";
+                    int regionsReady = 0;
+                    int regionsInError = 0;
+                    int inProgress = 0;
+                    if (evt.getPropertyName().equals("progress")) { // count overall progress
+                        float progress = 0;
+                        if (osm2Garmin.planetDownloader != null) {
+                            progress += osm2Garmin.planetDownloader.getProgress() / 4;
+                        }
+                        if (osm2Garmin.planetUpdateDownloader != null) {
+                            progress += osm2Garmin.planetUpdateDownloader.getProgress() / 8;
+                        }
+                        if (osm2Garmin.planetUpdater != null) {
+                            progress += osm2Garmin.planetUpdater.getProgress() / 8;
+                        }
+                        for (int regno = 0; regno < osm2Garmin.regions.size(); regno++) {
+                            Region region = osm2Garmin.regions.get(regno);
+                            if (region != null) {
+                                if (region.getState() >= Region.READY) {
+                                    progress += 50 / osm2Garmin.regions.size();
+                                    regionsReady++;
+                                    if (region.getState() == Region.ERROR) {
+                                        regionsInError++;
+                                    }
+                                } else if (region.getState() == Region.MAKING_OSM) {
+                                    progress += (25 + 0.25 * region.processor.getProgress()) / osm2Garmin.regions.size();
+                                    inProgressText += " Processing map for region " + region.name
+                                            + " (" + (regno + 1) + "/" + osm2Garmin.regions.size() + "). ";
+                                    inProgress += 1;
+                                    regionsStatus.setBackground(null); // clear bgcolor
+                                } else if (region.getState() == Region.MAKING_CONTOURS) {
+                                    progress += 0.25 * region.processor.getProgress() / osm2Garmin.regions.size();
+                                    inProgressText += " Creating contours for region: " + region.name
+                                            + " (" + (regno + 1) + "/" + osm2Garmin.regions.size() + "). ";
+                                    inProgress += 1;
+                                    contoursStatus.setBackground(null); // clear bgcolor
+                                }
+                            }
+                        }
+                        //inProgressText += " (" + (regionsReady + inProgress) + "/" + osm2Garmin.regions.size() + ")";
+                        if (regionsInError == 1) {
+                            inProgressText += " - " + regionsInError + " region with error.";
+                        } else if (regionsInError > 1) {
+                            inProgressText += " - " + regionsInError + " regions with error.";
+                        }
+                        overallProgress.setValue((int) (progress + 0));
+                        regionLabel.setText(inProgressText);
+                        if (regionsInError > 0) {
+                            regionLabel.setForeground(Color.red);
+                        } else {
+                            regionLabel.setForeground(Color.black);
+                        }
                     }
+                    validate();
                 }
-                int idx = (int) (ulsp.length * Math.random());
-                ulsp[idx] = upSpeed;
-                dlsp[idx] = downSpeed;
-                upSpeed = 0;
-                downSpeed = 0;
-                for (int i = 0; i < ulsp.length; i++) {
-                    upSpeed += ulsp[i];
-                    downSpeed += dlsp[i];
-                }
-                upSpeed = upSpeed / ulsp.length;
-                downSpeed = downSpeed / dlsp.length;
-                String action = "<a href=\"pause\">Pause</a>";
-                if (!running) {
-                    action = "<a href=\"resume\">Resume</a>";
-                }
-                if (init) {
-                    action = "";
-                }
-                String webseed = WebseedTask.webseedActive ? "+webseed" : "";
-                text = peers + webseed + " peers, downloaded " + downloaded / 1024 / 1024
-                        + " mb / uploaded " + uploaded / 1024 / 1024 + " mb, D/U rate "
-                        + df1.format(downSpeed) + " / " + df1.format(upSpeed) + " kb/s " + action;
-            } else {
-                text = "No active downloads.";
             }
-        }
-        updateTorrentStatus(text);
-        this.validate();
+        });
     }
     private static Boolean updatingTorrentStatus = false;
 
     private synchronized void updateTorrentStatus(String text) {
-            if (updatingTorrentStatus) {
-                try {
-                    this.wait();
-                } catch (InterruptedException ex) {
-                }
+        if (updatingTorrentStatus) {
+            try {
+                this.wait();
+            } catch (InterruptedException ex) {
             }
-            updatingTorrentStatus = true;
-            torrentStatusItem.setText("<html><head><style>body {text-align: right}</style></head><body>" + text + "</body></html>");
-            updatingTorrentStatus = false;
-            this.notify();
+        }
+        updatingTorrentStatus = true;
+        torrentStatusItem.setText("<html><head><style>body {text-align: right}</style></head><body>" + text + "</body></html>");
+        updatingTorrentStatus = false;
+        this.notify();
     }
 
     private void pauseDownloads(boolean pause) {
@@ -803,10 +829,16 @@ public final class MainWindowTopComponent extends TopComponent implements Proper
         io.select();
         osm2Garmin.start(getParameters(new Properties()));
         saveParameters(osm2Garmin.getParameters());
-        cancelButton.setEnabled(false);
-        startButton.setEnabled(true);
         Installer.setCanClose(true);
         stopSystemStreamsRedirect();
+        stopped = true;
+        startButton.setText("Exit");
+        startButton.setToolTipText("Click to finish the application. Rerun later to update planet file and generate updated maps.");
+        cancelButton.setText("Restart");
+        cancelButton.setToolTipText("<html>Restart the application now.<br/>Restart is not possible on some systems.<br/>"
+                + "If the application will not restart, start it manualy, please.");
+        startButton.setEnabled(true);
+        cancelButton.setEnabled(true);
     }
     private PrintStream systemOut, systemErr, logreport;
 

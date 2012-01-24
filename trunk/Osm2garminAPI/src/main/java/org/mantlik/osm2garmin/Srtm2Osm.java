@@ -143,6 +143,9 @@ public class Srtm2Osm extends ThreadProcessor {
         if (contours == null || contours.isEmpty()) {
             setStatus("Contours " + coords + ": No contours created.");
             setState(COMPLETED);
+            synchronized (this) {
+                notify();
+            }
             return;
         }
         // export contours to file
@@ -175,6 +178,9 @@ public class Srtm2Osm extends ThreadProcessor {
             setState(ERROR);
         } finally {
             ss.close();
+        }
+        synchronized (this) {
+            notify();
         }
     }
     private HashMap<Point, Integer> starts = new HashMap<Point, Integer>();

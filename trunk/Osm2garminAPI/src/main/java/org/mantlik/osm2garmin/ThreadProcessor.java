@@ -21,6 +21,8 @@
  */
 package org.mantlik.osm2garmin;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.Properties;
 import org.openide.util.RequestProcessor;
@@ -29,7 +31,7 @@ import org.openide.util.RequestProcessor;
  *
  * @author fm
  */
-public abstract class ThreadProcessor implements Runnable {
+public abstract class ThreadProcessor implements Runnable, PropertyChangeListener {
 
     /**
      *
@@ -198,15 +200,8 @@ public abstract class ThreadProcessor implements Runnable {
             if (commandline) {
                 System.out.print(BLANKLINE);
                 System.out.print(getStatus() + "\r");
-            } else {
-                getStatus();
-            }
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException ex) {
-                setStatus(processName + " interrupted.");
-                state = ERROR;
-                return true;
+            //} else {
+            //    getStatus();
             }
         }
         return false;
@@ -233,5 +228,10 @@ public abstract class ThreadProcessor implements Runnable {
         }
         wait += hour + ":" + min + ":" + sec;
         return " (waiting " + wait + ")";
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        changeSupport.firePropertyChange(evt);
     }
 }
