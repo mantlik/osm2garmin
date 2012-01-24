@@ -117,6 +117,9 @@ public class PlanetUpdater extends ThreadProcessor {
                 setStatus("Completed.");
                 setProgress(100);
                 setState(COMPLETED);
+                synchronized (this) {
+                    notify();
+                }
                 return;
             }
             String[] args;
@@ -147,7 +150,10 @@ public class PlanetUpdater extends ThreadProcessor {
 
             while (currRegion < regions.size()) {
                 pass++;
-                int nregions = Math.min(MAX_REGIONS_PASS, regions.size() - currRegion);
+                int nregions = (regions.size() - currRegion) % MAX_REGIONS_PASS;
+                if (nregions == 0) {
+                    nregions = MAX_REGIONS_PASS;
+                }
                 int procregions = nregions;
                 if (currRegion == 0) {
                     procregions++;
@@ -185,9 +191,9 @@ public class PlanetUpdater extends ThreadProcessor {
                 }
                 ArrayList<String> largs = new ArrayList<String>();
                 largs.addAll(Arrays.asList(args));
-                regions_in_progress = " processing " + nregions + " regions (" + 
-                        (currRegion + 1) + "-" + (currRegion + nregions) + "/" +
-                        regions.size() + ")";
+                regions_in_progress = " processing " + nregions + " regions ("
+                        + (currRegion + 1) + "-" + (currRegion + nregions) + "/"
+                        + regions.size() + ")";
                 for (int j = 0; j < nregions; j++) {
                     Region region = regions.get(currRegion);
                     currRegion++;
@@ -212,8 +218,10 @@ public class PlanetUpdater extends ThreadProcessor {
                 //}
                 setStatus("Planet file has invalid size after update.");
                 setState(ERROR);
+                synchronized (this) {
+                    notify();
+                }
                 return;
-
             }
 
             if (torrentFile.exists()) {
@@ -239,6 +247,9 @@ public class PlanetUpdater extends ThreadProcessor {
         } catch (Exception ex) {
             Logger.getLogger(PlanetUpdater.class.getName()).log(Level.SEVERE, "", ex);
             setState(ERROR);
+        }
+        synchronized (this) {
+            notify();
         }
     }
 }

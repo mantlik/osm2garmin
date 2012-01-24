@@ -53,14 +53,13 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
     int startPiece = 0;
     int noOfPieces = 0;
     int firstPieceToProcess = 0;
-    private PlanetUpdateDownloader instance;
+
     /**
      *
      * @param parameters
      */
     public PlanetUpdateDownloader(Properties parameters) {
         super(parameters);
-        instance = this;
     }
 
     @Override
@@ -87,6 +86,9 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
                     Logger.getLogger(Osm2garmin.class.getName()).log(Level.SEVERE,
                             "Error recovering Osmosis status backup.", ex);
                     setState(ERROR);
+                    synchronized (this) {
+                        notify();
+                    }
                     return;
                 }
             }
@@ -115,6 +117,9 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
                     Logger.getLogger(Osm2garmin.class.getName()).log(Level.SEVERE,
                             "Error creating Osmosis status backup.", ex);
                     setState(ERROR);
+                    synchronized (this) {
+                        notify();
+                    }
                     return;
                 }
             }
@@ -142,6 +147,9 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
                 } catch (Exception ex) {
                     Logger.getLogger(PlanetUpdateDownloader.class.getName()).log(Level.SEVERE, null, ex);
                     setState(ERROR);
+                    synchronized (this) {
+                        notify();
+                    }
                     return;
                 }
                 long oldPlanetTimestamp = planet_timestamp;
@@ -159,6 +167,9 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
                 if (torrent == null) {
                     setStatus("Error creating updates pseudo-torrent.");
                     setState(ERROR);
+                    synchronized (this) {
+                        notify();
+                    }
                     return;
                 }
                 doDownload++;
@@ -171,9 +182,14 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
             torrentDownloader =
                     new TorrentDownloader(parameters, torrent, new File(Utilities.getUserdir(this)),
                     startPiece, noOfPieces, new UpdateFileVerifier(torrent));
+            Utilities.getInstance().addProcessToMonitor(torrentDownloader);
+            torrentDownloader.changeSupport.addPropertyChangeListener(this);
             while (torrentDownloader.getState() != TorrentDownloader.COMPLETED) {
                 if (torrentDownloader.getState() == Downloader.ERROR) {
                     setState(ERROR);
+                    synchronized (this) {
+                        notify();
+                    }
                     return;
                 }
                 try {
@@ -183,6 +199,9 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
                 } catch (InterruptedException ex) {
                     //Logger.getLogger(PlanetDownloader.class.getName()).log(Level.SEVERE, null, ex);
                     setState(ERROR);
+                    synchronized (this) {
+                        notify();
+                    }
                     return;
                 }
             }
@@ -195,7 +214,7 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
             for (fileno = firstPieceToProcess; fileno < (startPiece + noOfPieces); fileno++) {
                 setProgress((float) (100.0 * (fileno - firstPieceToProcess)
                         / (startPiece + noOfPieces - firstPieceToProcess + 24)));
-                setStatus("Processing updates (" + ((int)getProgress()) + " %)...");
+                setStatus("Processing updates (" + ((int) getProgress()) + " %)...");
                 ii++;
                 l.add("--rxc");
                 l.add("file=" + Utilities.getUserdir(this) + updateName(fileno));
@@ -215,6 +234,9 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
                     } catch (Exception ex) {
                         setStatus(ex.getMessage());
                         setState(ERROR);
+                        synchronized (this) {
+                            notify();
+                        }
                         return;
                     }
                     sequence++;
@@ -238,6 +260,9 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
                 } catch (Exception ex) {
                     setStatus(ex.getMessage());
                     setState(ERROR);
+                    synchronized (this) {
+                        notify();
+                    }
                     return;
                 }
             }
@@ -258,6 +283,9 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
                     Logger.getLogger(Osm2garmin.class.getName()).log(Level.SEVERE, "", ex);
                     setStatus(ex.getMessage());
                     setState(ERROR);
+                    synchronized (this) {
+                        notify();
+                    }
                     return;
                 }
                 String state = osmosiswork + "state.txt";
@@ -274,6 +302,9 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
                         //setState(ERROR);
                         setStatus("Interrupted.");
                         setState(ERROR);
+                        synchronized (this) {
+                            notify();
+                        }
                         return;
                     }
                 }
@@ -286,6 +317,9 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
         setProgress(100);
         setStatus("Completed.");
         setState(COMPLETED);
+        synchronized (this) {
+            notify();
+        }
     }
 
     private static long getPlanetTimestamp(File timestampFile) {
@@ -338,7 +372,7 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
         @Override
         public boolean verify(int index, byte[] data) {
             InputStream is = null;
-            File hashfile = new File(Utilities.getUserdir(instance) + updateName(index) + ".sha1");
+            File hashfile = new File(Utilities.getUserdir(PlanetUpdateDownloader.this) + updateName(index) + ".sha1");
             if (hashfile.exists()) {
                 int l = (int) hashfile.length();
                 byte[] hexhash = new byte[l];

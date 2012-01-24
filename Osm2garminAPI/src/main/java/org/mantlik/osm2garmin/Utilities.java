@@ -59,6 +59,7 @@ public class Utilities {
                                 process.changeSupport.firePropertyChange("status", null, process.getStatus());
                                 process.changeSupport.firePropertyChange("progress", -1, process.getProgress());
                                 process.changeSupport.firePropertyChange("state", -1, process.getState());
+                                process.lifeCycleCheck(process.getClass().getSimpleName());
                             }
                         }
                     }
@@ -78,6 +79,37 @@ public class Utilities {
         }
         return instance;
     }
+    
+    /**
+     * 
+     * Add process to monitor and fire status, state and progress change in regular
+     * interval REFRESH_INTERVAL
+     * 
+     * Each process will be added only once.
+     *
+     * @param process process to add
+     */
+    public void addProcessToMonitor (ThreadProcessor process) {
+        if (! processesToMonitor.contains(process)) {
+            processesToMonitor.add(process);
+        }
+    }
+    
+    /**
+     * Removes process from monitoring.
+     * 
+     * @param process process to remove
+     * @return process if process was monitored. otherwise returns null.
+     */
+    public ThreadProcessor removeMonitoredProcess(ThreadProcessor process) {
+        ThreadProcessor p = null;
+        if (processesToMonitor.remove(process)) {
+            p = process;
+        }
+        while (processesToMonitor.remove(process)) {
+        }
+        return p;
+    }
 
     /**
      *
@@ -91,7 +123,13 @@ public class Utilities {
      */
     public void runExternal(String extclass, String method, String library,
             String[] args, ThreadProcessor processor) throws Exception {
+        try {
         waitExclusive(extclass, processor);
+        } catch (InterruptedException ex) {
+            processor.setState(ThreadProcessor.ERROR);
+            processor.setStatus("Interrupted.");
+            return;
+        }
         processor.classLoader = Thread.currentThread().getContextClassLoader();
         ClassLoader loader = libClassLoader(library, processor);
         if (processor.getClass().isAssignableFrom(OsmMaker.class)) {

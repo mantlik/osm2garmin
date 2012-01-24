@@ -78,6 +78,9 @@ public class PlanetDownloader extends ThreadProcessor {
             } catch (IOException ex) {
                 Logger.getLogger(Osm2garmin.class.getName()).log(Level.SEVERE, "Can't read download parameters.");
                 setState(ERROR);
+                synchronized (this) {
+                    notify();
+                }
                 return;
             }
         }
@@ -86,6 +89,9 @@ public class PlanetDownloader extends ThreadProcessor {
             if (!downloadPlanetFile(planetFile)) {
                 Logger.getLogger(Osm2garmin.class.getName()).log(Level.SEVERE, "Planet file download failed.");
                 setState(ERROR);
+                synchronized (this) {
+                    notify();
+                }
                 return;
             } else {
                 setProgress(100);
@@ -104,12 +110,18 @@ public class PlanetDownloader extends ThreadProcessor {
             System.out.println("Resuming broken download of " + planetDownload.getName().replace(".osm.pbf", ""));
             if (!resumePlanetFileDownload(planetFile)) {
                 setState(ERROR);
+                synchronized (this) {
+                    notify();
+                }
                 return;
             }
         }
         setProgress(100);
         setStatus("Completed.");
         setState(COMPLETED);
+        synchronized (this) {
+            notify();
+        }
     }
 
     private boolean downloadPlanetFile(File planetFile) {
@@ -121,8 +133,8 @@ public class PlanetDownloader extends ThreadProcessor {
             while (i < 14) {
                 planet_found = true;
                 String planetUrl = mirror + "planet-" + sdf.format(planetDate) + ".osm.pbf";
-                if (! "http".equals(parameters.getProperty("download_method", "http"))) {
-                    planetUrl = parameters.getProperty("torrent_download_url") 
+                if (!"http".equals(parameters.getProperty("download_method", "http"))) {
+                    planetUrl = parameters.getProperty("torrent_download_url")
                             + "planet-" + sdf.format(planetDate) + ".osm.bz2" + ".torrent";
                 }
                 url = new URL(planetUrl);
@@ -347,6 +359,8 @@ public class PlanetDownloader extends ThreadProcessor {
             }
             torrentDownloader =
                     new TorrentDownloader(parameters, torrentFile, torrentFile.getAbsoluteFile().getParentFile());
+            Utilities.getInstance().addProcessToMonitor(torrentDownloader);
+            torrentDownloader.changeSupport.addPropertyChangeListener(this);
             while (torrentDownloader.getState() != TorrentDownloader.COMPLETED) {
                 if (torrentDownloader.getState() == Downloader.ERROR) {
                     return false;

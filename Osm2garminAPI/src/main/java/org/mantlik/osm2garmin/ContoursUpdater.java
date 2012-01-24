@@ -97,15 +97,18 @@ public class ContoursUpdater extends ThreadProcessor {
                     zipFile3.renameTo(zipfile);
                     continue;
                 }
-                
+
                 Utilities utils = Utilities.getInstance();
                 try {
                     utils.waitExclusive(Srtm2Osm.class.getName(), this);
                 } catch (InterruptedException ex) {
-                        setState(ERROR);
-                        setStatus("Interrupted.");
-                        region.setState(Region.ERROR);
-                        return;
+                    setState(ERROR);
+                    setStatus("Interrupted.");
+                    region.setState(Region.ERROR);
+                    synchronized (this) {
+                        notify();
+                    }
+                    return;
                 }
                 String outputName = contoursDir + name + ".osm.gz";
                 srtm2osm = new Srtm2Osm(parameters, la, lo, outputName);
@@ -117,6 +120,9 @@ public class ContoursUpdater extends ThreadProcessor {
                         setState(ERROR);
                         setStatus("Interrupted.");
                         region.setState(Region.ERROR);
+                        synchronized (this) {
+                            notify();
+                        }
                         return;
                     }
                     setStatus(srtm2osm.getStatus() + " - " + region.name + " " + perc + " % completed.");
@@ -126,6 +132,9 @@ public class ContoursUpdater extends ThreadProcessor {
                     setState(ERROR);
                     setStatus(srtm2osm.getStatus());
                     region.setState(Region.ERROR);
+                    synchronized (this) {
+                        notify();
+                    }
                     return;
                 }
                 File f = new File(outputName);
@@ -163,6 +172,9 @@ public class ContoursUpdater extends ThreadProcessor {
                         setState(ERROR);
                         setStatus(ex.getMessage());
                         region.setState(Region.ERROR);
+                        synchronized (this) {
+                            notify();
+                        }
                         return;
                     }
                     if (new File(contoursDir + d8.format(Long.parseLong(name) + 1) + ".osm.pbf").exists()) {
@@ -203,12 +215,15 @@ public class ContoursUpdater extends ThreadProcessor {
                         setState(ERROR);
                         setStatus(ex.getMessage());
                         region.setState(Region.ERROR);
+                        synchronized (this) {
+                            notify();
+                        }
                         return;
                     }
                 }
                 System.gc();
 
-                ArrayList <String> imgFiles = new ArrayList<String>();
+                ArrayList<String> imgFiles = new ArrayList<String>();
                 String nn;
                 for (String file : osmFiles) {
                     nn = file.replace(".osm.gz", ".img");
@@ -252,10 +267,10 @@ public class ContoursUpdater extends ThreadProcessor {
                 }
                 for (int i = 0; i < osmFiles.length; i++) {
                     File osmFile = new File(osmFiles[i]);
-                    if (! osmFile.delete()) {
+                    if (!osmFile.delete()) {
                         try {
                             Thread.sleep(500);
-                            if (! osmFile.delete()) {
+                            if (!osmFile.delete()) {
                                 osmFile.deleteOnExit();
                             }
                         } catch (InterruptedException ex) {
@@ -268,6 +283,9 @@ public class ContoursUpdater extends ThreadProcessor {
         setStatus(region.name + " contours update completed.");
         setProgress(100);
         setState(COMPLETED);
+        synchronized (this) {
+            notify();
+        }
     }
 
     private void unpackFiles(File zipFile) {
