@@ -148,6 +148,9 @@ public class OsmMaker extends ThreadProcessor {
             Logger.getLogger(OsmMaker.class.getName()).log(Level.SEVERE, null, ex);
             setState(ERROR);
             setStatus(ex.getMessage());
+            synchronized (this) {
+                notify();
+            }
             return;
         }
         isSplitting = false;
@@ -257,32 +260,49 @@ public class OsmMaker extends ThreadProcessor {
         setStatus(region.name + " adding " + contourMaps.size() + " contour maps and "
                 + osmMaps.size() + " OSM maps to gmapsupp.img.");
         ArrayList<String> aa = new ArrayList<String>();
-        aa.add("--output-dir=" + region.dir.getPath());
         aa.add("--gmapsupp");
-        aa.add("--tdbfile");
-        aa.add("--nsis");
+        aa.add("--output-dir=" + region.dir.getPath());
         aa.add("--index");
         aa.add("--family-id=" + region.familyID);
         aa.add("--family-name=" + region.name);
         aa.add("--series-name=" + region.name);
         aa.add("--product-id=1");
         aa.addAll(osmMaps);
-        //aa.add("--family-id=" + (region.familyID));
-        //aa.add("--product-id=1");
         aa.add("--draw-priority=10000");
         aa.add("--show-profiles");
         aa.addAll(contourMaps);
         args = aa.toArray(new String[0]);
         try {
-            //uk.me.parabola.mkgmap.main.Main.main(args);
             Utilities.getInstance().runExternal("uk.me.parabola.mkgmap.main.Main", "main", "mkgmap", args, this);
         } catch (Exception ex) {
             Logger.getLogger(OsmMaker.class.getName()).log(Level.SEVERE, null, ex);
             setState(ERROR);
             setStatus(ex.getMessage());
+            synchronized (this) {
+                notify();
+            }
             return;
         }
 
+        setStatus(region.name + " creating files for MapSource.");
+        setProgress(98);
+        // create MapSource registration files
+        aa.set(0, "--tdbfile"); // replace --gmapsupp with --tdbfile
+        aa.add("--nsis");
+        args = aa.toArray(new String[0]);
+        try {
+            Utilities.getInstance().runExternal("uk.me.parabola.mkgmap.main.Main", "main", "mkgmap", args, this);
+        } catch (Exception ex) {
+            Logger.getLogger(OsmMaker.class.getName()).log(Level.SEVERE, null, ex);
+            setState(ERROR);
+            setStatus(ex.getMessage());
+            synchronized (this) {
+                notify();
+            }
+            return;
+        }
+
+        // delete splitted pbf maps
         for (long id = MAPID; id <= maxid; id++) {
             File osmFile = new File(region.dir.getPath() + "/" + id + ".osm.pbf");
             if (!osmFile.delete()) {
@@ -296,12 +316,24 @@ public class OsmMaker extends ThreadProcessor {
                 }
             }
         }
+        
+        // delete temp files
+        for (File f : region.dir.listFiles()) {
+            if (f.getName().endsWith(".tmp")) {
+                if (! f.delete()){
+                    f.deleteOnExit();
+                }
+            }
+        }
 
         setStatus(" completed.");
         setProgress(100);
         setState(COMPLETED);
+        synchronized (this) {
+            notify();
+        }
     }
-    
+
     public void setSplitterLoader(ClassLoader splitterLoader) {
         this.splitterLoader = splitterLoader;
     }
