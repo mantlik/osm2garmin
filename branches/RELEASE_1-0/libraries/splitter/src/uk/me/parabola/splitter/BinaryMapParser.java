@@ -172,7 +172,7 @@ public class BinaryMapParser extends BinaryParser {
 			double topf = block.getBbox().getTop() * multiplier;
 			double bottomf = block.getBbox().getBottom() * multiplier;
 
-			System.err.println("Bounding box "+leftf+" "+bottomf+" "+rightf+" "+topf);
+			System.out.println("Bounding box "+leftf+" "+bottomf+" "+rightf+" "+topf);
 
 			Area area = new Area(
 					Utils.toMapUnit(bottomf),

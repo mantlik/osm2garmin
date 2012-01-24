@@ -175,9 +175,9 @@ public class Main {
 		if (areaList == null) {
                         status = "Calculating areas for splitting.";
 			int alignment = 1 << (24 - resolution);
-                        System.err.println("Map is being split for resolution " + resolution + ':');
-                        System.err.println(" - area boundaries are aligned to 0x" + Integer.toHexString(alignment) + " map units");
-                        System.err.println(" - areas are multiples of 0x" + Integer.toHexString(alignment * 2) + " map units wide and high");
+                        System.out.println("Map is being split for resolution " + resolution + ':');
+                        System.out.println(" - area boundaries are aligned to 0x" + Integer.toHexString(alignment) + " map units");
+                        System.out.println(" - areas are multiples of 0x" + Integer.toHexString(alignment * 2) + " map units wide and high");
 			areaList = calculateAreas();
 			for (Area area : areaList.getAreas()) {
 				area.setMapId(mapId++);
@@ -196,13 +196,13 @@ public class Main {
 		}
 
 		List<Area> areas = areaList.getAreas();
-                System.err.println(areas.size() + " areas:");
+                System.out.println(areas.size() + " areas:");
 		for (Area area : areas) {
-                    System.err.print("Area " + area.getMapId() + " covers " + area.toHexString());
+                    System.out.print("Area " + area.getMapId() + " covers " + area.toHexString());
                     if (area.getName() != null) {
-                        System.err.print(' ' + area.getName());
+                        System.out.print(' ' + area.getName());
                     }
-                    System.err.println();
+                    System.out.println();
                 }
 
 		if (kmlOutputFile != null) {
@@ -210,7 +210,7 @@ public class Main {
                         if (!out.isAbsolute()) {
 				kmlOutputFile = new File(fileOutputDir, kmlOutputFile).getPath();
                         }
-                        System.err.println("Writing KML file to " + kmlOutputFile);
+                        System.out.println("Writing KML file to " + kmlOutputFile);
 			areaList.writeKml(kmlOutputFile);
 		}
                 if (stopAfterAnalysis) {
@@ -346,9 +346,9 @@ public class Main {
                     } else {
                         splittableArea = nodes.getRoundedArea(resolution);
                     }
-                    System.err.println("Exact map coverage is " + exactArea);
-                    System.err.println("Trimmed and rounded map coverage is " + splittableArea.getBounds());
-                    System.err.println("Splitting nodes into areas containing a maximum of " + Utils.format(maxNodes) + " nodes each...");
+                    System.out.println("Exact map coverage is " + exactArea);
+                    System.out.println("Trimmed and rounded map coverage is " + splittableArea.getBounds());
+                    System.out.println("Splitting nodes into areas containing a maximum of " + Utils.format(maxNodes) + " nodes each...");
 
                     areas = splittableArea.split(maxNodes);
                 } else {
@@ -398,7 +398,7 @@ public class Main {
 	 * @param areaList Area list determined on the first pass.
 	 */
 	private void writeAreas(List<Area> areas) throws IOException, XmlPullParserException {
-                System.err.println("Writing out split osm files " + new Date());
+                System.out.println("Writing out split osm files " + new Date());
 
 		int numPasses = getAreasPerPass(areas.size());
 		int areasPerPass = (int) Math.ceil((double) areas.size() / (double) numPasses);
@@ -424,7 +424,7 @@ public class Main {
 
 			MapProcessor processor = new SplitProcessor(currentWriters, maxThreads);
 			processMap(processor);
-			//System.err.println("Wrote " + Utils.format(mapReader.getNodeCount()) + " nodes, " +
+			//System.out.println("Wrote " + Utils.format(mapReader.getNodeCount()) + " nodes, " +
 			//				Utils.format(mapReader.getWayCount()) + " ways, " +
 			//				Utils.format(mapReader.getRelationCount()) + " relations");
 		}
@@ -436,7 +436,7 @@ public class Main {
 		// Appropriate parser.
 		OSMParser parser = new OSMParser(processor, mixed);
 		if (useStdIn) {
-			System.err.println("Reading osm data from stdin...");
+			System.out.println("Reading osm data from stdin...");
 			Reader reader = new InputStreamReader(System.in, Charset.forName("UTF-8"));
 			parser.setReader(reader);
 			try {

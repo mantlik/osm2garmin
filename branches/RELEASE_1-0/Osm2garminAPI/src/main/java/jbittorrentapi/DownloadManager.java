@@ -245,7 +245,24 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
      * Stop the tracker updates
      */
     public void stopTrackerUpdate() {
+        ArrayList <String> ids = new ArrayList<String>();
+        for (String id : task.keySet()) {
+            ids.add(id);
+        }
+        for (String id : ids) {
+            DownloadTask dt = task.get(id);
+            dt.end();
+            taskCompleted(id, DownloadTask.TASK_COMPLETED);
+        }
         this.pu.end();
+    }
+    
+    public boolean isPaused() {
+        if (pu==null || pu.stopped()) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /*

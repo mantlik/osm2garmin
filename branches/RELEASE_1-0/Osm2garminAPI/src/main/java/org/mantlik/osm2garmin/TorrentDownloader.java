@@ -195,9 +195,10 @@ public class TorrentDownloader extends ThreadProcessor {
      */
     public void resume() {
         dm.checkTempFiles();
+        paused = false;
         dm.startTrackerUpdate();
     }
-
+    
     public static long downloaded() {
         long downloaded = 0;
         for (DownloadManager dm : downloads) {

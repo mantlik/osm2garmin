@@ -87,7 +87,7 @@ public class SplittableNodeArea implements SplittableArea {
 		boolean minHeight = height <= 2 << shift;
 		boolean minWidth = width <= 2 << shift;
 		if (minHeight && minWidth) {
-			System.err.println("Area " + bounds + " contains " + Utils.format(getSize())
+			System.out.println("Area " + bounds + " contains " + Utils.format(getSize())
 							+ " nodes but is already at the minimum size so can't be split further");
 			return Collections.singletonList(bounds);
 		}

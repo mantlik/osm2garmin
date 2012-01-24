@@ -29,6 +29,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import org.mantlik.osm2garmin.Osm2garmin;
+import org.mantlik.osm2garmin.Utilities;
 import org.openide.awt.HtmlBrowser;
 import org.openide.util.Exceptions;
 import org.openide.util.NbPreferences;
@@ -269,7 +270,7 @@ final class RegionsPanel extends javax.swing.JPanel implements ListSelectionList
                 System.getProperty("netbeans.user") + "/" + "regions.txt"));
         if (!r.exists()) {
             try {
-                Osm2garmin.copyFile(Osm2garmin.class.getResourceAsStream("regions.txt"),
+                Utilities.copyFile(Osm2garmin.class.getResourceAsStream("regions.txt"),
                         r);
             } catch (IOException ex) {
                 Exceptions.printStackTrace(ex);

@@ -81,11 +81,14 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
                     osmosisState.delete();
                 }
                 try {
-                    Osm2garmin.copyFile(osmosisStateBackup, osmosisState);
+                    Utilities.copyFile(osmosisStateBackup, osmosisState);
                 } catch (IOException ex) {
                     Logger.getLogger(Osm2garmin.class.getName()).log(Level.SEVERE,
                             "Error recovering Osmosis status backup.", ex);
                     setState(ERROR);
+                    synchronized (this) {
+                        notify();
+                    }
                     return;
                 }
             }
@@ -109,11 +112,14 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
             }
             if (osmosisState.exists()) {
                 try {
-                    Osm2garmin.copyFile(osmosisState, osmosisStateBackup);
+                    Utilities.copyFile(osmosisState, osmosisStateBackup);
                 } catch (IOException ex) {
                     Logger.getLogger(Osm2garmin.class.getName()).log(Level.SEVERE,
                             "Error creating Osmosis status backup.", ex);
                     setState(ERROR);
+                    synchronized (this) {
+                        notify();
+                    }
                     return;
                 }
             }
@@ -132,15 +138,18 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
                         + DF.format(getProgress()) + " % completed.");
                 String[] osargs = new String[]{
                     "--rri", "workingDirectory=" + osmosiswork,
-                    "--wxc", "file=" + Osm2garmin.userdir + "update" + i + ".osc.gz"
+                    "--wxc", "file=" + Utilities.getUserdir(this) + "update" + i + ".osc.gz"
                 };
 
                 try {
-                    Osm2garmin.runExternal("org.openstreetmap.osmosis.core.Osmosis", "run", "osmosis",
-                            Osm2garmin.libClassLoader("osmosis", getClass().getClassLoader()), osargs, this);
+                    Utilities.getInstance().runExternal("org.openstreetmap.osmosis.core.Osmosis", "run", "osmosis",
+                            osargs, this);
                 } catch (Exception ex) {
                     Logger.getLogger(PlanetUpdateDownloader.class.getName()).log(Level.SEVERE, null, ex);
                     setState(ERROR);
+                    synchronized (this) {
+                        notify();
+                    }
                     return;
                 }
                 long oldPlanetTimestamp = planet_timestamp;
@@ -158,6 +167,9 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
                 if (torrent == null) {
                     setStatus("Error creating updates pseudo-torrent.");
                     setState(ERROR);
+                    synchronized (this) {
+                        notify();
+                    }
                     return;
                 }
                 doDownload++;
@@ -168,11 +180,16 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
                 return;
             }
             torrentDownloader =
-                    new TorrentDownloader(parameters, torrent, new File(Osm2garmin.userdir),
+                    new TorrentDownloader(parameters, torrent, new File(Utilities.getUserdir(this)),
                     startPiece, noOfPieces, new UpdateFileVerifier(torrent));
+            Utilities.getInstance().addProcessToMonitor(torrentDownloader);
+            torrentDownloader.changeSupport.addPropertyChangeListener(this);
             while (torrentDownloader.getState() != TorrentDownloader.COMPLETED) {
                 if (torrentDownloader.getState() == Downloader.ERROR) {
                     setState(ERROR);
+                    synchronized (this) {
+                        notify();
+                    }
                     return;
                 }
                 try {
@@ -182,10 +199,12 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
                 } catch (InterruptedException ex) {
                     //Logger.getLogger(PlanetDownloader.class.getName()).log(Level.SEVERE, null, ex);
                     setState(ERROR);
+                    synchronized (this) {
+                        notify();
+                    }
                     return;
                 }
             }
-            setStatus("Processing updates...");
             int sequence = 0;
             String[] args;
             ArrayList<String> l = new ArrayList<String>();
@@ -195,9 +214,10 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
             for (fileno = firstPieceToProcess; fileno < (startPiece + noOfPieces); fileno++) {
                 setProgress((float) (100.0 * (fileno - firstPieceToProcess)
                         / (startPiece + noOfPieces - firstPieceToProcess + 24)));
+                setStatus("Processing updates (" + ((int) getProgress()) + " %)...");
                 ii++;
                 l.add("--rxc");
-                l.add("file=" + Osm2garmin.userdir + updateName(fileno));
+                l.add("file=" + Utilities.getUserdir(this) + updateName(fileno));
                 l.add("--buffer-change");
                 l.add("bufferCapacity=10000");
                 if (ii == 24) {
@@ -206,14 +226,17 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
                     l.add("--sc");
                     l.add("--simc");
                     l.add("--wxc");
-                    l.add("file=" + Osm2garmin.userdir + "update" + sequence + ".osc.gz");
+                    l.add("file=" + Utilities.getUserdir(this) + "update" + sequence + ".osc.gz");
                     args = l.toArray(new String[0]);
                     try {
-                        Osm2garmin.runExternal("org.openstreetmap.osmosis.core.Osmosis", "run", "osmosis",
-                                Osm2garmin.libClassLoader("osmosis", getClass().getClassLoader()), args, this);
+                        Utilities.getInstance().runExternal("org.openstreetmap.osmosis.core.Osmosis", "run", "osmosis",
+                                args, this);
                     } catch (Exception ex) {
                         setStatus(ex.getMessage());
                         setState(ERROR);
+                        synchronized (this) {
+                            notify();
+                        }
                         return;
                     }
                     sequence++;
@@ -229,14 +252,17 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
                 l.add("--sc");
                 l.add("--simc");
                 l.add("--wxc");
-                l.add("file=" + Osm2garmin.userdir + "update" + sequence + ".osc.gz");
+                l.add("file=" + Utilities.getUserdir(this) + "update" + sequence + ".osc.gz");
                 args = l.toArray(new String[0]);
                 try {
-                    Osm2garmin.runExternal("org.openstreetmap.osmosis.core.Osmosis", "run", "osmosis",
-                            Osm2garmin.libClassLoader("osmosis", getClass().getClassLoader()), args, this);
+                    Utilities.getInstance().runExternal("org.openstreetmap.osmosis.core.Osmosis", "run", "osmosis",
+                            args, this);
                 } catch (Exception ex) {
                     setStatus(ex.getMessage());
                     setState(ERROR);
+                    synchronized (this) {
+                        notify();
+                    }
                     return;
                 }
             }
@@ -257,6 +283,9 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
                     Logger.getLogger(Osm2garmin.class.getName()).log(Level.SEVERE, "", ex);
                     setStatus(ex.getMessage());
                     setState(ERROR);
+                    synchronized (this) {
+                        notify();
+                    }
                     return;
                 }
                 String state = osmosiswork + "state.txt";
@@ -273,6 +302,9 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
                         //setState(ERROR);
                         setStatus("Interrupted.");
                         setState(ERROR);
+                        synchronized (this) {
+                            notify();
+                        }
                         return;
                     }
                 }
@@ -285,6 +317,9 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
         setProgress(100);
         setStatus("Completed.");
         setState(COMPLETED);
+        synchronized (this) {
+            notify();
+        }
     }
 
     private static long getPlanetTimestamp(File timestampFile) {
@@ -337,9 +372,9 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
         @Override
         public boolean verify(int index, byte[] data) {
             InputStream is = null;
-            File hashfile = new File(Osm2garmin.userdir + updateName(index) + ".sha1");
+            File hashfile = new File(Utilities.getUserdir(PlanetUpdateDownloader.this) + updateName(index) + ".sha1");
             if (hashfile.exists()) {
-                int l = (int)hashfile.length();
+                int l = (int) hashfile.length();
                 byte[] hexhash = new byte[l];
                 try {
                     is = new FileInputStream(hashfile);
@@ -473,13 +508,13 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
         // search for existing older files to seed
         while (size > 0) {
             sequence--;
-            String fname = Osm2garmin.userdir + updateName(sequence);
+            String fname = Utilities.getUserdir(this) + updateName(sequence);
             size = (int) (new File(fname).length());
         }
         sequence++;
         startPiece = sequence;
         while (sequence < firstPieceToProcess) {
-            String fname = Osm2garmin.userdir + updateName(sequence);
+            String fname = Utilities.getUserdir(this) + updateName(sequence);
             String hashname = fname + ".sha1";
             if (!new File(hashname).exists()) {
                 setStatus("Checking existing " + updateName(sequence));

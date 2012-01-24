@@ -45,7 +45,7 @@ public class OsmMaker extends ThreadProcessor {
     private Region region;
     private boolean isSplitting;
     private ClassLoader splitterLoader;
-    private int max_areas = 25;
+    private int max_areas = 50;
 
     /**
      *
@@ -94,7 +94,7 @@ public class OsmMaker extends ThreadProcessor {
                 String status = region.name + " splitting " + astatus;
                 setStatus(status);
                 setProgress(getProgress());
-                return status;
+                return status + waitingString();
             } catch (Exception ex) {
                 Logger.getLogger(OsmMaker.class.getName()).log(Level.SEVERE, null, ex);
                 return super.getStatus();
@@ -112,14 +112,14 @@ public class OsmMaker extends ThreadProcessor {
         if (!new File(splitFile).exists()) {
             args = new String[]{
                 "--output-dir=" + region.dir.getPath(), "--max-areas=" + max_areas, "--mapid=" + MAPID, "--output=pbf",
-                "--geonames-file=" + Osm2garmin.userdir + "cities15000.zip", "--bottom=" + region.lat1,
+                "--geonames-file=" + Utilities.getUserdir(this) + "cities15000.zip", "--bottom=" + region.lat1,
                 "--top=" + region.lat2, "--left=" + region.lon1, "--right=" + region.lon2, "--status-freq=0",
                 "--max-threads=1", "--max-nodes=1200000", region.dir.getPath() + "/" + region.name + ".osm.pbf"
             };
         } else {
             args = new String[]{
                 "--output-dir=" + region.dir.getPath(), "--max-areas=" + max_areas, "--mapid=" + MAPID,
-                "--geonames-file=" + Osm2garmin.userdir + "cities15000.zip", "--status-freq=0",
+                "--geonames-file=" + Utilities.getUserdir(this) + "cities15000.zip", "--status-freq=0",
                 "--split-file=" + splitFile, "--output=pbf",
                 "--max-threads=1", region.dir.getPath() + "/" + region.name + ".osm.pbf"
             };
@@ -128,9 +128,8 @@ public class OsmMaker extends ThreadProcessor {
         //uk.me.parabola.splitter.Main.main(args);
         try {
 
-            splitterLoader = Osm2garmin.libClassLoader("splitter", getClass().getClassLoader());
-            Osm2garmin.runExternal("uk.me.parabola.splitter.Main", "main", "splitter",
-                    splitterLoader, args, this);
+            Utilities.getInstance().runExternal("uk.me.parabola.splitter.Main", "main", "splitter",
+                    args, this);
         } catch (InvocationTargetException ex) {
             Throwable exx = ex.getTargetException();
             region.splitterMaxAreas = Math.max(1, region.splitterMaxAreas / 2);
@@ -149,6 +148,9 @@ public class OsmMaker extends ThreadProcessor {
             Logger.getLogger(OsmMaker.class.getName()).log(Level.SEVERE, null, ex);
             setState(ERROR);
             setStatus(ex.getMessage());
+            synchronized (this) {
+                notify();
+            }
             return;
         }
         isSplitting = false;
@@ -180,7 +182,7 @@ public class OsmMaker extends ThreadProcessor {
         }
         try {
             //uk.me.parabola.mkgmap.main.Main.main(args);
-            Osm2garmin.runExternal("uk.me.parabola.mkgmap.main.Main", "main", "mkgmap", null, args, this);
+            Utilities.getInstance().runExternal("uk.me.parabola.mkgmap.main.Main", "main", "mkgmap", args, this);
         } catch (Exception ex) {
             Logger.getLogger(OsmMaker.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -194,15 +196,14 @@ public class OsmMaker extends ThreadProcessor {
                 setStatus(region.name + " splitting area (" + id + ".img) - " + getProgress() + " %");
                 args = new String[]{
                     "--output-dir=" + region.dir.getPath(), "--max-areas=20", "--mapid=" + (maxid + 1),
-                    "--geonames-file=" + Osm2garmin.userdir + "cities15000.zip", "--output=pbf",
+                    "--geonames-file=" + Utilities.getUserdir(this) + "cities15000.zip", "--output=pbf",
                     "--max-nodes=800000", "--status-freq=0",
                     region.dir.getPath() + "/" + id + ".osm.pbf"
                 };
                 try {
                     //uk.me.parabola.splitter.Main.main(args);
-                    splitterLoader = Osm2garmin.libClassLoader("splitter", getClass().getClassLoader());
-                    Osm2garmin.runExternal("uk.me.parabola.splitter.Main", "main", "splitter",
-                            splitterLoader, args, this);
+                    Utilities.getInstance().runExternal("uk.me.parabola.splitter.Main", "main", "splitter",
+                            args, this);
                 } catch (Exception ex) {
                     Logger.getLogger(OsmMaker.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -230,7 +231,7 @@ public class OsmMaker extends ThreadProcessor {
                 }
                 try {
                     //uk.me.parabola.mkgmap.main.Main.main(args);
-                    Osm2garmin.runExternal("uk.me.parabola.mkgmap.main.Main", "main", "mkgmap", null, args, this);
+                    Utilities.getInstance().runExternal("uk.me.parabola.mkgmap.main.Main", "main", "mkgmap", args, this);
                 } catch (Exception ex) {
                     Logger.getLogger(OsmMaker.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -259,32 +260,49 @@ public class OsmMaker extends ThreadProcessor {
         setStatus(region.name + " adding " + contourMaps.size() + " contour maps and "
                 + osmMaps.size() + " OSM maps to gmapsupp.img.");
         ArrayList<String> aa = new ArrayList<String>();
-        aa.add("--output-dir=" + region.dir.getPath());
         aa.add("--gmapsupp");
-        aa.add("--tdbfile");
-        aa.add("--nsis");
+        aa.add("--output-dir=" + region.dir.getPath());
         aa.add("--index");
         aa.add("--family-id=" + region.familyID);
         aa.add("--family-name=" + region.name);
-        aa.add("--series-name=\"" + region.name + "\"");
+        aa.add("--series-name=" + region.name);
         aa.add("--product-id=1");
         aa.addAll(osmMaps);
-        //aa.add("--family-id=" + (region.familyID));
-        //aa.add("--product-id=1");
         aa.add("--draw-priority=10000");
         aa.add("--show-profiles");
         aa.addAll(contourMaps);
         args = aa.toArray(new String[0]);
         try {
-            //uk.me.parabola.mkgmap.main.Main.main(args);
-            Osm2garmin.runExternal("uk.me.parabola.mkgmap.main.Main", "main", "mkgmap", null, args, this);
+            Utilities.getInstance().runExternal("uk.me.parabola.mkgmap.main.Main", "main", "mkgmap", args, this);
         } catch (Exception ex) {
             Logger.getLogger(OsmMaker.class.getName()).log(Level.SEVERE, null, ex);
             setState(ERROR);
             setStatus(ex.getMessage());
+            synchronized (this) {
+                notify();
+            }
             return;
         }
 
+        setStatus(region.name + " creating files for MapSource.");
+        setProgress(98);
+        // create MapSource registration files
+        aa.set(0, "--tdbfile"); // replace --gmapsupp with --tdbfile
+        aa.add("--nsis");
+        args = aa.toArray(new String[0]);
+        try {
+            Utilities.getInstance().runExternal("uk.me.parabola.mkgmap.main.Main", "main", "mkgmap", args, this);
+        } catch (Exception ex) {
+            Logger.getLogger(OsmMaker.class.getName()).log(Level.SEVERE, null, ex);
+            setState(ERROR);
+            setStatus(ex.getMessage());
+            synchronized (this) {
+                notify();
+            }
+            return;
+        }
+
+        // delete splitted pbf maps
         for (long id = MAPID; id <= maxid; id++) {
             File osmFile = new File(region.dir.getPath() + "/" + id + ".osm.pbf");
             if (!osmFile.delete()) {
@@ -298,9 +316,25 @@ public class OsmMaker extends ThreadProcessor {
                 }
             }
         }
+        
+        // delete temp files
+        for (File f : region.dir.listFiles()) {
+            if (f.getName().endsWith(".tmp")) {
+                if (! f.delete()){
+                    f.deleteOnExit();
+                }
+            }
+        }
 
         setStatus(" completed.");
         setProgress(100);
         setState(COMPLETED);
+        synchronized (this) {
+            notify();
+        }
+    }
+
+    public void setSplitterLoader(ClassLoader splitterLoader) {
+        this.splitterLoader = splitterLoader;
     }
 }

@@ -28,12 +28,10 @@ import java.util.Arrays;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 import org.mantlik.osm2garmin.srtm2osm.Srtm;
-import org.openide.util.Exceptions;
 
 /**
  *
@@ -100,39 +98,46 @@ public class ContoursUpdater extends ThreadProcessor {
                     continue;
                 }
 
-                /*
-                 * if (!Srtm.exists(lo, la, parameters)) {
-                 * // System.out.println(coords+" no srtm data.");
-                 * continue;
-                 * }
-                 */
-
-
-                //String name = d000.format(Math.abs(lo)) + (lo >= 0 ? "E" : "W") + d00.format(Math.abs(la)) + (la >= 0 ? "N" : "S");
+                Utilities utils = Utilities.getInstance();
+                try {
+                    utils.waitExclusive(Srtm2Osm.class.getName(), this);
+                } catch (InterruptedException ex) {
+                    setState(ERROR);
+                    setStatus("Interrupted.");
+                    region.setState(Region.ERROR);
+                    synchronized (this) {
+                        notify();
+                    }
+                    return;
+                }
                 String outputName = contoursDir + name + ".osm.gz";
                 srtm2osm = new Srtm2Osm(parameters, la, lo, outputName);
                 while (srtm2osm.getState() == Srtm2Osm.RUNNING) {
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException ex) {
+                        utils.endExclusive(Srtm2Osm.class.getName());
                         setState(ERROR);
                         setStatus("Interrupted.");
                         region.setState(Region.ERROR);
+                        synchronized (this) {
+                            notify();
+                        }
                         return;
                     }
                     setStatus(srtm2osm.getStatus() + " - " + region.name + " " + perc + " % completed.");
                 }
+                utils.endExclusive(Srtm2Osm.class.getName());
                 if (srtm2osm.getState() == Srtm2Osm.ERROR) {
                     setState(ERROR);
                     setStatus(srtm2osm.getStatus());
                     region.setState(Region.ERROR);
+                    synchronized (this) {
+                        notify();
+                    }
                     return;
                 }
                 File f = new File(outputName);
-                //if (f.exists() && f.length() < 30) {
-                //    f.delete();  // gzip header only
-                //    continue;
-                //}
                 if (!f.exists()) {
                     continue;
                 }
@@ -161,12 +166,15 @@ public class ContoursUpdater extends ThreadProcessor {
                         setStatus(coords + "Splitting contour data "
                                 + " - " + region.name + " " + perc + " % completed.");
                         //uk.me.parabola.splitter.Main.main(args);
-                        Osm2garmin.runExternal("uk.me.parabola.splitter.Main", "main", "splitter", null, args, this);
+                        Utilities.getInstance().runExternal("uk.me.parabola.splitter.Main", "main", "splitter", args, this);
                     } catch (Exception ex) {
                         Logger.getLogger(ContoursUpdater.class.getName()).log(Level.SEVERE, null, ex);
                         setState(ERROR);
                         setStatus(ex.getMessage());
                         region.setState(Region.ERROR);
+                        synchronized (this) {
+                            notify();
+                        }
                         return;
                     }
                     if (new File(contoursDir + d8.format(Long.parseLong(name) + 1) + ".osm.pbf").exists()) {
@@ -201,18 +209,21 @@ public class ContoursUpdater extends ThreadProcessor {
                     args = aa.toArray(new String[0]);
                     try {
                         //uk.me.parabola.mkgmap.main.Main.main(args);
-                        Osm2garmin.runExternal("uk.me.parabola.mkgmap.main.Main", "main", "mkgmap", null, args, this);
+                        Utilities.getInstance().runExternal("uk.me.parabola.mkgmap.main.Main", "main", "mkgmap", args, this);
                     } catch (Exception ex) {
                         Logger.getLogger(ContoursUpdater.class.getName()).log(Level.SEVERE, null, ex);
                         setState(ERROR);
                         setStatus(ex.getMessage());
                         region.setState(Region.ERROR);
+                        synchronized (this) {
+                            notify();
+                        }
                         return;
                     }
                 }
                 System.gc();
 
-                ArrayList <String> imgFiles = new ArrayList<String>();
+                ArrayList<String> imgFiles = new ArrayList<String>();
                 String nn;
                 for (String file : osmFiles) {
                     nn = file.replace(".osm.gz", ".img");
@@ -256,10 +267,10 @@ public class ContoursUpdater extends ThreadProcessor {
                 }
                 for (int i = 0; i < osmFiles.length; i++) {
                     File osmFile = new File(osmFiles[i]);
-                    if (! osmFile.delete()) {
+                    if (!osmFile.delete()) {
                         try {
                             Thread.sleep(500);
-                            if (! osmFile.delete()) {
+                            if (!osmFile.delete()) {
                                 osmFile.deleteOnExit();
                             }
                         } catch (InterruptedException ex) {
@@ -270,7 +281,11 @@ public class ContoursUpdater extends ThreadProcessor {
             }
         }
         setStatus(region.name + " contours update completed.");
+        setProgress(100);
         setState(COMPLETED);
+        synchronized (this) {
+            notify();
+        }
     }
 
     private void unpackFiles(File zipFile) {
