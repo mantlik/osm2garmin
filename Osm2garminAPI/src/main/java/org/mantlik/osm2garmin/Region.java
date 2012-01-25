@@ -87,7 +87,7 @@ public class Region {
     /**
      * 
      */
-    public int splitterMaxAreas = 32;
+    public int splitterMaxAreas = 50;
     /*
      * 
      */
