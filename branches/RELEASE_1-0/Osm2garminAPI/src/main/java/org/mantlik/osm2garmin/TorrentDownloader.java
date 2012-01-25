@@ -42,7 +42,6 @@ public class TorrentDownloader extends ThreadProcessor {
     private int startPiece = 0;
     private int noOfPieces;
     private DataVerifier verifier;
-    private static ArrayList<DownloadManager> downloads = new ArrayList<DownloadManager>();
 
     /**
      *
@@ -155,7 +154,8 @@ public class TorrentDownloader extends ThreadProcessor {
         } else {
             dm = new DownloadManager(torrent, Utils.generateID());
         }
-        downloads.add(dm);
+        DownloadManager.setDownloadLimit(Float.valueOf(parameters.getProperty("torrent_download_limit", "0.0")));
+        DownloadManager.setUploadLimit(Float.valueOf(parameters.getProperty("torrent_upload_limit", "0.0")));
         dm.startListening(Integer.valueOf(parameters.getProperty("torrent_port_start", "6881")),
                 Integer.valueOf(parameters.getProperty("torrent_port_end", "6889")));
         dm.startTrackerUpdate();
@@ -178,7 +178,7 @@ public class TorrentDownloader extends ThreadProcessor {
      */
     public void stop() {
         stop = true;
-        downloads.remove(dm);
+        dm.stop();
     }
 
     /**
@@ -199,22 +199,6 @@ public class TorrentDownloader extends ThreadProcessor {
         dm.startTrackerUpdate();
     }
     
-    public static long downloaded() {
-        long downloaded = 0;
-        for (DownloadManager dm : downloads) {
-            downloaded += dm.downloaded();
-        }
-        return downloaded;
-    }
-
-    public static long uploaded() {
-        long uploaded = 0;
-        for (DownloadManager dm : downloads) {
-            uploaded += dm.uploaded();
-        }
-        return uploaded;
-    }
-
     public int getNoOfPieces() {
         if (dm == null) {
             return 0;
@@ -227,9 +211,5 @@ public class TorrentDownloader extends ThreadProcessor {
             return false;
         }
         return dm.isPieceComplete(piece + dm.startPiece());
-    }
-
-    public static DownloadManager[] getDownloads() {
-        return downloads.toArray(new DownloadManager[0]);
     }
 }

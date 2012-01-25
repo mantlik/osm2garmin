@@ -568,6 +568,9 @@ public final class MainWindowTopComponent extends TopComponent implements Proper
             public void run() {
                 while (!eventQueue.isEmpty()) {
                     PropertyChangeEvent evt = eventQueue.remove(0);
+                    if (evt==null) {
+                        continue;
+                    }
                     if (evt.getSource().getClass().equals(PlanetDownloader.class)) {
                         PlanetDownloader downloader = (PlanetDownloader) evt.getSource();
                         planetDownloadStatus.setText(downloader.getStatus());
@@ -614,50 +617,24 @@ public final class MainWindowTopComponent extends TopComponent implements Proper
                     } else if (evt.getSource().getClass().equals(TorrentDownloader.class)) {
                         if (evt.getPropertyName().equals("progress")) {
                             String text;
-                            DownloadManager[] downloads = TorrentDownloader.getDownloads();
-                            if (downloads.length > 0) {
-                                long downloaded = 0;
-                                long uploaded = 0;
-                                float downSpeed = 0;
-                                float upSpeed = 0;
-                                int peers = 0;
-                                boolean running = false;
-                                boolean init = false;
-                                for (DownloadManager dm : downloads) {
-                                    downloaded += dm.downloaded();
-                                    uploaded += dm.uploaded();
-                                    downSpeed += dm.getDLRate();
-                                    upSpeed += dm.getULRate();
-                                    peers += dm.noOfPeers();
-                                    if (!dm.isPaused()) {
-                                        running = true;
-                                    }
-                                    if (dm.init_progress() >= 0) {
-                                        init = true;
-                                    }
-                                }
-                                int idx = (int) (ulsp.length * Math.random());
-                                ulsp[idx] = upSpeed;
-                                dlsp[idx] = downSpeed;
-                                upSpeed = 0;
-                                downSpeed = 0;
-                                for (int i = 0; i < ulsp.length; i++) {
-                                    upSpeed += ulsp[i];
-                                    downSpeed += dlsp[i];
-                                }
-                                upSpeed = upSpeed / ulsp.length;
-                                downSpeed = downSpeed / dlsp.length;
+                            if (DownloadManager.getNoOfDownloads() > 0) {
+                                long downloaded = DownloadManager.getTotalDownloaded();
+                                long uploaded = DownloadManager.getTotalUploaded();
+                                float downSpeed = DownloadManager.getDownSpeed();
+                                float upSpeed = DownloadManager.getUpSpeed();
+                                int peers = DownloadManager.getTotalPeers();
                                 String action = "<a href=\"pause\">Pause</a>";
-                                if (!running) {
+                                if (DownloadManager.getNoOfRunningDownloads() == 0) {
                                     action = "<a href=\"resume\">Resume</a>";
                                 }
-                                if (init) {
+                                if (DownloadManager.initiating()) {
                                     action = "";
                                 }
                                 String webseed = WebseedTask.webseedActive ? "+webseed" : "";
                                 text = peers + webseed + " peers, downloaded " + downloaded / 1024 / 1024
                                         + " mb / uploaded " + uploaded / 1024 / 1024 + " mb, D/U rate "
-                                        + df1.format(downSpeed) + " / " + df1.format(upSpeed) + " kb/s " + action;
+                                        + df1.format(downSpeed) + " / " + df1.format(upSpeed) 
+                                        + " kb/s " + action;
                             } else {
                                 text = "No active downloads.";
                             }
@@ -743,20 +720,7 @@ public final class MainWindowTopComponent extends TopComponent implements Proper
     }
 
     private void pauseDownloads(boolean pause) {
-        DownloadManager[] downloads = TorrentDownloader.getDownloads();
-        for (DownloadManager dm : downloads) {
-            if (pause) {
-                if (!dm.isPaused()) {
-                    dm.stopTrackerUpdate();
-                    dm.closeTempFiles();
-                }
-            } else {
-                if (dm.isPaused()) {
-                    dm.checkTempFiles();
-                    dm.startTrackerUpdate();
-                }
-            }
-        }
+        DownloadManager.pauseAllDownloads(pause);
     }
 
     private Properties getParameters(Properties par) {
@@ -796,6 +760,8 @@ public final class MainWindowTopComponent extends TopComponent implements Proper
                 "http://osm-torrent.torres.voyager.hr/files/"));
         par.setProperty("torrent_port_start", NbPreferences.forModule(Osm2garmin.class).get("torrent_port_start", "6881"));
         par.setProperty("torrent_port_end", NbPreferences.forModule(Osm2garmin.class).get("torrent_port_end", "6999"));
+        par.setProperty("torrent_download_limit", NbPreferences.forModule(Osm2garmin.class).get("torrent_download_limit", "0.0"));
+        par.setProperty("torrent_upload_limit", NbPreferences.forModule(Osm2garmin.class).get("torrent_upload_limit", "0.0"));
         par.setProperty("log_report", NbPreferences.forModule(Osm2garmin.class).get("log_report", "report.log"));
         par.setProperty("cycling_features", NbPreferences.forModule(Osm2garmin.class).get("cycling_features", "false"));
         par.setProperty("srtm_step", NbPreferences.forModule(Osm2garmin.class).get("srtm_step", "5"));

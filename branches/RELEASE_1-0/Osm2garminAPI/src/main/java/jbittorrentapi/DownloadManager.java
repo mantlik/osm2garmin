@@ -51,6 +51,7 @@ import java.util.*;
 public class DownloadManager implements DTListener, PeerUpdateListener,
         ConListenerInterface {
 
+    private static final int SPEED_SAMPLES = 100;  // no of samples to average overall down/up speed
     // Client ID
     private byte[] clientID;
     TorrentFile torrent = null;
@@ -81,6 +82,14 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
     long lastPieceReceived;
     static final String WEBSEED_ID = "webseed";
     private DataVerifier verifier;
+    private static float downloadSpeedLimit = 0;
+    private static float uploadSpeedLimit = 0;
+    private static ArrayList<DownloadManager> downloads = new ArrayList<DownloadManager>();
+    private static float[] ulsp = new float[SPEED_SAMPLES];
+    private static float[] dlsp = new float[SPEED_SAMPLES];
+    private static SpeedLimitGuard speedLimitGuard = new SpeedLimitGuard();
+    private static final Object uploadWatch = new Object();
+    private static final Object downloadWatch = new Object();
 
     /**
      * Create a new manager according to the given torrent and using the client
@@ -110,6 +119,7 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
 
         this.length = 0;
         this.left = 0;
+        downloads.add(this);
     }
 
     public DownloadManager(TorrentFile torrent, final byte[] clientID) {
@@ -245,7 +255,7 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
      * Stop the tracker updates
      */
     public void stopTrackerUpdate() {
-        ArrayList <String> ids = new ArrayList<String>();
+        ArrayList<String> ids = new ArrayList<String>();
         for (String id : task.keySet()) {
             ids.add(id);
         }
@@ -256,13 +266,28 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
         }
         this.pu.end();
     }
-    
+
+    /**
+     * Checks whether current download is paused
+     *
+     * @return true if download is paused
+     */
     public boolean isPaused() {
-        if (pu==null || pu.stopped()) {
+        if (pu == null || pu.stopped()) {
             return true;
         } else {
             return false;
         }
+    }
+
+    /**
+     * Stop download
+     */
+    public void stop() {
+        if (!isPaused()) {
+            stopTrackerUpdate();
+        }
+        downloads.remove(this);
     }
 
     /*
@@ -1045,6 +1070,227 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
             return rate / (1024);
         } catch (Exception e) {
             return 0.00f;
+        }
+    }
+
+    public static void setUploadLimit(float limit) {
+        uploadSpeedLimit = limit;
+    }
+
+    public static void setDownloadLimit(float limit) {
+        downloadSpeedLimit = limit;
+    }
+
+    public static float getUploadSpeedLimit() {
+        return uploadSpeedLimit;
+    }
+
+    public static float getDownloadSpeedLimit() {
+        return downloadSpeedLimit;
+    }
+
+    static void limitDownloadSpeed() {
+        if (downloadSpeedLimit == 0) {
+            return;
+        }
+        if (getDownSpeed() > getDownloadSpeedLimit()) {
+            synchronized (downloadWatch) {
+                try {
+                    downloadWatch.wait();
+                } catch (InterruptedException ex) {
+                }
+            }
+        }
+    }
+
+    static void limitUploadSpeed() {
+        if (uploadSpeedLimit == 0) {
+            return;
+        }
+        if (getUpSpeed() > getUploadSpeedLimit()) {
+            synchronized (uploadWatch) {
+                try {
+                    uploadWatch.wait();
+                } catch (InterruptedException ex) {
+                }
+            }
+        }
+    }
+
+    /**
+     *
+     * @return total number of downloads
+     */
+    public static int getNoOfDownloads() {
+        return downloads.size();
+    }
+
+    /**
+     *
+     * @return number of running downloads
+     */
+    public static int getNoOfRunningDownloads() {
+        int d = 0;
+        for (DownloadManager dm : downloads) {
+            if (!dm.isPaused()) {
+                d++;
+            }
+        }
+        return d;
+    }
+
+    /**
+     * Is any download initializing?
+     *
+     * @return true if at least one download is running init().
+     */
+    public static boolean initiating() {
+        boolean d = false;
+        for (DownloadManager dm : downloads) {
+            if (dm.init_progress() >= 0) {
+                d = true;
+            }
+        }
+        return d;
+    }
+
+    /**
+     * Number of bytes downloaded so far by all active downloads.
+     *
+     * @return
+     */
+    public static long getTotalDownloaded() {
+        long downloaded = 0;
+        for (DownloadManager dm : downloads) {
+            downloaded += dm.downloaded();
+        }
+        return downloaded;
+    }
+
+    /**
+     * Number of bytes uploaded so far by all active downloads.
+     *
+     * @return
+     */
+    public static long getTotalUploaded() {
+        long uploaded = 0;
+        for (DownloadManager dm : downloads) {
+            uploaded += dm.uploaded();
+        }
+        return uploaded;
+    }
+
+    /**
+     * Current overall download speed in kb/s
+     *
+     * @return
+     */
+    public static float getDownSpeed() {
+        querySpeed();
+        float downSpeed = 0;
+        for (int i = 0; i < SPEED_SAMPLES; i++) {
+            downSpeed += dlsp[i];
+        }
+        downSpeed = downSpeed / SPEED_SAMPLES;
+        return downSpeed;
+    }
+
+    /**
+     * Current overall upload speed in kb/s
+     *
+     * @return
+     */
+    public static float getUpSpeed() {
+        querySpeed();
+        float upSpeed = 0;
+        for (int i = 0; i < SPEED_SAMPLES; i++) {
+            upSpeed += ulsp[i];
+        }
+        upSpeed = upSpeed / SPEED_SAMPLES;
+        return upSpeed;
+    }
+
+    private static void querySpeed() {
+        float upSpeed = 0;
+        for (DownloadManager dm : downloads) {
+            upSpeed += dm.getULRate();
+        }
+        float downSpeed = 0;
+        for (DownloadManager dm : downloads) {
+            downSpeed += dm.getDLRate();
+        }
+        int idx = (int) (SPEED_SAMPLES * Math.random());
+        ulsp[idx] = upSpeed;
+        dlsp[idx] = downSpeed;
+    }
+
+    /**
+     * Number of peers in all active downloads.
+     *
+     * @return
+     */
+    public static int getTotalPeers() {
+        int peers = 0;
+        for (DownloadManager dm : downloads) {
+            peers += dm.noOfPeers();
+        }
+        return peers;
+    }
+
+    /**
+     * Pause or resume all downloads.
+     *
+     * @param pause
+     */
+    public static void pauseAllDownloads(boolean pause) {
+        for (DownloadManager dm : downloads) {
+            if (pause) {
+                if (!dm.isPaused()) {
+                    dm.stopTrackerUpdate();
+                    dm.closeTempFiles();
+                }
+            } else {
+                if (dm.isPaused()) {
+                    dm.checkTempFiles();
+                    dm.startTrackerUpdate();
+                }
+            }
+        }
+    }
+
+    private static class SpeedLimitGuard implements Runnable {
+
+        private SpeedLimitGuard() {
+            start();
+        }
+
+        private void start() {
+            Thread thread = new Thread(this);
+            thread.setPriority(Thread.MIN_PRIORITY);
+            thread.start();
+        }
+
+        @Override
+        public void run() {
+            while (true) {
+                if ((getUpSpeed() <= getUploadSpeedLimit()) || (getUploadSpeedLimit() == 0)) {
+                    synchronized (uploadWatch) {
+                        uploadWatch.notify();
+                    }
+                }
+                if ((getDownSpeed() <= getDownloadSpeedLimit()) || (getDownloadSpeedLimit() == 0)) {
+                    synchronized (downloadWatch) {
+                        downloadWatch.notify();
+                    }
+                }
+                try {
+                    synchronized (this) {
+                        this.wait(200);
+                    }
+                } catch (InterruptedException ex) {
+                    break;
+                }
+            }
         }
     }
 }

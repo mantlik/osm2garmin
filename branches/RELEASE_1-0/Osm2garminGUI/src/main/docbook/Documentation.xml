@@ -160,6 +160,17 @@
                         </para>
                     </listitem>
                 </varlistentry>
+                <varlistentry>
+                    <term>BitTorrent maximum speed</term>
+                    <listitem>
+                        <para>
+                            Speed limit for BitTorrent downloading in kb/s. Zero means no limit (default).
+                        </para>
+                        <para>
+                            Changes will only take place after program restart.
+                        </para>
+                    </listitem>
+                </varlistentry>
             </variablelist>
         </section>
         <section xml:id="parameters">
@@ -218,6 +229,21 @@
                             Elevation difference threshold for each 1x1 degree tile to plot minor resp.
                             medium contours. If the overall elevation difference in the tile exceeds a
                             threshold, corresponding contours are not plotted.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>SRTM contours shift correction</term>
+                    <listitem>
+                        <para>
+                            In some regions, SRTM data seem to have a systematic shift
+                            half a cell diagonal size, i.e. approx. 50-60 m to the SW. 
+                            If your generated map is possessed with the problem, correction of
+                            1/2400 = 0.0004167 degree in both directions will put contours 
+                            to the right place.
+                        </para>
+                        <para>
+                            Contours directory must be cleaned in order to reprocess SRTM data.
                         </para>
                     </listitem>
                 </varlistentry>
