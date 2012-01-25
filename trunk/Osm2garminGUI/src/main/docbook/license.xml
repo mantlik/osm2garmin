@@ -371,28 +371,15 @@ Public License instead of this License.
             </thead>
             <tbody>
                 <tr>
-                    <td>Netbeans</td> 
+                    <td>Java Bittorrent Api</td> 
                     <td>
                         <link xmlns:xlink="http://www.w3.org/1999/xlink" 
-                    xlink:href="http://netbeans.org"/>
+                    xlink:href="http://sourceforge.net/projects/bitext/"/>
                     </td>
                     <td>
                         <link xmlns:xlink="http://www.w3.org/1999/xlink" 
-                    xlink:href="http://netbeans.org/about/legal/index.html">
-                    dual CDDL v. 1.0 and GPL v. 2 license
-                        </link>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Osmosis</td> 
-                    <td>
-                        <link xmlns:xlink="http://www.w3.org/1999/xlink" 
-                    xlink:href="http://wiki.openstreetmap.org/wiki/Osmosis"/>
-                    </td>
-                    <td>
-                        <link xmlns:xlink="http://www.w3.org/1999/xlink" 
-                    xlink:href="http://wiki.openstreetmap.org/wiki/Osmosis">
-                     
+                    xlink:href="http://www.gnu.org/licenses/gpl-2.0.html">
+                     GPL version 2
                         </link>
                     </td>
                 </tr>
@@ -410,6 +397,19 @@ Public License instead of this License.
                     </td>
                 </tr>
                 <tr>
+                    <td>Netbeans</td> 
+                    <td>
+                        <link xmlns:xlink="http://www.w3.org/1999/xlink" 
+                    xlink:href="http://netbeans.org"/>
+                    </td>
+                    <td>
+                        <link xmlns:xlink="http://www.w3.org/1999/xlink" 
+                    xlink:href="http://netbeans.org/about/legal/index.html">
+                    dual CDDL v. 1.0 and GPL v. 2 license
+                        </link>
+                    </td>
+                </tr>
+                <tr>
                     <td>OSM Tile Splitter</td> 
                     <td>
                         <link xmlns:xlink="http://www.w3.org/1999/xlink" 
@@ -419,6 +419,19 @@ Public License instead of this License.
                         <link xmlns:xlink="http://www.w3.org/1999/xlink" 
                     xlink:href="http://www.gnu.org/licenses/gpl-2.0.html">
                      GPL version 2
+                        </link>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Osmosis</td> 
+                    <td>
+                        <link xmlns:xlink="http://www.w3.org/1999/xlink" 
+                    xlink:href="http://wiki.openstreetmap.org/wiki/Osmosis"/>
+                    </td>
+                    <td>
+                        <link xmlns:xlink="http://www.w3.org/1999/xlink" 
+                    xlink:href="http://wiki.openstreetmap.org/wiki/Osmosis">
+                     
                         </link>
                     </td>
                 </tr>
