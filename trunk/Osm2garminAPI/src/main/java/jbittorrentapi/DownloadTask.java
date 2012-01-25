@@ -85,7 +85,7 @@ public class DownloadTask extends Thread implements IncomingListener,
     public MessageReceiver mr = null;
     private long downloaded = 0;
     private long uploaded = 0;
-    private long creationTime = 0;
+    private long creationTime = System.currentTimeMillis();
     private long updateTime = 0;
     private long lmrt = 0;
     private LinkedList<Integer> pendingRequest;
@@ -418,6 +418,8 @@ public class DownloadTask extends Thread implements IncomingListener,
                      */
 
                     if (!this.peer.isChoked()) {
+                        // wait until upload speed decreases below limit if needed
+                        DownloadManager.limitUploadSpeed();
                         this.firePeerRequest(this.peer.toString(),
                                 Utils.byteArrayToInt(
                                 Utils.subArray(message.getPayload(),
@@ -535,6 +537,7 @@ public class DownloadTask extends Thread implements IncomingListener,
                         length = PeerProtocol.BLOCK_SIZE;
                     }
                     if (ms != null) {
+                        // wait until upload speed decreases below limit if needed
                         ms.addMessageToQueue(new Message_PP(PeerProtocol.REQUEST,
                                 Utils.concat(pieceIndex,
                                 Utils.concat(begin,
@@ -718,5 +721,13 @@ public class DownloadTask extends Thread implements IncomingListener,
             }
         }
         //System.out.println("Task "+taskid+" connection closed. Stopped.");
+    }
+    
+    /**
+     * Time in milliseconds how long the task runs
+     * @return
+     */
+    public long runningTime() {
+        return System.currentTimeMillis() - creationTime;
     }
 }

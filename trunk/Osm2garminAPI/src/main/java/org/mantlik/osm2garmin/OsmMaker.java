@@ -286,6 +286,8 @@ public class OsmMaker extends ThreadProcessor {
 
         setStatus(region.name + " creating files for MapSource.");
         setProgress(98);
+        System.gc();
+        
         // create MapSource registration files
         aa.set(0, "--tdbfile"); // replace --gmapsupp with --tdbfile
         aa.add("--nsis");
