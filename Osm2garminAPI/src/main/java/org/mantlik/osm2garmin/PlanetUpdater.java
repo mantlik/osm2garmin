@@ -112,16 +112,6 @@ public class PlanetUpdater extends ThreadProcessor {
                 i++;
                 upd = new File(Utilities.getUserdir(this) + "update" + i + ".osc.gz");
             }
-            if (i == 0) {
-                oldPlanetFile.renameTo(planetFile);
-                setStatus("Completed.");
-                setProgress(100);
-                setState(COMPLETED);
-                synchronized (this) {
-                    notify();
-                }
-                return;
-            }
             String[] args;
             if (nchanges > 0) {
                 l.add("--apc");
@@ -150,12 +140,15 @@ public class PlanetUpdater extends ThreadProcessor {
 
             while (currRegion < regions.size()) {
                 pass++;
-                int nregions = (regions.size() - currRegion) % MAX_REGIONS_PASS;
-                if (nregions == 0) {
-                    nregions = MAX_REGIONS_PASS;
+                int nregions = 0;
+                if ((pass > 1) || (nchanges == 0)) {
+                    nregions = (regions.size() - currRegion) % MAX_REGIONS_PASS;
+                    if (nregions == 0) {
+                        nregions = MAX_REGIONS_PASS;
+                    }
                 }
                 int procregions = nregions;
-                if (currRegion == 0) {
+                if (pass == 1) {
                     procregions++;
                     ArrayList<String> largs = new ArrayList<String>();
                     largs.add(readSource);
@@ -191,9 +184,13 @@ public class PlanetUpdater extends ThreadProcessor {
                 }
                 ArrayList<String> largs = new ArrayList<String>();
                 largs.addAll(Arrays.asList(args));
-                regions_in_progress = " processing " + nregions + " regions ("
-                        + (currRegion + 1) + "-" + (currRegion + nregions) + "/"
-                        + regions.size() + ")";
+                if (nregions > 0) {
+                    regions_in_progress = " processing " + nregions + " regions ("
+                            + (currRegion + 1) + "-" + (currRegion + nregions) + "/"
+                            + regions.size() + ")";
+                } else {
+                    regions_in_progress = "";
+                }
                 for (int j = 0; j < nregions; j++) {
                     Region region = regions.get(currRegion);
                     currRegion++;
