@@ -25,6 +25,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.Properties;
+import org.openide.util.Exceptions;
 import org.openide.util.RequestProcessor;
 
 /**
@@ -198,10 +199,11 @@ public abstract class ThreadProcessor implements Runnable, PropertyChangeListene
             return true;
         } else {
             if (commandline) {
-                System.out.print(BLANKLINE);
-                System.out.print(getStatus() + "\r");
-            //} else {
-            //    getStatus();
+                System.out.print((getStatus() + BLANKLINE).substring(0, 79) + "\r");
+                try {
+                    Thread.sleep(Utilities.REFRESH_INTERVAL);
+                } catch (InterruptedException ex) {
+                }
             }
         }
         return false;
