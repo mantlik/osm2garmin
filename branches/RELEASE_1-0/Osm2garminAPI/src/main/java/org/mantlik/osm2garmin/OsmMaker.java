@@ -262,7 +262,12 @@ public class OsmMaker extends ThreadProcessor {
         ArrayList<String> aa = new ArrayList<String>();
         aa.add("--gmapsupp");
         aa.add("--output-dir=" + region.dir.getPath());
-        aa.add("--index");
+        boolean withIndexes = false;
+        if (Runtime.getRuntime().maxMemory() > 1800000000l) {
+            aa.add("--index");
+            aa.add("--location-autofill=nearest");
+            withIndexes = true;
+        }
         aa.add("--family-id=" + region.familyID);
         aa.add("--family-name=" + region.name);
         aa.add("--series-name=" + region.name);
@@ -287,7 +292,7 @@ public class OsmMaker extends ThreadProcessor {
         setStatus(region.name + " creating files for MapSource.");
         setProgress(98);
         System.gc();
-        
+
         // create MapSource registration files
         aa.set(0, "--tdbfile"); // replace --gmapsupp with --tdbfile
         aa.add("--nsis");
@@ -303,6 +308,7 @@ public class OsmMaker extends ThreadProcessor {
             }
             return;
         }
+        region.makeInstallers(withIndexes);
 
         // delete splitted pbf maps
         for (long id = MAPID; id <= maxid; id++) {
@@ -318,11 +324,11 @@ public class OsmMaker extends ThreadProcessor {
                 }
             }
         }
-        
+
         // delete temp files
         for (File f : region.dir.listFiles()) {
             if (f.getName().endsWith(".tmp")) {
-                if (! f.delete()){
+                if (!f.delete()) {
                     f.deleteOnExit();
                 }
             }

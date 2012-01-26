@@ -25,6 +25,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -41,6 +42,7 @@ import javax.swing.event.HyperlinkListener;
 import jbittorrentapi.DownloadManager;
 import jbittorrentapi.WebseedTask;
 import org.mantlik.osm2garmin.*;
+import org.netbeans.api.javahelp.Help;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.DialogDisplayer;
 import org.openide.LifecycleManager;
@@ -104,6 +106,7 @@ public final class MainWindowTopComponent extends TopComponent implements Proper
             public void hyperlinkUpdate(HyperlinkEvent e) {
                 if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
                     torrentStatusEventDesc = e.getDescription();
+                    startTorrentStatus = torrentStatusItem.getText();
                     updateTorrentStatus("Please wait...");
                     RequestProcessor.getDefault().post(new Runnable() {
 
@@ -114,14 +117,30 @@ public final class MainWindowTopComponent extends TopComponent implements Proper
                                 pauseDownloads(true);
                             } else if (s.equals("resume")) {
                                 pauseDownloads(false);
+                            } else if (s.equals("memoryHelp")) {
+                                Help help = Lookup.getDefault().lookup(Help.class);
+                                String id = "more_memory";
+                                if (help != null && help.isValidID(id, true)) {
+                                    help.showHelp(new HelpCtx(id));
+                                    torrentStatusItem.setText(startTorrentStatus);
+                                }
                             }
                         }
                     });
                 }
             }
         });
+
+        long maxMemory = Runtime.getRuntime().maxMemory();
+        int mm = (int) (maxMemory / 1024 / 1024);
+        if (maxMemory <= 1800000000l) {
+            torrentStatusItem.setText("<html><font color=\"red\">Only " + mm
+                    + " mb of memory available.</font> Address indexes will NOT be generated - at least 1800 mb would be needed. "
+                    + "<a href=\"memoryHelp\">Help</a>");
+        }
     }
     private String torrentStatusEventDesc;
+    String startTorrentStatus = "<html>";
 
     @Override
     public HelpCtx getHelpCtx() {
@@ -568,7 +587,7 @@ public final class MainWindowTopComponent extends TopComponent implements Proper
             public void run() {
                 while (!eventQueue.isEmpty()) {
                     PropertyChangeEvent evt = eventQueue.remove(0);
-                    if (evt==null) {
+                    if (evt == null) {
                         continue;
                     }
                     if (evt.getSource().getClass().equals(PlanetDownloader.class)) {
@@ -633,7 +652,7 @@ public final class MainWindowTopComponent extends TopComponent implements Proper
                                 String webseed = WebseedTask.webseedActive ? "+webseed" : "";
                                 text = peers + webseed + " peers, downloaded " + downloaded / 1024 / 1024
                                         + " mb / uploaded " + uploaded / 1024 / 1024 + " mb, D/U rate "
-                                        + df1.format(downSpeed) + " / " + df1.format(upSpeed) 
+                                        + df1.format(downSpeed) + " / " + df1.format(upSpeed)
                                         + " kb/s " + action;
                             } else {
                                 text = "No active downloads.";
