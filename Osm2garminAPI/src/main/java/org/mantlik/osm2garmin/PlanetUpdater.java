@@ -66,7 +66,7 @@ public class PlanetUpdater extends ThreadProcessor {
             setProgress(100);
             return super.getStatus();
         }
-        int npasses = (regions.size() + MAX_REGIONS_PASS - 1) / MAX_REGIONS_PASS + 1;
+        int npasses = (regions.size() + MAX_REGIONS_PASS - 1) / MAX_REGIONS_PASS + 2;
         double pass_progress = 0;
         File uf = new File(Utilities.getUserdir(this) + "update.osc.gz");
         if (uf.exists()) {

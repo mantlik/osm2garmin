@@ -379,7 +379,7 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
             try {
                 this.output_files[i].close();
             } catch (Exception e) {
-                e.printStackTrace();
+                System.err.println(e.getMessage());
             }
         }
     }
