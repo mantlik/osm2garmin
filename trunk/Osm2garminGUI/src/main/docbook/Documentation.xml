@@ -92,6 +92,7 @@
                 </mediaobject>
             </para>
             <variablelist>
+                <?dbfo list-presentation="blocks"?>
                 <varlistentry>
                     <term>SRTM3 download URL</term>
                     <listitem>
@@ -185,6 +186,7 @@
                 </mediaobject>
             </para>
             <variablelist>
+                <?dbfo list-presentation="blocks"?>
                 <varlistentry>
                     <term>Working directory</term>
                     <listitem>
@@ -255,16 +257,8 @@
                             Mkgmap or Splitter is allowed. Useful in case of out-of-memory problems.
                         </para>
                         <para>
-                            If running on 64bit system with 64bit JRE, memory limit can be increased in the configuration file
-                            located at
-                        </para>
-                        <programlisting>&lt;PROGRAM_FILES&gt;/osm2garmin_&lt;version&gt;/etc/osm2garmin.conf</programlisting>
-                        <para>
-                            In the file replace -J-Xmx1400m with higher value, e.g. -J-Xmx2000m.
-                        </para>
-                        <para>
-                            You can edit osm2garmin.conf in privilegued editor only in Windows Vista or 7. Right-click your Notepad
-                            Start menu shortcut and select "Run as administrator" item.
+                            <link linkend="more_memory">Assign more memory to the program</link> section gives some tips how to increase amount
+                            of memory assigned to the program.
                         </para>
                     </listitem>
                 </varlistentry>
@@ -332,6 +326,65 @@
             </para>
         </section>
     </chapter>
+    <chapter xml:id="startup_options">
+        <info>
+            <title>Startup options</title>
+        </info>
+        <para>
+            Program executable (osm2garmin.exe for Windows or osm2garmin for Linux) supports several startup options
+            controlling parameters of the running Java virtual machine. All possible startup options can be listed by
+            passing -h or --help as a startup option, e.g.:
+        </para>
+        <para>
+            <literallayout>osm2garmin.exe --help</literallayout>
+        </para>
+        <section xml:id="more_memory">
+            <info>
+                <title>Assign more memory to the program</title>
+            </info>
+            <para>
+                If running on 64bit system with 64bit JRE, memory limit can be increased with the use of one of the 
+                following methods:
+            </para>
+            <orderedlist>
+                <listitem>
+                    <para>
+                        Start program with -J-Xmx&lt;memsize&gt;m option where memsize is memory heep size in Mbytes, 
+                        e.g. osm2garmin.exe -J-Xmx2000m
+                    </para>
+                    <para>
+                        In addition, if you would like to use different JRE, add the parameter --jdkhome &lt;path-to-jre$gt;
+                    </para>
+                    <para>
+                        Your customized command line can look e.g. like this:
+                    </para>
+                    <para>
+                        <literallayout>c:\program files\osm2garmin_1.0\bin\osm2garmin.exe -J-Xmx2000m --jdkhome "c:/program files/Java/jre6"</literallayout>
+                    </para>
+                    <tip>
+                        <para>
+                            Startup parameters can be added permanently to the program startup link, e.g. associated
+                            to program desktop icon. In Windows, right-click the icon, select Properties and adjust
+                            the settings as needed.
+                        </para>
+                    </tip>
+                </listitem>
+                <listitem>
+                    <para>
+                        Edit the configuration file located at
+                    </para>
+                    <programlisting>&lt;PROGRAM_FILES&gt;/osm2garmin_&lt;version&gt;/etc/osm2garmin.conf</programlisting>
+                    <para>
+                        In the file replace -J-Xmx1400m with higher value, e.g. -J-Xmx2000m.
+                    </para>
+                    <para>
+                        You can edit osm2garmin.conf in privilegued editor only in Windows Vista or 7. Right-click your Notepad
+                        Start menu shortcut and select "Run as administrator" item.
+                    </para>
+                </listitem>
+            </orderedlist>
+        </section>
+    </chapter>
     <chapter xml:id="results">
         <info>
             <title>Working with processed maps</title>
@@ -341,6 +394,7 @@
             Maps directory:
         </para>
         <variablelist>
+            <?dbfo list-presentation="blocks"?>
             <varlistentry>
                 <term>gmapsupp.img</term>
                 <listitem>
