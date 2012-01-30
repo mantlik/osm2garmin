@@ -161,41 +161,41 @@
                         <goals>
                             <goal>upload</goal>
                         </goals>
-                        <configuration>
-                            <projectName>osm2garmin</projectName>
-                            <failsOnError>false</failsOnError>
-                            <serverId>code.google.com</serverId>
-                            <uploads>
-                                <upload>
-                                    <file>${project.build.directory}/Documentation-${project.version}-build-${buildNumber}.pdf</file>
-                                    <labels>
-                                        <label>Type-Docs</label>
-                                        <label>Featured</label>
-                                    </labels>
-                                    <summary>User's guide in PDF format</summary>
-                                </upload>
-                                <upload>
-                                    <file>${project.build.directory}/Osm2garminGUI-${project.version}-build-${buildNumber}-linux.sh</file>
-                                    <labels>
-                                        <label>OpSys-Linux</label>
-                                        <label>Type-Installer</label>
-                                        <label>Featured</label>
-                                    </labels>
-                                    <summary>Osm2Garmin GUI Linux installer</summary>
-                                </upload>
-                                <upload>
-                                    <file>${project.build.directory}/Osm2garminGUI-${project.version}-build-${buildNumber}-windows.exe</file>
-                                    <labels>
-                                        <label>OpSys-Windows</label>
-                                        <label>Type-Installer</label>
-                                        <label>Featured</label>
-                                    </labels>
-                                    <summary>Osm2Garmin GUI Windows installer</summary>
-                                </upload>
-                            </uploads>
-                        </configuration>
                     </execution>
                 </executions>
+                <configuration>
+                    <projectName>osm2garmin</projectName>
+                    <failsOnError>false</failsOnError>
+                    <serverId>code.google.com</serverId>
+                    <uploads>
+                        <upload>
+                            <file>${project.build.directory}/Documentation-${project.version}-build-${buildNumber}.pdf</file>
+                            <labels>
+                                <label>Type-Docs</label>
+                                <label>Featured</label>
+                            </labels>
+                            <summary>User's guide in PDF format</summary>
+                        </upload>
+                        <upload>
+                            <file>${project.build.directory}/Osm2garminGUI-${project.version}-build-${buildNumber}-linux.sh</file>
+                            <labels>
+                                <label>OpSys-Linux</label>
+                                <label>Type-Installer</label>
+                                <label>Featured</label>
+                            </labels>
+                            <summary>Osm2Garmin GUI Linux installer</summary>
+                        </upload>
+                        <upload>
+                            <file>${project.build.directory}/Osm2garminGUI-${project.version}-build-${buildNumber}-windows.exe</file>
+                            <labels>
+                                <label>OpSys-Windows</label>
+                                <label>Type-Installer</label>
+                                <label>Featured</label>
+                            </labels>
+                            <summary>Osm2Garmin GUI Windows installer</summary>
+                        </upload>
+                    </uploads>
+                </configuration>
             </plugin>
             <!-- To run NbModuleSuite in integration-test phase:
             <plugin>
