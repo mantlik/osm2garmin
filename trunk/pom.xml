@@ -159,10 +159,10 @@
                         <preparationGoals>clean install</preparationGoals>
                         <goals>clean install</goals>
                         <autoVersionSubmodules>true</autoVersionSubmodules>
-                        <commitByProject>true</commitByProject>
+                        <commitByProject>false</commitByProject>
                         <developmentVersion>1.0-SNAPSHOT</developmentVersion>
                         <releaseVersion>1.0-RC1</releaseVersion>
-                        <tag>RELEASE_1-0-RC1</tag>
+                        <tagNameFormat>RELEASE_@{project.version}</tagNameFormat>
                     </configuration>
                 </plugin>
                 <plugin>
