@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.mantlik</groupId>
         <artifactId>Osm2garminGUI</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0-RC1</version>
     </parent>
 
     <artifactId>Osm2garminGUI-app</artifactId>
@@ -15,7 +14,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <netbeans.run.params.ide/>
+        <netbeans.run.params.ide />
         <netbeans.run.params>${netbeans.run.params.ide} -J-Xmx1400m</netbeans.run.params>
     </properties>
 
@@ -136,8 +135,7 @@
                             <fileset dir="${basedir}/../Osm2garminGUI/src/main/javahelp/org/mantlik/osm2garminspi/docs/" />
                         </copy>
                         <copy file="${basedir}/target/docbkx/Documentation/Documentation.html" tofile="${basedir}/target/docbkx/Documentation/index.html" failonerror="false" />
-                        <copy file="${basedir}/target/docbkx/Documentation.pdf" 
-                              tofile="${basedir}/target/Documentation-${project.version}-build-${buildNumber}.pdf" failonerror="false" />
+                        <copy file="${basedir}/target/docbkx/Documentation.pdf" tofile="${basedir}/target/Documentation-${project.version}-build-${buildNumber}.pdf" failonerror="false" />
                     </postProcess>
                 </configuration>
                 <executions>

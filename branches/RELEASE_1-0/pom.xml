@@ -4,7 +4,7 @@
 
     <groupId>org.mantlik</groupId>
     <artifactId>Osm2garminGUI</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0-RC1</version>
     <packaging>pom</packaging>
 
     <name>Osm2garminGUI</name>
@@ -39,8 +39,8 @@
     </distributionManagement>
 
     <scm>
-        <connection>scm:svn:http://osm2garmin.googlecode.com/svn/trunk</connection>
-        <developerConnection>scm:svn:https://osm2garmin.googlecode.com/svn/trunk/</developerConnection>
+        <connection>scm:svn:http://osm2garmin.googlecode.com/svn/tags/RELEASE_1-0-RC1</connection>
+        <developerConnection>scm:svn:https://osm2garmin.googlecode.com/svn/tags/RELEASE_1-0-RC1</developerConnection>
     </scm>
 
     <build>
