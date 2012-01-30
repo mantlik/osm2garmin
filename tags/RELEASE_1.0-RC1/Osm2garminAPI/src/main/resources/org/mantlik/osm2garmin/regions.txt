@@ -1,0 +1,10 @@
+55 -50 180 10 australia_nz	 
+-24 35 9 72 western_europe
+7 35 40 85 eastern_europe
+-179 41 -13 85 canada_alasca
+-105 26 -24 49 usa_east
+-179 26 -95 49 usa_west
+-179 -60 -24 33 south_latin_america
+40 -10 180 35 asia_south	
+40 35 180 85 asia_north	
+-24 -40 65 40 africa
