@@ -18,7 +18,7 @@
                 <goal>install</goal>
                 <goal>nbm:build-installers</goal>
                 <goal>nbm:autoupdate</goal>
-                <goal>deploy</goal>
+                <goal>gcu:upload</goal>
             </goals>
         </action>
     </actions>
