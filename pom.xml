@@ -163,6 +163,7 @@
                         <developmentVersion>1.0-SNAPSHOT</developmentVersion>
                         <releaseVersion>1.0-RC1</releaseVersion>
                         <tagNameFormat>RELEASE_@{project.version}</tagNameFormat>
+                        <remoteTagging>false</remoteTagging>
                     </configuration>
                 </plugin>
                 <plugin>
