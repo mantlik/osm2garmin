@@ -170,9 +170,9 @@ public class OsmMaker extends ThreadProcessor {
         setProgress(50);
         setStatus(region.name + " converting to Garmin format");
         args = new String[]{
-            "--output-dir=" + region.dir.getPath(), "--ignore-osm-bounds",
+            "--output-dir=" + region.dir.getPath(), "--draw-priority=20",
             "--net", "--route", "--add-pois-to-areas", "--series-name=" + region.name,
-            "-c", region.dir.getPath() + "/" + "template.args", "--merge-lines",
+            "-c", region.dir.getPath() + "/" + "template.args",
             "--remove-short-arcs"
         };
         if (parameters.getProperty("cycling_features", "false").equals("true")) {
@@ -219,9 +219,9 @@ public class OsmMaker extends ThreadProcessor {
                 // convert to Garmin
                 setStatus(region.name + " converting to Garmin format");
                 args = new String[]{
-                    "--output-dir=" + region.dir.getPath(), "--ignore-osm-bounds",
+                    "--output-dir=" + region.dir.getPath(), "--draw-priority=20",
                     "--net", "--route", "--add-pois-to-areas", "--series-name=" + region.name,
-                    "-c", region.dir.getPath() + "/" + "template.args", "--merge-lines",
+                    "-c", region.dir.getPath() + "/" + "template.args",
                     "--remove-short-arcs"
                 };
                 if (parameters.getProperty("cycling_features", "false").equals("true")) {
@@ -273,7 +273,6 @@ public class OsmMaker extends ThreadProcessor {
         aa.add("--series-name=" + region.name);
         aa.add("--product-id=1");
         aa.addAll(osmMaps);
-        aa.add("--draw-priority=10000");
         aa.add("--show-profiles");
         aa.addAll(contourMaps);
         args = aa.toArray(new String[0]);
