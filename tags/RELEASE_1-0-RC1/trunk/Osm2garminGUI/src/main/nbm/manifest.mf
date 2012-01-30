@@ -1,5 +1,0 @@
-Manifest-Version: 1.0
-OpenIDE-Module-Install: org/mantlik/osm2garminspi/Installer.class
-OpenIDE-Module-Layer: org/mantlik/osm2garminspi/layer.xml
-OpenIDE-Module-Localizing-Bundle: org/mantlik/osm2garminspi/Bundle.properties
-OpenIDE-Module-Requires: org.openide.windows.WindowManager
