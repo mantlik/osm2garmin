@@ -159,7 +159,6 @@
                         <preparationGoals>clean install</preparationGoals>
                         <goals>clean install</goals>
                         <autoVersionSubmodules>true</autoVersionSubmodules>
-                        <commitByProject>true</commitByProject>
                         <developmentVersion>1.0-SNAPSHOT</developmentVersion>
                         <releaseVersion>1.0-RC1</releaseVersion>
                         <tag>RELEASE_1-0-RC1</tag>
@@ -218,7 +217,7 @@
     </modules>
 
     <properties>
-        <netbeans.version>RELEASE71-BETA</netbeans.version>
+        <netbeans.version>RELEASE71</netbeans.version>
         <brandingToken>osm2garmin</brandingToken>
         <netbeans.hint.license>gpl20</netbeans.hint.license>
         <project.version.short>1.0</project.version.short>
