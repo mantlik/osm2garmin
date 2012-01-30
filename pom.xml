@@ -218,7 +218,7 @@
     </modules>
 
     <properties>
-        <netbeans.version>RELEASE71-BETA</netbeans.version>
+        <netbeans.version>RELEASE71</netbeans.version>
         <brandingToken>osm2garmin</brandingToken>
         <netbeans.hint.license>gpl20</netbeans.hint.license>
         <project.version.short>1.0</project.version.short>
