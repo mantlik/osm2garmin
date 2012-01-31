@@ -84,17 +84,19 @@ public class ContoursUpdater extends ThreadProcessor {
                 setStatus(coords + "Unpacking contours data "
                         + " - " + region.name + " " + perc + " % completed.");
 
-                File zipfile = new File(contoursDir + srtmName + ".zip");
+                File zipFile = new File(contoursDir + srtmName + ".zip");
                 // typo in file name up to r34
                 File zipFile3 = new File(contoursDir + srtmName + "..zip");
-                if (zipfile.exists() && (zipfile.length() > 0)) {
-                    unpackFiles(zipfile);
+                // file created but not yet checked
+                File zipFile2 = new File(contoursDir + srtmName + "_.zip");
+                if (zipFile.exists() && (zipFile.length() > 0)) {
+                    unpackFiles(zipFile);
                     continue;
                 } else if (zipFile3.exists()) {
                     if (zipFile3.length() > 0) {
                         unpackFiles(zipFile3);
                     }
-                    zipFile3.renameTo(zipfile);
+                    zipFile3.renameTo(zipFile);
                     continue;
                 }
 
@@ -150,7 +152,7 @@ public class ContoursUpdater extends ThreadProcessor {
 
                     // run splitter
                     String[] args = new String[]{
-                        "--max-areas=4", "--max-nodes=1000000", "--output=pbf",
+                        "--max-areas=10", "--max-nodes=1000000", "--output=pbf",
                         "--status-freq=0", "--output-dir=" + contoursDir,
                         "--mapid=" + d8.format(Long.parseLong(name) + 1), contoursDir + name + ".osm.gz"
                     };
@@ -200,7 +202,7 @@ public class ContoursUpdater extends ThreadProcessor {
                     setStatus(coords + "Convert contours to Garmin "
                             + " - " + region.name + " " + perc + " % completed.");
                     String args[] = new String[]{
-                        "--draw-priority=10000", "--transparent",
+                        "--draw-priority=30", "--transparent",
                         "--merge-lines", "--output-dir=" + contoursDir
                     };
                     ArrayList<String> aa = new ArrayList<String>();
@@ -260,9 +262,29 @@ public class ContoursUpdater extends ThreadProcessor {
                     // if data ready, unpack file to region dir
                     setStatus(coords + "Copying contours data "
                             + " - " + region.name + " " + perc + " % completed.");
-                    File zipFile = new File(contoursDir + srtmName + ".zip");
                     if (zipFile.length() > 0) {
-                        unpackFiles(zipFile);
+                        if (zipFile2.exists()) {
+                            // check pass
+                            if (zipFile.length() == zipFile2.length()) {
+                                // checked, contours OK
+                                zipFile2.delete();
+                                unpackFiles(zipFile);
+                            } else if (zipFile.length() > zipFile2.length()) {
+                                // use new contours and allow one more check
+                                unpackFiles(zipFile);
+                                zipFile2.delete();
+                                zipFile.renameTo(zipFile2);
+                            } else {
+                                // things go wrong, discard current zipFile
+                                // and do one more check
+                                zipFile.delete();
+                                unpackFiles(zipFile2);
+                            }
+                        } else {
+                            // first try, allow check pass next time
+                            unpackFiles(zipFile);
+                            zipFile.renameTo(zipFile2);
+                        }
                     }
                 }
                 for (int i = 0; i < osmFiles.length; i++) {
