@@ -353,7 +353,7 @@
                         e.g. osm2garmin.exe -J-Xmx2000m
                     </para>
                     <para>
-                        In addition, if you would like to use different JRE, add the parameter --jdkhome &lt;path-to-jre$gt;
+                        In addition, if you would like to use different JRE, add the parameter --jdkhome &lt;path-to-jre&gt;
                     </para>
                     <para>
                         Your customized command line can look e.g. like this:
