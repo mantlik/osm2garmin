@@ -32,6 +32,8 @@ import java.util.jar.Pack200;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 /**
  *
@@ -53,7 +55,7 @@ public class Utilities {
             public void run() {
                 while (true) {
                     if (!processesToMonitor.isEmpty()) {
-                        for (int i = 0; i < processesToMonitor.size(); i ++) {
+                        for (int i = 0; i < processesToMonitor.size(); i++) {
                             ThreadProcessor process = processesToMonitor.get(i);
                             if (process != null) {
                                 process.changeSupport.firePropertyChange("status", null, process.getStatus());
@@ -79,25 +81,25 @@ public class Utilities {
         }
         return instance;
     }
-    
+
     /**
-     * 
-     * Add process to monitor and fire status, state and progress change in regular
-     * interval REFRESH_INTERVAL
-     * 
+     *
+     * Add process to monitor and fire status, state and progress change in
+     * regular interval REFRESH_INTERVAL
+     *
      * Each process will be added only once.
      *
      * @param process process to add
      */
-    public void addProcessToMonitor (ThreadProcessor process) {
-        if (! processesToMonitor.contains(process)) {
+    public void addProcessToMonitor(ThreadProcessor process) {
+        if (!processesToMonitor.contains(process)) {
             processesToMonitor.add(process);
         }
     }
-    
+
     /**
      * Removes process from monitoring.
-     * 
+     *
      * @param process process to remove
      * @return process if process was monitored. otherwise returns null.
      */
@@ -124,7 +126,7 @@ public class Utilities {
     public void runExternal(String extclass, String method, String library,
             String[] args, ThreadProcessor processor) throws Exception {
         try {
-        waitExclusive(extclass, processor);
+            waitExclusive(extclass, processor);
         } catch (InterruptedException ex) {
             processor.setState(ThreadProcessor.ERROR);
             processor.setStatus("Interrupted.");
@@ -445,5 +447,71 @@ public class Utilities {
             return null;
         }
         return parameters;
+    }
+
+    /**
+     * Unpack files from zip archive zipFile to directory destDir
+     *
+     * @param zipFile
+     * @param destDir
+     */
+    public static void unpackZipFiles(File zipFile, String destDir) {
+        byte[] buf = new byte[1024];
+        try {
+            ZipInputStream zip = new ZipInputStream(new BufferedInputStream(
+                    new FileInputStream(zipFile)));
+            ZipEntry entry = zip.getNextEntry();
+            while (entry != null) {
+                String destname = entry.getName();
+                File destFile = new File(destDir + destname);
+                if (destFile.exists()) {
+                    destFile.delete();
+                }
+                OutputStream os = new BufferedOutputStream(new FileOutputStream(destFile));
+                int len;
+                while ((len = zip.read(buf)) > 0) {
+                    os.write(buf, 0, len);
+                }
+                os.close();
+                zip.closeEntry();
+                entry = zip.getNextEntry();
+            }
+            zip.close();
+        } catch (IOException ex) {
+            Logger.getLogger(ContoursUpdater.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    /**
+     * Count total uncompressed length of all files in zipFile
+     *
+     * @param zipFile
+     * @return
+     */
+    public static long zipGetTotalLength(File zipFile) {
+        long length = 0;
+        ZipInputStream zip = null;
+        try {
+            zip = new ZipInputStream(new BufferedInputStream(
+                    new FileInputStream(zipFile)));
+            ZipEntry entry = zip.getNextEntry();
+            while (entry != null) {
+                long l = entry.getSize();
+                if (l > 0) {
+                    length += l;
+                }
+                entry = zip.getNextEntry();
+            }
+            zip.close();
+        } catch (IOException ex) {
+            Logger.getLogger(ContoursUpdater.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        if (zip != null) {
+            try {
+                zip.close();
+            } catch (IOException ex) {
+            }
+        }
+        return length;
     }
 }
