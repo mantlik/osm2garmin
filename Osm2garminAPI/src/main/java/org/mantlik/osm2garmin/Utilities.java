@@ -33,6 +33,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 /**
@@ -490,17 +491,16 @@ public class Utilities {
      */
     public static long zipGetTotalLength(File zipFile) {
         long length = 0;
-        ZipInputStream zip = null;
+        ZipFile zip = null;
         try {
-            zip = new ZipInputStream(new BufferedInputStream(
-                    new FileInputStream(zipFile)));
-            ZipEntry entry = zip.getNextEntry();
-            while (entry != null) {
+            zip = new ZipFile(zipFile);
+            Enumeration <? extends ZipEntry> entries = zip.entries();
+            while (entries.hasMoreElements()) {
+                ZipEntry entry = entries.nextElement();
                 long l = entry.getSize();
                 if (l > 0) {
                     length += l;
                 }
-                entry = zip.getNextEntry();
             }
             zip.close();
         } catch (IOException ex) {
