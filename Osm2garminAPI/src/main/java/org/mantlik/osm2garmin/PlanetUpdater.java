@@ -168,7 +168,7 @@ public class PlanetUpdater extends ThreadProcessor {
                         };
                     } else {
                         args1 = new String[]{
-                            "--log-progress", "interval=120",
+                            "--log-progress", "interval=120", "inPipe.0=ac0",
                             "--t", "outputCount=" + procregions,
                             "--wb", "file=" + parameters.getProperty("planet_file")
                         };
