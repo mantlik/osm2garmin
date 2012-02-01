@@ -29,7 +29,6 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 import org.mantlik.osm2garmin.srtm2osm.Srtm;
 
@@ -38,7 +37,7 @@ import org.mantlik.osm2garmin.srtm2osm.Srtm;
  * @author fm
  */
 public class ContoursUpdater extends ThreadProcessor {
-
+    
     private final static DecimalFormat d000 = new DecimalFormat("000");
     private final static DecimalFormat d00 = new DecimalFormat("00");
     private final static DecimalFormat d8 = new DecimalFormat("00000000");
@@ -55,7 +54,7 @@ public class ContoursUpdater extends ThreadProcessor {
         super(parameters);
         this.region = region;
     }
-
+    
     @Override
     public void run() {
         setStatus("Starting contours update - " + region.name);
@@ -83,7 +82,7 @@ public class ContoursUpdater extends ThreadProcessor {
                 // check existence of contours file
                 setStatus(coords + "Unpacking contours data "
                         + " - " + region.name + " " + perc + " % completed.");
-
+                
                 File zipFile = new File(contoursDir + srtmName + ".zip");
                 // typo in file name up to r34
                 File zipFile3 = new File(contoursDir + srtmName + "..zip");
@@ -91,6 +90,11 @@ public class ContoursUpdater extends ThreadProcessor {
                 File zipFile2 = new File(contoursDir + srtmName + "_.zip");
                 if (zipFile.exists() && (zipFile.length() > 0)) {
                     unpackFiles(zipFile);
+                    if (zipFile2.exists()) {
+                        if (Utilities.zipGetTotalLength(zipFile) == Utilities.zipGetTotalLength(zipFile2)) {
+                            zipFile2.delete();
+                        }
+                    }
                     continue;
                 } else if (zipFile3.exists()) {
                     if (zipFile3.length() > 0) {
@@ -99,7 +103,7 @@ public class ContoursUpdater extends ThreadProcessor {
                     zipFile3.renameTo(zipFile);
                     continue;
                 }
-
+                
                 Utilities utils = Utilities.getInstance();
                 try {
                     utils.waitExclusive(Srtm2Osm.class.getName(), this);
@@ -145,7 +149,7 @@ public class ContoursUpdater extends ThreadProcessor {
                 }
                 ArrayList<String> outputFiles = new ArrayList<String>();
                 outputFiles.add(contoursDir + name + ".osm.gz");
-
+                
                 long osmlen = f.length();
                 // split big contours file
                 if (osmlen > 30000000) {  // 30 MB
@@ -190,13 +194,13 @@ public class ContoursUpdater extends ThreadProcessor {
                             outputFiles.add(fname);
                         }
                     }
-
+                    
                     new File(contoursDir + name + ".osm.gz").delete();
                     new File(contoursDir + "areas.list").delete();
                     new File(contoursDir + "template.args").delete();
                 }
                 String[] osmFiles = outputFiles.toArray(new String[0]);
-
+                
                 if (osmlen > 20) {
                     // transform splitted contours files to Garmin format
                     setStatus(coords + "Convert contours to Garmin "
@@ -224,7 +228,7 @@ public class ContoursUpdater extends ThreadProcessor {
                     }
                 }
                 System.gc();
-
+                
                 ArrayList<String> imgFiles = new ArrayList<String>();
                 String nn;
                 for (String file : osmFiles) {
@@ -234,7 +238,7 @@ public class ContoursUpdater extends ThreadProcessor {
                         imgFiles.add(nn);
                     }
                 }
-
+                
                 if (!imgFiles.isEmpty()) {
                     // pack files
                     setStatus(coords + "Packing files for later use "
@@ -262,23 +266,49 @@ public class ContoursUpdater extends ThreadProcessor {
                     // if data ready, unpack file to region dir
                     setStatus(coords + "Copying contours data "
                             + " - " + region.name + " " + perc + " % completed.");
-                    if (zipFile.length() > 0) {
-                        if (zipFile2.exists()) {
+                    long zipLength = Utilities.zipGetTotalLength(zipFile);
+                    if (zipLength > 0) {
+                        if (zipFile2.exists() && zipFile2.length() > 0) {
                             // check pass
-                            if (zipFile.length() == zipFile2.length()) {
+                            long zip2length = Utilities.zipGetTotalLength(zipFile2);
+                            if (zipLength == zip2length) {
                                 // checked, contours OK
-                                zipFile2.delete();
                                 unpackFiles(zipFile);
-                            } else if (zipFile.length() > zipFile2.length()) {
+                                if (!zipFile2.delete()) {
+                                    try {
+                                        Thread.sleep(100);
+                                        if (!zipFile2.delete()) {
+                                            zipFile2.deleteOnExit();
+                                        }
+                                    } catch (InterruptedException ex) {
+                                    }
+                                }
+                            } else if (zipLength > zip2length) {
                                 // use new contours and allow one more check
                                 unpackFiles(zipFile);
-                                zipFile2.delete();
+                                if (!zipFile2.delete()) {
+                                    try {
+                                        Thread.sleep(100);
+                                        if (!zipFile2.delete()) {
+                                            zipFile2.deleteOnExit();
+                                        }
+                                    } catch (InterruptedException ex) {
+                                    }
+                                }
                                 zipFile.renameTo(zipFile2);
                             } else {
                                 // things go wrong, discard current zipFile
                                 // and do one more check
-                                zipFile.delete();
                                 unpackFiles(zipFile2);
+                                if (!zipFile.delete()) {
+                                    try {
+                                        Thread.sleep(100);
+                                        if (!zipFile.delete()) {
+                                            zipFile.deleteOnExit();
+                                        }
+                                    } catch (InterruptedException ex) {
+                                    }
+                                }
                             }
                         } else {
                             // first try, allow check pass next time
@@ -309,7 +339,7 @@ public class ContoursUpdater extends ThreadProcessor {
             notify();
         }
     }
-
+    
     private void unpackFiles(File zipFile) {
         String destDir = parameters.getProperty("maps_dir");
         if (destDir.equals("")) {
@@ -320,28 +350,6 @@ public class ContoursUpdater extends ThreadProcessor {
             }
             destDir = destDir + region.name;
         }
-        try {
-            ZipInputStream zip = new ZipInputStream(new BufferedInputStream(
-                    new FileInputStream(zipFile)));
-            ZipEntry entry = zip.getNextEntry();
-            while (entry != null) {
-                String destname = entry.getName();
-                File destFile = new File(destDir + destname);
-                if (destFile.exists()) {
-                    destFile.delete();
-                }
-                OutputStream os = new BufferedOutputStream(new FileOutputStream(destFile));
-                int len;
-                while ((len = zip.read(buf)) > 0) {
-                    os.write(buf, 0, len);
-                }
-                os.close();
-                zip.closeEntry();
-                entry = zip.getNextEntry();
-            }
-            zip.close();
-        } catch (IOException ex) {
-            Logger.getLogger(ContoursUpdater.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        Utilities.unpackZipFiles(zipFile, destDir);
     }
 }

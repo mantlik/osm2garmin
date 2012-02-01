@@ -359,7 +359,7 @@
                         Your customized command line can look e.g. like this:
                     </para>
                     <para>
-                        <literallayout>c:\program files\osm2garmin_1.0\bin\osm2garmin.exe -J-Xmx2000m --jdkhome "c:/program files/Java/jre6"</literallayout>
+                        <literallayout>"c:\program files\osm2garmin_1.0\bin\osm2garmin.exe" -J-Xmx2000m --jdkhome "c:/program files/Java/jre6"</literallayout>
                     </para>
                     <tip>
                         <para>
