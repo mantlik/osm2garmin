@@ -48,11 +48,12 @@ public class PlanetUpdater extends ThreadProcessor {
      * @param regions
      */
     public PlanetUpdater(Properties parameters, ArrayList<Region> regions) {
-        super(parameters);
+        super(parameters, false);
         planetFile = new File(parameters.getProperty("planet_file"));
         oldPlanetFile = new File(parameters.getProperty("old_planet_file"));
         uflen = 0;
         this.regions = regions;
+        start();
     }
 
     /**

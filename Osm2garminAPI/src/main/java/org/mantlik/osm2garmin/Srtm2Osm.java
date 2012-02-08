@@ -54,11 +54,12 @@ public class Srtm2Osm extends ThreadProcessor {
      * @param outputFile
      */
     public Srtm2Osm(Properties parameters, int lat, int lon, String outputFile) {
-        super(parameters);
+        super(parameters, false);
         super.parameters = parameters;
         this.lat = lat;
         this.lon = lon;
         this.outputFile = outputFile;
+        start();
     }
 
     @Override
