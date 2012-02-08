@@ -51,22 +51,13 @@ public class ContoursUpdater extends ThreadProcessor {
      * @param parameters
      */
     public ContoursUpdater(Region region, Properties parameters) {
-        super(parameters);
+        super(parameters, false);
         this.region = region;
-        synchronized (this) {
-            this.notify();
-        }
+        start();
     }
 
     @Override
     public void run() {
-        // wait for initialization to be finished
-        try {
-            synchronized (this) {
-                this.wait(1000);
-            }
-        } catch (InterruptedException ex) {
-        }
         setStatus("Starting contours update - " + region.name);
         setProgress(0);
         String contoursDir = parameters.getProperty("contours_dir");

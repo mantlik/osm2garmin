@@ -23,7 +23,6 @@ package org.mantlik.osm2garmin;
 
 import java.io.File;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.Properties;
 import jbittorrentapi.*;
 
@@ -50,9 +49,10 @@ public class TorrentDownloader extends ThreadProcessor {
      * @param saveDir
      */
     public TorrentDownloader(Properties parameters, File torrentFile, File saveDir) {
-        super(parameters);
+        super(parameters, false);
         this.torrentFile = torrentFile;
         this.saveDir = saveDir;
+        start();
     }
 
     /**
@@ -62,9 +62,10 @@ public class TorrentDownloader extends ThreadProcessor {
      * @param saveDir
      */
     public TorrentDownloader(Properties parameters, TorrentFile torrent, File saveDir) {
-        super(parameters);
+        super(parameters, false);
         this.torrent = torrent;
         this.saveDir = saveDir;
+        start();
     }
 
     public TorrentDownloader(Properties parameters, TorrentFile torrent, File saveDir,
