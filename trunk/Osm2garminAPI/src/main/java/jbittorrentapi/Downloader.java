@@ -21,7 +21,6 @@
  */
 package jbittorrentapi;
 
-import org.mantlik.osm2garmin.*;
 import java.io.File;
 import java.io.InputStream;
 import java.io.RandomAccessFile;

@@ -712,7 +712,7 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
             }
 
             DownloadTask dt = this.task.get(p.toString());
-            if (nbDownloaders < 5 && dt != null) {
+            if (nbDownloaders < 5 && dt != null && dt.ms != null) {
                 if (!p.isInterested()) {
                     this.unchoken.put(p.toString(), p);
                     if (p.isChoked()) {
@@ -762,7 +762,7 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
                 p = (Peer) this.unchokeList.remove(0);
                 synchronized (this.task) {
                     DownloadTask dt = this.task.get(p.toString());
-                    if (dt != null) {
+                    if (dt != null && dt.ms != null) {
                         dt.ms.addMessageToQueue(new Message_PP(PeerProtocol.UNCHOKE));
                         p.setChoked(false);
                         this.unchoken.put(p.toString(), p);

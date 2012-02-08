@@ -19,23 +19,6 @@
  * <http://www.gnu.org/licenses/gpl-2.0.html>.
  * #L%
  */
-/*
- * Copyright (C) 2012 Frantisek Mantlik <frantisek at mantlik.cz>
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
- */
 package jbittorrentapi;
 
 import java.io.File;
@@ -44,13 +27,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.TreeMap;
 
 /**
  *
  * @author Frantisek Mantlik <frantisek at mantlik.cz>
  */
-public class WebseedTask extends DownloadTask {
+public class WebseedTask extends DownloadTask implements Observer {
 
     private DownloadManager manager;
     private static final long MAX_IDLE_TIME = 120000;  // start download when no piece received 2 min
@@ -65,7 +50,7 @@ public class WebseedTask extends DownloadTask {
     public void run() {
         while (run) {
             try {
-                if (! manager.isComplete() && (System.currentTimeMillis() - manager.lastPieceReceived) > MAX_IDLE_TIME) {
+                if (!manager.isComplete() && (System.currentTimeMillis() - manager.lastPieceReceived) > MAX_IDLE_TIME) {
                     webseedActive = true;
                     downloadPiece = null;
                     manager.peerReady(DownloadManager.WEBSEED_ID);
@@ -87,8 +72,13 @@ public class WebseedTask extends DownloadTask {
                             Downloader downloader = new Downloader(new URL(fileUrl), tempFileName, false);
                             downloader.setSize(downloadPiece.getLength());
                             downloader.setOffset(offs);
-                            downloader.run();
+                            downloader.addObserver(this);
+                            downloader.resume();
+                            synchronized (this) {
+                                this.wait(300000);
+                            }
                             if (downloader.getStatus() != Downloader.COMPLETE) {
+                                downloader.cancel();
                                 manager.pieceCompleted(DownloadManager.WEBSEED_ID, downloadPiece.getIndex(), false);
                                 breakDownload = true;
                                 continue;
@@ -122,6 +112,14 @@ public class WebseedTask extends DownloadTask {
                 }
             } catch (InterruptedException ex) {
             }
+        }
+    }
+
+    @Override
+    public synchronized void update(Observable o, Object arg) {
+        Downloader downloader = (Downloader) o;
+        if (downloader.getStatus() != Downloader.DOWNLOADING) {
+            this.notify();
         }
     }
 }
