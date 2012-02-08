@@ -37,7 +37,7 @@ import org.mantlik.osm2garmin.srtm2osm.Srtm;
  * @author fm
  */
 public class ContoursUpdater extends ThreadProcessor {
-    
+
     private final static DecimalFormat d000 = new DecimalFormat("000");
     private final static DecimalFormat d00 = new DecimalFormat("00");
     private final static DecimalFormat d8 = new DecimalFormat("00000000");
@@ -53,10 +53,20 @@ public class ContoursUpdater extends ThreadProcessor {
     public ContoursUpdater(Region region, Properties parameters) {
         super(parameters);
         this.region = region;
+        synchronized (this) {
+            this.notify();
+        }
     }
-    
+
     @Override
     public void run() {
+        // wait for initialization to be finished
+        try {
+            synchronized (this) {
+                this.wait(1000);
+            }
+        } catch (InterruptedException ex) {
+        }
         setStatus("Starting contours update - " + region.name);
         setProgress(0);
         String contoursDir = parameters.getProperty("contours_dir");
@@ -82,7 +92,7 @@ public class ContoursUpdater extends ThreadProcessor {
                 // check existence of contours file
                 setStatus(coords + "Unpacking contours data "
                         + " - " + region.name + " " + perc + " % completed.");
-                
+
                 File zipFile = new File(contoursDir + srtmName + ".zip");
                 // typo in file name up to r34
                 File zipFile3 = new File(contoursDir + srtmName + "..zip");
@@ -103,7 +113,7 @@ public class ContoursUpdater extends ThreadProcessor {
                     zipFile3.renameTo(zipFile);
                     continue;
                 }
-                
+
                 Utilities utils = Utilities.getInstance();
                 try {
                     utils.waitExclusive(Srtm2Osm.class.getName(), this);
@@ -149,7 +159,7 @@ public class ContoursUpdater extends ThreadProcessor {
                 }
                 ArrayList<String> outputFiles = new ArrayList<String>();
                 outputFiles.add(contoursDir + name + ".osm.gz");
-                
+
                 long osmlen = f.length();
                 // split big contours file
                 if (osmlen > 30000000) {  // 30 MB
@@ -194,13 +204,13 @@ public class ContoursUpdater extends ThreadProcessor {
                             outputFiles.add(fname);
                         }
                     }
-                    
+
                     new File(contoursDir + name + ".osm.gz").delete();
                     new File(contoursDir + "areas.list").delete();
                     new File(contoursDir + "template.args").delete();
                 }
                 String[] osmFiles = outputFiles.toArray(new String[0]);
-                
+
                 if (osmlen > 20) {
                     // transform splitted contours files to Garmin format
                     setStatus(coords + "Convert contours to Garmin "
@@ -228,7 +238,7 @@ public class ContoursUpdater extends ThreadProcessor {
                     }
                 }
                 System.gc();
-                
+
                 ArrayList<String> imgFiles = new ArrayList<String>();
                 String nn;
                 for (String file : osmFiles) {
@@ -238,7 +248,7 @@ public class ContoursUpdater extends ThreadProcessor {
                         imgFiles.add(nn);
                     }
                 }
-                
+
                 if (!imgFiles.isEmpty()) {
                     // pack files
                     setStatus(coords + "Packing files for later use "
@@ -295,7 +305,9 @@ public class ContoursUpdater extends ThreadProcessor {
                                     } catch (InterruptedException ex) {
                                     }
                                 }
-                                zipFile.renameTo(zipFile2);
+                                if (!((Srtm2Osm) srtm2osm).allSrtms) {
+                                    zipFile.renameTo(zipFile2);
+                                }
                             } else {
                                 // things go wrong, discard current zipFile
                                 // and do one more check
@@ -311,9 +323,11 @@ public class ContoursUpdater extends ThreadProcessor {
                                 }
                             }
                         } else {
-                            // first try, allow check pass next time
                             unpackFiles(zipFile);
-                            zipFile.renameTo(zipFile2);
+                            if (!((Srtm2Osm) srtm2osm).allSrtms) {
+                                // not all srtms included
+                                zipFile.renameTo(zipFile2);
+                            }
                         }
                     }
                 }
@@ -339,7 +353,7 @@ public class ContoursUpdater extends ThreadProcessor {
             notify();
         }
     }
-    
+
     private void unpackFiles(File zipFile) {
         String destDir = parameters.getProperty("maps_dir");
         if (destDir.equals("")) {

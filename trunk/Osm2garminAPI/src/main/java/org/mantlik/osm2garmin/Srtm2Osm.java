@@ -21,7 +21,10 @@
  */
 package org.mantlik.osm2garmin;
 
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Properties;
@@ -32,7 +35,6 @@ import org.mantlik.osm2garmin.srtm2osm.Contour;
 import org.mantlik.osm2garmin.srtm2osm.Contours;
 import org.mantlik.osm2garmin.srtm2osm.Point;
 import org.mantlik.osm2garmin.srtm2osm.Srtm;
-import org.openide.util.Exceptions;
 
 /**
  *
@@ -42,6 +44,7 @@ public class Srtm2Osm extends ThreadProcessor {
 
     private int lat, lon;
     private String outputFile;
+    public boolean allSrtms = true;
 
     /**
      *
@@ -77,8 +80,21 @@ public class Srtm2Osm extends ThreadProcessor {
                 coords = Math.abs(lat + la) + (lat + la > 0 ? "N " : "S ") + Math.abs(lon + lo) + (lon + lo > 0 ? "E" : "W");
                 Srtm srtm = null;
                 if (Srtm.exists(lon + lo, lat + la, parameters)) {
-                    setStatus("Contours " + coords + ": Downloading SRTM data.");
-                    srtm = Srtm.get(lon + lo, lat + la, parameters);
+                    int i = 0;
+                    while (srtm == null && i <= 5) {
+                        i++;
+                        setStatus("Contours " + coords + ": Downloading SRTM data - attempt no. " + i);
+                        srtm = Srtm.get(lon + lo, lat + la, parameters);
+                        if (srtm == null) {
+                            try {
+                                Thread.sleep(1000);
+                            } catch (InterruptedException ex) {
+                            }
+                        }
+                    }
+                    if (srtm == null) {
+                        allSrtms = false;
+                    }
                 }
                 if (srtm == null) {
                     setStatus("Contours " + coords + ": No SRTM data.");
@@ -255,9 +271,8 @@ public class Srtm2Osm extends ThreadProcessor {
     }
 
     /*
-     * join c2 to the end of c1
-     * suppose the last point of c1 equals to the first point of c2 (not
-     * checked)
+     * join c2 to the end of c1 suppose the last point of c1 equals to the first
+     * point of c2 (not checked)
      */
     private Contour joinContours(Contour c1, Contour c2) {
         Point end = c1.getData().get(c1.getData().size() - 1);
