@@ -21,7 +21,7 @@ You can find out whether the particular JRE installation is 32-bit or 64-bit wit
 "c:\Program files\Java\jre6\bin\java.exe" -version
 }}}
 
-in the Command window (parenthesis are part of the command). Last line of the output will show 32-Bit or 64-Bit version of the installation. Output can look like this:
+in the Commandline window (parenthesis are part of the command). Last line of the output will show 32-Bit or 64-Bit version of the installation. Output can look like this:
 
 {{{
 java version "1.6.0_29"
