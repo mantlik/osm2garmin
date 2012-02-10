@@ -190,7 +190,7 @@ final class RegionsPanel extends javax.swing.JPanel implements ListSelectionList
 
     private void addRegionButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addRegionButtonActionPerformed
         DefaultTableModel model = (DefaultTableModel) regionsTable.getModel();
-        model.addRow(new Object[]{"", 0, 0, 0, 0});
+        model.addRow(new Object[]{true, "new_region", 0.0f, 0.0f, 0.0f, 0.0f});
     }//GEN-LAST:event_addRegionButtonActionPerformed
 
     private void moveUpRegionButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_moveUpRegionButtonActionPerformed
