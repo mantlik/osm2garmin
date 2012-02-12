@@ -54,9 +54,10 @@ public class OsmMaker extends ThreadProcessor {
      * @param max_areas
      */
     public OsmMaker(Region region, Properties parameters, int max_areas) {
-        super(parameters);
+        super(parameters, false);
         this.region = region;
         this.max_areas = max_areas;
+        start();
     }
 
     /**

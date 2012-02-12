@@ -121,12 +121,13 @@ public class Osm2garminTest {
 
         ExtprocessProcessor(Properties properties, String extclass, String method, String library,
                 String[] args) {
-            super(properties);
+            super(properties, false);
             this.properties = properties;
             this.extclass = extclass;
             this.method = method;
             this.library = library;
             this.args = args;
+            start();
         }
 
         @Override

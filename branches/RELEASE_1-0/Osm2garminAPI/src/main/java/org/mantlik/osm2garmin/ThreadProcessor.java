@@ -25,7 +25,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.Properties;
-import org.openide.util.Exceptions;
 import org.openide.util.RequestProcessor;
 
 /**
@@ -67,12 +66,13 @@ public abstract class ThreadProcessor implements Runnable, PropertyChangeListene
     boolean commandline = true;
     RequestProcessor processor;
     long waitFrom = -1;
+    boolean running;
 
     /**
      *
      * @param parameters
      */
-    public ThreadProcessor(Properties parameters) {
+    public ThreadProcessor(Properties parameters, boolean start) {
         changeSupport = new PropertyChangeSupport(this);
         this.parameters = parameters;
         if (parameters.containsKey("gui") && parameters.getProperty("gui").equals("1")) {
@@ -83,7 +83,20 @@ public abstract class ThreadProcessor implements Runnable, PropertyChangeListene
             status = "Interrupted.";
             return;
         }
-        process();
+        if (start) {
+            process();
+        }
+    }
+    
+    public ThreadProcessor (Properties parameters) {
+        this(parameters, true);
+    }
+
+    public synchronized void start() {
+        if (!running) {
+            running = true;
+            process();
+        }
     }
 
     private void process() {

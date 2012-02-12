@@ -24,6 +24,9 @@ package org.mantlik.osm2garmin;
 import java.io.*;
 import java.lang.reflect.Method;
 import java.net.*;
+import java.text.DecimalFormat;
+import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -513,5 +516,49 @@ public class Utilities {
             }
         }
         return length;
+    }
+
+    /**
+     * Download state.txt for given date (approximately, no later)
+     *
+     * @param date date in the form YYYY-MM-DD
+     * @param mirror mirror to download state.txt from
+     * @param targetPath path to osmosis state dir
+     * @return true in case of success
+     */
+    public static boolean downloadOsmosisStateFile(Long date, String mirror,
+            String targetPath) {
+        if (!mirror.endsWith("/")) {
+            mirror = mirror + "/";
+        }
+        long planetTime = date;
+        long startReplTime = new SimpleDateFormat("yyyy-MM-dd").parse(
+                "2009-11-20", new ParsePosition(0)).getTime();
+        int sequenceNo = (int) ((planetTime - startReplTime) / 1000 / 60 / 60); // hours
+        DecimalFormat nnn = new DecimalFormat("000000");
+        String sequence = nnn.format(sequenceNo);
+        String stateUrl = mirror + "hour-replicate/000/"
+                + sequence.substring(0, 3) + "/" + sequence.substring(3) + ".state.txt";
+        URL surl;
+        try {
+            surl = new URL(stateUrl);
+        } catch (MalformedURLException ex) {
+            Logger.getLogger(Osm2garmin.class.getName()).log(Level.SEVERE, "", ex);
+            return false;
+        }
+        Downloader downloader = new Downloader(surl, targetPath);
+        while (downloader.getStatus() != Downloader.COMPLETE) {
+            if (downloader.getStatus() == Downloader.ERROR) {
+                return false;
+            }
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException ex) {
+                //Logger.getLogger(PlanetUpdateDownloader.class.getName()).log(Level.SEVERE, null, ex);
+                //setState(ERROR);
+                return false;
+            }
+        }
+        return true;
     }
 }

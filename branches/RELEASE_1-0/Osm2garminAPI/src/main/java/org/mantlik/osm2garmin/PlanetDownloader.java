@@ -116,6 +116,7 @@ public class PlanetDownloader extends ThreadProcessor {
                 return;
             }
         }
+
         setProgress(100);
         setStatus("Completed.");
         setState(COMPLETED);
@@ -174,47 +175,6 @@ public class PlanetDownloader extends ThreadProcessor {
         } catch (IOException ex) {
             Logger.getLogger(Osm2garmin.class.getName()).log(Level.SEVERE, "Can not save download parameters.", ex);
             return false;
-        }
-
-        String osmosiswork = parameters.getProperty("osmosiswork");
-
-        if (!osmosiswork.endsWith("/")) {
-            osmosiswork = osmosiswork + "/";
-        }
-        File osmosisState = new File(osmosiswork + "state.txt");
-
-        if (!new File(osmosiswork).isDirectory()) {
-            // initialize Osmosis working directory
-            new File(osmosiswork).mkdirs();
-            String[] osargs = new String[]{"--rrii", "-v 9", "workingDirectory=" + osmosiswork};
-            new File(osmosiswork + "configuration.txt").delete();
-            try {
-                Utilities.getInstance().runExternal("org.openstreetmap.osmosis.core.Osmosis", "run", "osmosis",
-                        osargs, this);
-            } catch (Exception ex) {
-                Logger.getLogger(Osm2garmin.class.getName()).log(Level.SEVERE, "Osmosis error.", ex);
-                setState(ERROR);
-                return false;
-            }
-            try {
-                //org.openstreetmap.osmosis.core.Osmosis.run(osargs);
-                Utilities.copyFile(this.getClass().getResourceAsStream("configuration.txt"), new File(osmosiswork + "configuration.txt"));
-            } catch (Exception ex) {
-                Logger.getLogger(Osm2garmin.class.getName()).log(Level.SEVERE, "Error while copying osmosis configuration.", ex);
-                setState(ERROR);
-                return false;
-            }
-        }
-        // create osmosiswork
-        if (!osmosisState.exists()) { // download state.txt
-            String[] mirrors = parameters.getProperty("planet_file_update_urls").split(",");
-            String upmirror = mirrors[(int) (Math.floor(Math.random() * mirrors.length))].trim();  // select random mirror
-            if (!downloadOsmosisStateFile(new SimpleDateFormat("yyyy-MM-dd").parse(
-                    downloadParameters.getProperty("start_date_osmosis"), new ParsePosition(0)).getTime(),
-                    upmirror, osmosisState.getPath())) {
-                setState(ERROR);
-                return false;
-            }
         }
 
         System.out.println("downloading " + url.toExternalForm());
@@ -385,52 +345,49 @@ public class PlanetDownloader extends ThreadProcessor {
             }
         }
 
-        // remove download properties
-        new File(Utilities.getUserdir(this) + "planetdownload.properties").delete();
-        return true;
-    }
+        String osmosiswork = parameters.getProperty("osmosiswork");
 
-    /**
-     * Download state.txt for given date (approximately, no later)
-     *
-     * @param date date in the form YYYY-MM-DD
-     * @param mirror mirror to download state.txt from
-     * @param targetPath path to osmosis state dir
-     * @return true in case of success
-     */
-    public static boolean downloadOsmosisStateFile(Long date, String mirror,
-            String targetPath) {
-        if (!mirror.endsWith("/")) {
-            mirror = mirror + "/";
+        if (!osmosiswork.endsWith("/")) {
+            osmosiswork = osmosiswork + "/";
         }
-        long planetTime = date;
-        long startReplTime = new SimpleDateFormat("yyyy-MM-dd").parse(
-                "2009-11-20", new ParsePosition(0)).getTime();
-        int sequenceNo = (int) ((planetTime - startReplTime) / 1000 / 60 / 60); // hours
-        DecimalFormat nnn = new DecimalFormat("000000");
-        String sequence = nnn.format(sequenceNo);
-        String stateUrl = mirror + "hour-replicate/000/"
-                + sequence.substring(0, 3) + "/" + sequence.substring(3) + ".state.txt";
-        URL surl;
-        try {
-            surl = new URL(stateUrl);
-        } catch (MalformedURLException ex) {
-            Logger.getLogger(Osm2garmin.class.getName()).log(Level.SEVERE, "", ex);
-            return false;
-        }
-        Downloader downloader = new Downloader(surl, targetPath);
-        while (downloader.getStatus() != Downloader.COMPLETE) {
-            if (downloader.getStatus() == Downloader.ERROR) {
+        File osmosisState = new File(osmosiswork + "state.txt");
+
+        if (!new File(osmosiswork).isDirectory()) {
+            // initialize Osmosis working directory
+            new File(osmosiswork).mkdirs();
+            String[] osargs = new String[]{"--rrii", "-v 9", "workingDirectory=" + osmosiswork};
+            new File(osmosiswork + "configuration.txt").delete();
+            try {
+                Utilities.getInstance().runExternal("org.openstreetmap.osmosis.core.Osmosis", "run", "osmosis",
+                        osargs, this);
+            } catch (Exception ex) {
+                Logger.getLogger(Osm2garmin.class.getName()).log(Level.SEVERE, "Osmosis error.", ex);
+                setState(ERROR);
                 return false;
             }
             try {
-                Thread.sleep(1000);
-            } catch (InterruptedException ex) {
-                //Logger.getLogger(PlanetUpdateDownloader.class.getName()).log(Level.SEVERE, null, ex);
-                //setState(ERROR);
+                //org.openstreetmap.osmosis.core.Osmosis.run(osargs);
+                Utilities.copyFile(this.getClass().getResourceAsStream("configuration.txt"), new File(osmosiswork + "configuration.txt"));
+            } catch (Exception ex) {
+                Logger.getLogger(Osm2garmin.class.getName()).log(Level.SEVERE, "Error while copying osmosis configuration.", ex);
+                setState(ERROR);
                 return false;
             }
         }
+        // create osmosiswork
+        if (!osmosisState.exists()) { // download state.txt
+            String[] mirrors = parameters.getProperty("planet_file_update_urls").split(",");
+            String upmirror = mirrors[(int) (Math.floor(Math.random() * mirrors.length))].trim();  // select random mirror
+            if (!Utilities.downloadOsmosisStateFile(new SimpleDateFormat("yyyy-MM-dd").parse(
+                    downloadParameters.getProperty("start_date_osmosis"), new ParsePosition(0)).getTime(),
+                    upmirror, osmosisState.getPath())) {
+                setState(ERROR);
+                return false;
+            }
+        }
+
+        // remove download properties
+        new File(Utilities.getUserdir(this) + "planetdownload.properties").delete();
         return true;
     }
 }
