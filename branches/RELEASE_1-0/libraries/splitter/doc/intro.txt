@@ -1,8 +1,0 @@
-
-* The size of each tile is modified depending on the density of features.  So tiles can remain large for the most part but shrink down in areas of high density.
-* Tiles meet exactly and do not overlap.
-* Tiles are split on boundries that are exact at a low zoom level in Garmin units, ensuring that the tiles do not overlap or have gaps in the overview map.
-* Lines crossing the boundry are cut into two pieces exactly on the boundry.  Part of the line will be in one tile, the rest in the other tile.  There is no overlap.
-* The same is true for polygons.  They are cut with a straight line.
-* If a line crosses a corner of a tile but does not have a node inside the tile it will still appear.
-* Includes relations.
