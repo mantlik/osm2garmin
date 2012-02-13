@@ -177,7 +177,7 @@ public class OsmMaker extends ThreadProcessor {
             "--remove-short-arcs"
         };
         if (parameters.getProperty("cycling_features", "false").equals("true")) {
-            List<String> l = Arrays.asList(args);
+            ArrayList<String> l = new ArrayList(Arrays.asList(args));
             l.add("--make-all-cycleways");
             args = l.toArray(new String[0]);
         }
@@ -226,7 +226,7 @@ public class OsmMaker extends ThreadProcessor {
                     "--remove-short-arcs"
                 };
                 if (parameters.getProperty("cycling_features", "false").equals("true")) {
-                    List<String> l = Arrays.asList(args);
+                    ArrayList<String> l = new ArrayList(Arrays.asList(args));
                     l.add("--make-all-cycleways");
                     args = l.toArray(new String[0]);
                 }
