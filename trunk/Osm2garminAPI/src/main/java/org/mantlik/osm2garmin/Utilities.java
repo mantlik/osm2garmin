@@ -38,6 +38,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -408,14 +409,34 @@ public class Utilities {
                 File[] files = path.listFiles();
                 for (int i = 0; i < files.length; i++) {
                     if (files[i].isDirectory()) {
-                        deleteFile(files[i]);
+                        if (!deleteFile(files[i])) {
+                            try {
+                                Thread.sleep(300);
+                            } catch (InterruptedException ex) {
+                            }
+                            deleteFile(files[i]);
+                        }
                     } else {
-                        files[i].delete();
+                        if (!files[i].delete()) {
+                            try {
+                                Thread.sleep(300);
+                            } catch (InterruptedException ex) {
+                            }
+                            files[i].delete();
+                        }
                     }
                 }
             }
         }
-        return (path.delete());
+        if (!path.delete()) {
+            try {
+                Thread.sleep(300);
+            } catch (InterruptedException ex) {
+            }
+            return path.delete();
+        } else {
+            return true;
+        }
     }
 
     /**
@@ -497,7 +518,7 @@ public class Utilities {
         ZipFile zip = null;
         try {
             zip = new ZipFile(zipFile);
-            Enumeration <? extends ZipEntry> entries = zip.entries();
+            Enumeration<? extends ZipEntry> entries = zip.entries();
             while (entries.hasMoreElements()) {
                 ZipEntry entry = entries.nextElement();
                 long l = entry.getSize();
