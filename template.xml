@@ -61,8 +61,8 @@
         </condition>
 
         <exec executable="${mvn.executable}" dir="${suite.location}">
-           <arg value="install"/>
-           <env key="JAVA_HOME" value="${java.home}"/>
+            <arg value="install"/>
+            <env key="JAVA_HOME" value="${java.home}"/>
         </exec>
     </target>
 
@@ -70,10 +70,10 @@
 
     <target name="prepare-sources">
         <copy todir="${installer.build.dir}">
-           <fileset dir="${nbi.stub.location}"/>
+            <fileset dir="${nbi.stub.location}"/>
         </copy>
         <copy todir="${installer.build.dir}/.common">
-           <fileset dir="${nbi.stub.common.location}"/>
+            <fileset dir="${nbi.stub.common.location}"/>
         </copy>
 
         <property name="product-uid"  value="${suite.nbi.product.uid}"/>
@@ -81,24 +81,24 @@
         <property name="product-version-short"  value="${suite.nbi.product.version.short}"/>
 
         <condition property="icon.path" value="${nbi.icon.file}" else="${installer.build.dir}/ext/components/products/helloworld/data/icon48.png">
-             <and>
-                 <isset property="nbi.icon.file"/>
-                 <available file="${nbi.icon.file}"/>
-             </and>
+            <and>
+                <isset property="nbi.icon.file"/>
+                <available file="${nbi.icon.file}"/>
+            </and>
         </condition>
 
         <basename property="icon.file.name" file="${icon.path}"/>
         <condition property="icon.extension" value=".gif">
-             <or>
-                 <matches string="${icon.file.name}" pattern="^.*\.gif$"/>
-                 <matches string="${icon.file.name}" pattern="^.*\.gif$"/>
-             </or>
+            <or>
+                <matches string="${icon.file.name}" pattern="^.*\.gif$"/>
+                <matches string="${icon.file.name}" pattern="^.*\.gif$"/>
+            </or>
         </condition>
         <condition property="icon.extension" value=".png">
-             <or>
-                 <matches string="${icon.file.name}" pattern="^.*\.png$"/>
-                 <matches string="${icon.file.name}" pattern="^.*\.PNG$"/>
-             </or>
+            <or>
+                <matches string="${icon.file.name}" pattern="^.*\.png$"/>
+                <matches string="${icon.file.name}" pattern="^.*\.PNG$"/>
+            </or>
         </condition>
 
         <property name="icon.name" value="${suite.props.app.name}${icon.extension}"/>
@@ -106,38 +106,38 @@
         <copy file="${icon.path}" tofile="${installer.build.dir}/ext/components/products/helloworld/src/org/mycompany/${icon.name}"/>
 
         <condition property="icon16.path" value="${nbi.icon16.file}">
-             <and>
-                 <isset property="nbi.icon16.file"/>
-                 <available file="${nbi.icon16.file}"/>
-             </and>
+            <and>
+                <isset property="nbi.icon16.file"/>
+                <available file="${nbi.icon16.file}"/>
+            </and>
         </condition>
 
         <condition property="ilc.path" value="${nbi.instleftcorner.file}">
-             <and>
-                 <isset property="nbi.instleftcorner.file"/>
-                 <available file="${nbi.instleftcorner.file}"/>
-             </and>
+            <and>
+                <isset property="nbi.instleftcorner.file"/>
+                <available file="${nbi.instleftcorner.file}"/>
+            </and>
         </condition>
 
         <condition property="irc.path" value="${nbi.instrightcorner.file}">
-             <and>
-                 <isset property="nbi.instrightcorner.file"/>
-                 <available file="${nbi.instrightcorner.file}"/>
-             </and>
+            <and>
+                <isset property="nbi.instrightcorner.file"/>
+                <available file="${nbi.instrightcorner.file}"/>
+            </and>
         </condition>
 
         <condition property="iwt.path" value="${nbi.instwelcometop.file}">
-             <and>
-                 <isset property="nbi.instwelcometop.file"/>
-                 <available file="${nbi.instwelcometop.file}"/>
-             </and>
+            <and>
+                <isset property="nbi.instwelcometop.file"/>
+                <available file="${nbi.instwelcometop.file}"/>
+            </and>
         </condition>
 
         <condition property="iwb.path" value="${nbi.instwelcomebottom.file}">
-             <and>
-                 <isset property="nbi.instwelcomebottom.file"/>
-                 <available file="${nbi.instwelcomebottom.file}"/>
-             </and>
+            <and>
+                <isset property="nbi.instwelcomebottom.file"/>
+                <available file="${nbi.instwelcomebottom.file}"/>
+            </and>
         </condition>
 
         <replace file="${installer.build.dir}/build.properties" encoding="utf-8">
@@ -171,75 +171,80 @@
             <replacefilter token="{product-install-directory-name-windows}" value="${install.dir.name}"/>
             <replacefilter token="{product-install-directory-name-macosx}"  value="${install.dir.name}"/>
         </replace>       
+        
+        <replace file="${installer.build.dir}/ext/engine/src/org/mycompany/installer/wizard/components/panels/PostInstallSummaryPanel.java" encoding="utf-8">
+            <replacefilter token="runAppNow.doClick();"        value="runAppNow.setVisible(false);"/>
+        </replace>
+
         <property name="dir.dir" value="${installer.build.dir}/tmpdirfornac"/>
         <mkdir dir="${dir.dir}"/>
 
         <native2ascii encoding="utf-8" src="${installer.build.dir}" dest="${dir.dir}" includes="build.properties ext/**/*.properties"/>
 
         <copy todir="${installer.build.dir}" overwrite="true" includeEmptyDirs="true">
-             <fileset dir="${dir.dir}"/>
+            <fileset dir="${dir.dir}"/>
         </copy> 
         <condition property="license.defined">
-             <and>
-                 <isset property="nbi.license.file"/>
-                 <available file="${nbi.license.file}"/>
-             </and>
+            <and>
+                <isset property="nbi.license.file"/>
+                <available file="${nbi.license.file}"/>
+            </and>
         </condition> 
         <antcall target="-prepare-license"/>
 
         <condition property="icon.defined">
-             <and>
-                 <isset property="nbi.icon.file"/>
-                 <available file="${nbi.icon.file}"/>
-             </and>
+            <and>
+                <isset property="nbi.icon.file"/>
+                <available file="${nbi.icon.file}"/>
+            </and>
         </condition> 
         <antcall target="-prepare-icon"/>
 
         <condition property="icon16.defined">
-             <and>
-                 <isset property="nbi.icon16.file"/>
-                 <available file="${nbi.icon16.file}"/>
-             </and>
+            <and>
+                <isset property="nbi.icon16.file"/>
+                <available file="${nbi.icon16.file}"/>
+            </and>
         </condition> 
         <antcall target="-prepare-icon16"/>
 
         <condition property="ilc.defined">
-             <and>
-                 <isset property="nbi.instleftcorner.file"/>
-                 <available file="${nbi.instleftcorner.file}"/>
-             </and>
+            <and>
+                <isset property="nbi.instleftcorner.file"/>
+                <available file="${nbi.instleftcorner.file}"/>
+            </and>
         </condition> 
         <antcall target="-prepare-ilc"/>
 
         <condition property="irc.defined">
-             <and>
-                 <isset property="nbi.instrightcorner.file"/>
-                 <available file="${nbi.instrightcorner.file}"/>
-             </and>
+            <and>
+                <isset property="nbi.instrightcorner.file"/>
+                <available file="${nbi.instrightcorner.file}"/>
+            </and>
         </condition> 
         <antcall target="-prepare-irc"/>
 
         <condition property="iwt.defined">
-             <and>
-                 <isset property="nbi.instwelcometop.file"/>
-                 <available file="${nbi.instwelcometop.file}"/>
-             </and>
+            <and>
+                <isset property="nbi.instwelcometop.file"/>
+                <available file="${nbi.instwelcometop.file}"/>
+            </and>
         </condition> 
         <antcall target="-prepare-iwt"/>
 
         <condition property="iwb.defined">
-             <and>
-                 <isset property="nbi.instwelcomebottom.file"/>
-                 <available file="${nbi.instwelcomebottom.file}"/>
-             </and>
+            <and>
+                <isset property="nbi.instwelcomebottom.file"/>
+                <available file="${nbi.instwelcomebottom.file}"/>
+            </and>
         </condition> 
         <antcall target="-prepare-iwb"/>
 
         <condition property="dock.icon.defined">
-             <and>
-                 <isset property="nbi.dock.icon.file"/>
-                 <available file="${nbi.dock.icon.file}"/>
-             </and>
+            <and>
+                <isset property="nbi.dock.icon.file"/>
+                <available file="${nbi.dock.icon.file}"/>
+            </and>
         </condition> 
         <antcall target="-prepare-dock-icon"/>
 
