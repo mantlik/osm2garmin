@@ -253,7 +253,7 @@ public class Utilities {
     }
 
     public static String getUserdir(ThreadProcessor processor) {
-        return processor.parameters.getProperty("userdir", "");
+        return processor.parameters.getProperty("userdir", "./");
     }
 
     /**
