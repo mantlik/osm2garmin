@@ -641,7 +641,11 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
                     + " : " + i + " (Total dl = " + totaldl
                     + " %)");
             this.savePiece(i);
-            this.getPieceBlock(i, 0, 15000);
+            try {
+                this.getPieceBlock(i, 0, 15000);
+            } catch (Exception ex) {
+                System.out.println(ex);
+            }
             if (!peerID.equals(WEBSEED_ID)) {
                 this.lastPieceReceived = System.currentTimeMillis();
             }
