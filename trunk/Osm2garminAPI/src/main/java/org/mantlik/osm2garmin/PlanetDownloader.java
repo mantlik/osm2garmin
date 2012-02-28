@@ -322,7 +322,9 @@ public class PlanetDownloader extends ThreadProcessor {
             Utilities.getInstance().addProcessToMonitor(torrentDownloader);
             torrentDownloader.changeSupport.addPropertyChangeListener(this);
             while (torrentDownloader.getState() != TorrentDownloader.COMPLETED) {
-                if (torrentDownloader.getState() == Downloader.ERROR) {
+                if (torrentDownloader.getState() == ERROR) {
+                    setStatus(torrentDownloader.getStatus());
+                    setState(ERROR);
                     return false;
                 }
                 try {
