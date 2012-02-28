@@ -142,6 +142,11 @@ public class TorrentDownloader extends ThreadProcessor {
         TorrentProcessor tp = new TorrentProcessor();
         if (torrent == null) {
             torrent = tp.getTorrentFile(tp.parseTorrent(torrentFile.getPath()));
+            if (torrent==null) {
+                setStatus("Cannot parse torrent file " + torrentFile);
+                setState(ERROR);
+                return;
+            }
         }
         if (saveDir != null) {
             String savePath = saveDir.getPath();
