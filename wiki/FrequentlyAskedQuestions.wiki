@@ -13,7 +13,7 @@ If you have 64-bit Windows AND 64-bit JRE and more than 2 Gb of memory, you can 
 
 More information how to make your JVM startup permanent for your system can be found at "Startup options" chapter of the manual - section "Assign more memory to the program".
 
-==Program execution fails with message java.lang.OutOfMemoryError: PermGen space==
+==Program execution fails with message java.lang.!OutOfMemoryError: !PermGen space==
 
 This problem can be solved by adding the following start-up parameters:
 
