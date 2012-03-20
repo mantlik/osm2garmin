@@ -1,0 +1,13 @@
+= Release notes =
+
+== 1.1 - development release ==
+
+ * Planet download type changed from bz2 to pbf for !BitTorrent method - Issue 45
+ * Changed installer wizard - removed "Run application when finished" option at the last installer wizard page - Issue 39
+ * Fixed !PermGen Space error - Issue 41
+ * Fixed missing license agreement when updating modules - Issue 33
+ * Several minor bug fixes - Issue 25, Issue 42, Issue 35
+
+== 1.0 (build 138) - stable release ==
+
+Initial release.
