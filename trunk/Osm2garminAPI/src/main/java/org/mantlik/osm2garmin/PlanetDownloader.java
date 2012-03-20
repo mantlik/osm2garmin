@@ -136,7 +136,7 @@ public class PlanetDownloader extends ThreadProcessor {
                 String planetUrl = mirror + "planet-" + sdf.format(planetDate) + ".osm.pbf";
                 if (!"http".equals(parameters.getProperty("download_method", "http"))) {
                     planetUrl = parameters.getProperty("torrent_download_url")
-                            + "planet-" + sdf.format(planetDate) + ".osm.bz2" + ".torrent";
+                            + "planet-" + sdf.format(planetDate) + ".osm.pbf" + ".torrent";
                 }
                 url = new URL(planetUrl);
                 HttpURLConnection connection = null;
@@ -292,7 +292,7 @@ public class PlanetDownloader extends ThreadProcessor {
                 return false;
             }
         } else {  // torrent download
-            String torrentName = downloadParameters.getProperty("planet_name").replace(".osm.pbf", ".osm.bz2");
+            String torrentName = downloadParameters.getProperty("planet_name");
             try {
                 url = new URL(parameters.getProperty("torrent_download_url") + torrentName + ".torrent");
             } catch (MalformedURLException ex) {
@@ -337,12 +337,11 @@ public class PlanetDownloader extends ThreadProcessor {
                 }
             }
             File torrentDownloadFile = new File(parent + torrentName);
-            File planetBzFile = new File(planetFile.getPath().replace(".osm.pbf", ".osm.bz2"));
             try {
-                Utilities.copyFile(new File(parent + torrentName), planetBzFile);
+                Utilities.copyFile(new File(parent + torrentName), planetFile);
             } catch (IOException ex) {
                 setStatus("Can not copy " + torrentDownloadFile.getName() + " to "
-                        + planetBzFile.getName());
+                        + planetFile.getName());
                 return false;
             }
         }
