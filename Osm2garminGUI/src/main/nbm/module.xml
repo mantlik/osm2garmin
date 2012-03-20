@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <nbm>
-    <!--
     <moduleType>autoload</moduleType>
     <codeNameBase>org.mantlik.osm2garmin.gui/1</codeNameBase>
     <licenseName>GPL Version 2.0</licenseName>
-    <licenseFile>gpl20.txt</licenseFile>
-    -->
+    <licenseFile>LICENSE.txt</licenseFile>
 </nbm>
