@@ -33,4 +33,4 @@ It is recommended to backup your data before proceeding. Please note that all us
 
  # Uninstall the software using uninstall procedure suitable for your operating system. In the first dialog of the Uninstall wizard check the Remove directory …./dev checkbox.
  # Download the newest installer for your system.
- # Run the downloaded installer and follow the installation wizard. Under some circumstances you have to manually delete the installation directory with system administrator rights manualy before proceeding with installation.
+ # Run the downloaded installer and follow the installation wizard. Under some circumstances you have to manually delete the installation directory with system administrator rights before proceeding with installation.
