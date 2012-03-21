@@ -470,7 +470,7 @@
                         <para>
                             MakeNSIS command can look e.g. like this:
                         </para>
-                        <programlisting>C:\Program Files\NSIS\makensis.exe" /X"SetCompressor /FINAL lzma" osmmap.nsi</programlisting>
+                        <programlisting>"C:\Program Files\NSIS\makensis.exe" /X"SetCompressor /FINAL lzma" osmmap.nsi</programlisting>
                         <para>
                             Maps installed via NSIS installer are not compatible with installer.bat / uninstaller.bat method. 
                             Uninstaller.bat will NOT uninstall maps installed via NSIS and vice versa.
