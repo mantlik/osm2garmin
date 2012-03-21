@@ -13,13 +13,28 @@ The application wraps following !OpenStreetMap processing utilities: [http://wik
   * [http://java.com/download Sun Java JRE 6] or newer
 
 =Downloads=
-Current installers and user's guide can be downloaded from here:
+Installers and user's guide can be downloaded from here:
 http://code.google.com/p/osm2garmin/downloads/list
 
+ * Recommended stable version:   1.0 (build 138)
+ * Unstable development version: 1.1-SNAPSHOT - [UnstableVersionHowto see instructions]
+
+[ReleaseNotes Release notes]
+
 =Help and support=
-Please post your questions to the [http://groups.google.com/group/osm2garmin-devel Osm2garmin group]. In addition, you can submit a bug report or suggest an enhancement at the [http://code.google.com/p/osm2garmin/issues/entry Issues page].
+[FrequentlyAskedQuestions Frequently Asked Questions] page covers the most frequent problems with the program.
+
+User's guide can be downloaded in PDF format from the [http://code.google.com/p/osm2garmin/downloads/list Download page].
+
+Please post your questions to the [http://groups.google.com/group/osm2garmin-devel Osm2garmin Development Group].
+
+You are welcome to submit a bug report or suggest an enhancement at the [http://code.google.com/p/osm2garmin/issues/entry Issues page].
 
 =Screenshots=
+Sample !MapSource screenshot of a resulting map - surrounding of the Prague Zoo:
+
+http://osm2garmin.googlecode.com/svn/wiki/map_example_prg_zoo.PNG
+
 Application ready to run:
 
 http://osm2garmin.googlecode.com/svn/trunk/Osm2garminGUI/src/main/javahelp/org/mantlik/osm2garminspi/docs/application.png
