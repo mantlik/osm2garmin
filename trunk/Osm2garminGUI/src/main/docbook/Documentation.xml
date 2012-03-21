@@ -463,10 +463,14 @@
                     </para>
                     <note>
                         <para>
-                            Maximum installer size which can be created by NSIS is 2 Gb. If your map is larger,
-                            NSIS installer can not be created. Installer.bat / uninstaller.bat scripts can be used
-                            to install maps of any size.
+                            If map size exceeds 2Gb, installer creation can fail because of default /SOLID compressor parameter 
+                            in osmmap.msi script. To avoid the problem, either remove "/SOLID" parameter from SetCompressor 
+                            command in the script, or use /X"SetCompressor /FINAL LZMA" startup parameter for MakeNSIS.
                         </para>
+                        <para>
+                            MakeNSIS command can look e.g. like this:
+                        </para>
+                        <programlisting>C:\Program Files\NSIS\makensis.exe" /X"SetCompressor /FINAL lzma" osmmap.nsi</programlisting>
                         <para>
                             Maps installed via NSIS installer are not compatible with installer.bat / uninstaller.bat method. 
                             Uninstaller.bat will NOT uninstall maps installed via NSIS and vice versa.
