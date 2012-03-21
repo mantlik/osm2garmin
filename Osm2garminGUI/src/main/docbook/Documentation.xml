@@ -472,6 +472,10 @@
                         </para>
                         <programlisting>"C:\Program Files\NSIS\makensis.exe" /X"SetCompressor /FINAL lzma" osmmap.nsi</programlisting>
                         <para>
+                            Even without "/SOLID" parameter, total size of resulting installer file cannot exceed 2 Gb, 
+                            which corresponds to gmapsupp.img size approx. 3 Gb.
+                        </para>
+                        <para>
                             Maps installed via NSIS installer are not compatible with installer.bat / uninstaller.bat method. 
                             Uninstaller.bat will NOT uninstall maps installed via NSIS and vice versa.
                         </para>
