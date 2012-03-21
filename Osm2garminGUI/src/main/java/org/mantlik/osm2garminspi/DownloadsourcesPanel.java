@@ -42,6 +42,7 @@ final class DownloadsourcesPanel extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        buttonGroup1 = new javax.swing.ButtonGroup();
         jPanel2 = new javax.swing.JPanel();
         jLabel7 = new javax.swing.JLabel();
         torrentMethodItem = new javax.swing.JRadioButton();
@@ -73,6 +74,7 @@ final class DownloadsourcesPanel extends javax.swing.JPanel {
 
         org.openide.awt.Mnemonics.setLocalizedText(jLabel7, org.openide.util.NbBundle.getMessage(DownloadsourcesPanel.class, "DownloadsourcesPanel.jLabel7.text")); // NOI18N
 
+        buttonGroup1.add(torrentMethodItem);
         torrentMethodItem.setSelected(true);
         org.openide.awt.Mnemonics.setLocalizedText(torrentMethodItem, org.openide.util.NbBundle.getMessage(DownloadsourcesPanel.class, "DownloadsourcesPanel.torrentMethodItem.text")); // NOI18N
         torrentMethodItem.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
@@ -81,6 +83,7 @@ final class DownloadsourcesPanel extends javax.swing.JPanel {
             }
         });
 
+        buttonGroup1.add(jRadioButton2);
         org.openide.awt.Mnemonics.setLocalizedText(jRadioButton2, org.openide.util.NbBundle.getMessage(DownloadsourcesPanel.class, "DownloadsourcesPanel.jRadioButton2.text")); // NOI18N
 
         org.openide.awt.Mnemonics.setLocalizedText(jLabel21, org.openide.util.NbBundle.getMessage(DownloadsourcesPanel.class, "DownloadsourcesPanel.jLabel21.text")); // NOI18N
@@ -430,6 +433,7 @@ final class DownloadsourcesPanel extends javax.swing.JPanel {
         return true;
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
