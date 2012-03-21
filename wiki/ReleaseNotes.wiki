@@ -6,7 +6,7 @@
  * Changed installer wizard - removed "Run application when finished" option at the last installer wizard page - Issue 39
  * Fixed !PermGen Space error - Issue 41
  * Fixed missing license agreement when updating modules - Issue 33
- * Several minor bug fixes - Issue 25, Issue 42, Issue 35
+ * Several minor bug fixes - Issue 25, Issue 35, Issue 42, Issue 49, Issue 50
 
 == 1.0 (build 138) - stable release ==
 
