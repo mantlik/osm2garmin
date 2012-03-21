@@ -1,3 +1,4 @@
+#labels Featured
 = Frequently Asked Questions =
 
 *On this page:*
@@ -17,7 +18,7 @@ Your customized command line can look e.g. like this:
 "c:\program files\osm2garmin_1.0\bin\osm2garmin.exe" -J-Xmx2000m --jdkhome "c:/program files/Java/jre6"
 }}}
 
-In Windows, startup parameters can be added permanently to the program startup link, e.g. associated to program desktop icon. In Windows, right-click the icon, select Properties and adjust the settings as needed.
+In Windows, startup parameters can be added permanently to the program startup link, e.g. associated to program desktop icon. Right-click the icon, select Properties and adjust the settings as needed.
 
 More information how to make your JVM startup permanent for your system can be found at "Startup options" chapter of the manual - section "Assign more memory to the program".
 
