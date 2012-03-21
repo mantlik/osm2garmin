@@ -11,6 +11,14 @@ If you have 32bit Windows or 32bit Java (JRE), depending on your system and JRE 
 
 If you have 64-bit Windows AND 64-bit JRE and more than 2 Gb of memory, you can increase memory limit with start-up parameter, e.g. `-J-Xmx2000m`. Please note that if you have both 32bit and 64bit JRE installed, it could be necessary to point the program to the proper 64-bit JRE version with the start-up parameter something like  `--jdkhome "c:/program files/Java/jre6"` (pointing to 64-bit JRE, of course).
 
+Your customized command line can look e.g. like this:
+
+{{{
+"c:\program files\osm2garmin_1.0\bin\osm2garmin.exe" -J-Xmx2000m --jdkhome "c:/program files/Java/jre6"
+}}}
+
+In Windows, startup parameters can be added permanently to the program startup link, e.g. associated to program desktop icon. In Windows, right-click the icon, select Properties and adjust the settings as needed.
+
 More information how to make your JVM startup permanent for your system can be found at "Startup options" chapter of the manual - section "Assign more memory to the program".
 
 ==Program execution fails with message java.lang.!OutOfMemoryError: !PermGen space==
