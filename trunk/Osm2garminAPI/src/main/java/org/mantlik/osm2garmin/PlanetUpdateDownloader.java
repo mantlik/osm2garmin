@@ -460,12 +460,15 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
      */
     private TorrentFile createUpdatesTorrent(File osmosisstate) {
         TorrentFile torrent = new TorrentFile();
-        torrent.announceURL = "http://tracker.ipv6tracker.org:80/announce";
+        torrent.announceURL = "http://www.mantlik.cz:80/tracker/announce.php";
         torrent.comment = "Original planets from http://planet.openstreetmap.org/ "
                 + "licensed under CC-BY-SA 2.0 by OpenStreetMap and contributors";
         torrent.createdBy = "Osm2garmin 1.0";
         torrent.creationDate = System.currentTimeMillis() / 1000;
         ArrayList<String> tier = new ArrayList<String>();
+        tier.add("http://www.mantlik.cz:80/tracker/announce.php");
+        torrent.announceList.add(tier);
+        tier = new ArrayList<String>();
         tier.add("http://tracker.ipv6tracker.org:80/announce");
         tier.add("udp://tracker.ipv6tracker.org:80/announce");
         torrent.announceList.add(tier);
