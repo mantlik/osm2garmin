@@ -21,14 +21,19 @@
  */
 package org.mantlik.osm2garminspi;
 
+import java.awt.Color;
+import java.awt.Component;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Scanner;
+import javax.swing.JTable;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import org.mantlik.osm2garmin.Osm2garmin;
+import org.mantlik.osm2garmin.Region;
 import org.mantlik.osm2garmin.Utilities;
 import org.openide.awt.HtmlBrowser;
 import org.openide.util.Exceptions;
@@ -43,6 +48,7 @@ final class RegionsPanel extends javax.swing.JPanel implements ListSelectionList
         this.controller = controller;
         initComponents();
         regionsTable.getSelectionModel().addListSelectionListener(this);
+        regionsTable.setDefaultRenderer(Float.class, new PolygonRenderer());
         moveDownRegionButton.setEnabled(false);
         moveUpRegionButton.setEnabled(false);
         displayRegionButton.setEnabled(false);
@@ -58,7 +64,14 @@ final class RegionsPanel extends javax.swing.JPanel implements ListSelectionList
 
         jPanel3 = new javax.swing.JPanel();
         jScrollPane3 = new javax.swing.JScrollPane();
-        regionsTable = new javax.swing.JTable();
+        regionsTable = new javax.swing.JTable(){
+            public boolean isCellEditable(int rowIndex, int colIndex) {
+                if (colIndex < 2) {
+                    return true;
+                }
+                return polyNotExists(rowIndex);
+            }
+        };
         addRegionButton = new javax.swing.JButton();
         moveUpRegionButton = new javax.swing.JButton();
         moveDownRegionButton = new javax.swing.JButton();
@@ -281,6 +294,7 @@ final class RegionsPanel extends javax.swing.JPanel implements ListSelectionList
         while (model.getRowCount() > 0) {
             model.removeRow(model.getRowCount() - 1);
         }
+        File regDir = r.getParentFile();
         try {
             s = new Scanner(new FileInputStream(r));
             while (s.hasNext()) {
@@ -292,10 +306,23 @@ final class RegionsPanel extends javax.swing.JPanel implements ListSelectionList
                         l[0] = l[0].replace("x", "");
                     }
                     String name = l[4];
-                    float lon1 = Float.parseFloat(l[0]);
-                    float lat1 = Float.parseFloat(l[1]);
-                    float lon2 = Float.parseFloat(l[2]);
-                    float lat2 = Float.parseFloat(l[3]);
+                    File polyFile = null;
+                    if (regDir != null) {
+                        polyFile = new File(regDir, name + ".poly");
+                    }
+                    float lon1, lat1, lon2, lat2;
+                    if ((polyFile != null) && polyFile.exists()) {
+                        float[] f = Region.envelope(polyFile);
+                        lon1 = f[0];
+                        lat1 = f[1];
+                        lon2 = f[2];
+                        lat2 = f[3];
+                    } else {
+                        lon1 = Float.parseFloat(l[0]);
+                        lat1 = Float.parseFloat(l[1]);
+                        lon2 = Float.parseFloat(l[2]);
+                        lat2 = Float.parseFloat(l[3]);
+                    }
                     model.insertRow(model.getRowCount(), new Object[]{enabled, name, lat1, lon1, lat2, lon2});
                 }
             }
@@ -380,5 +407,32 @@ final class RegionsPanel extends javax.swing.JPanel implements ListSelectionList
             }
         }
 
+    }
+
+    boolean polyNotExists(int row) {
+        String region = (String) regionsTable.getModel().getValueAt(row, 1);
+        File r = new File(NbPreferences.forModule(Osm2garmin.class).get("regions",
+                System.getProperty("netbeans.user") + "/" + "regions.txt")).getParentFile();
+        if (r == null) {
+            return true;
+        }
+        File polyFile = new File(r, region + ".poly");
+        return !polyFile.exists();
+    }
+
+    class PolygonRenderer extends DefaultTableCellRenderer {
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+                boolean hasFocus, int row, int column) {
+            Component component = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            Color foreground = component.getForeground();
+            if (!polyNotExists(row)) {
+                component.setForeground(Color.lightGray);
+            } else {
+                component.setForeground(Color.BLACK);
+            }
+            return component;
+        }
     }
 }
