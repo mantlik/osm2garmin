@@ -203,7 +203,7 @@ public class PlanetUpdater extends ThreadProcessor {
                         largs.add("top=" + region.lat2);
                     } else {
                         largs.add("--bp");
-                        largs.add("file=\""+ region.polygonFile.getName() +"\"");
+                        largs.add("file="+ region.polygonFile.getPath());
                     }
                     largs.add("--wb");
                     largs.add("omitmetadata=true");
