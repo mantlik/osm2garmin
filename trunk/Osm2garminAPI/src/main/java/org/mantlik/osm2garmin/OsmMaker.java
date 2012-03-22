@@ -26,7 +26,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -247,6 +246,11 @@ public class OsmMaker extends ThreadProcessor {
         String[] files = new File(region.dir.getPath()).list();
         for (String name : files) {
             if (!name.matches("[0-9]{8}.img")) {
+                continue;
+            }
+            File imgFile = new File(region.dir, name);
+            if (imgFile.length() < 10) {
+                imgFile.deleteOnExit();
                 continue;
             }
             long id = Long.parseLong(name.replace(".img", ""));
