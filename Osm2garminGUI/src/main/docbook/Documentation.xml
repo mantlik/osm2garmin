@@ -506,11 +506,11 @@
             <emphasis>jar</emphasis> file available in the
             program distribution:
         </para>
-        <programlisting>osm2garmin/modules/org-mantlik-Osm2garminAPI.jar</programlisting>
+        <programlisting>osm2garmin/modules/org-mantlik-osm2garmin.jar</programlisting>
         <para>
-            Simply copy the file to your working directory and run the command
+            Copy the file to your working directory and run the command
         </para>
-        <programlisting>java -Xmx1400m -jar org-mantlik-Osm2garminAPI.jar</programlisting>
+        <programlisting>java -Xmx1400m -jar org-mantlik-osm2garmin.jar</programlisting>
         <para>
             On the first run, two files are created, 
             <emphasis>regions.txt</emphasis> and 
