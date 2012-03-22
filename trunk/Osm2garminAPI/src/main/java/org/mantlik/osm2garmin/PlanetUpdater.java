@@ -195,11 +195,16 @@ public class PlanetUpdater extends ThreadProcessor {
                 for (int j = 0; j < nregions; j++) {
                     Region region = regions.get(currRegion);
                     currRegion++;
-                    largs.add("--bb");
-                    largs.add("left=" + region.lon1);
-                    largs.add("right=" + region.lon2);
-                    largs.add("bottom=" + region.lat1);
-                    largs.add("top=" + region.lat2);
+                    if (region.polygonFile == null) {
+                        largs.add("--bb");
+                        largs.add("left=" + region.lon1);
+                        largs.add("right=" + region.lon2);
+                        largs.add("bottom=" + region.lat1);
+                        largs.add("top=" + region.lat2);
+                    } else {
+                        largs.add("--bp");
+                        largs.add("file=\""+ region.polygonFile.getPath() +"\"");
+                    }
                     largs.add("--wb");
                     largs.add("omitmetadata=true");
                     largs.add("file=" + region.dir.getPath() + "/" + region.name + ".osm.pbf");

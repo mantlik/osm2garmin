@@ -135,6 +135,7 @@ public class Osm2garmin implements PropertyChangeListener {
         Utilities.deleteFile(libdir);
         // parse regions
         File r = new File(parameters.getProperty("regions"));
+        File regDir = r.getParentFile();
         try {
             if (!r.exists()) {
                 Utilities.copyFile(Osm2garmin.class.getResourceAsStream("regions.txt"),
@@ -154,6 +155,19 @@ public class Osm2garmin implements PropertyChangeListener {
                     region.lat1 = Float.parseFloat(l[1]);
                     region.lon2 = Float.parseFloat(l[2]);
                     region.lat2 = Float.parseFloat(l[3]);
+                    if ((regDir != null)) {
+                        File polyFile = new File(regDir, region.name + ".poly");
+                        if (polyFile.exists()) {
+                            region.polygonFile = polyFile;
+                            float[] f = Region.envelope(polyFile);
+                            region.lon1 = f[0];
+                            region.lat1 = f[1];
+                            region.lon2 = f[2];
+                            region.lat2 = f[3];
+                        } else {
+                            region.polygonFile = null;
+                        }
+                    }
                     regions.add(region);
                     region.changeSupport.addPropertyChangeListener(this);
                     //System.out.println(region.name+": "+region.lon1+" "+region.lat1

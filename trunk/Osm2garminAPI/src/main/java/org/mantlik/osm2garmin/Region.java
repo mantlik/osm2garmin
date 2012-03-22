@@ -22,9 +22,8 @@
 package org.mantlik.osm2garmin;
 
 import java.beans.PropertyChangeSupport;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintStream;
+import java.io.*;
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -34,39 +33,11 @@ import java.util.logging.Logger;
  */
 public class Region {
 
-    /**
-     *
-     */
-    /**
-     *
-     */
-    /**
-     *
-     */
-    /**
-     *
-     */
-    /**
-     *
-     */
-    /**
-     *
-     */
     public static final int NEW = 0, MAKING_CONTOURS = 1, CONTOURS_READY = 2,
             MAKING_OSM = 3, READY = 4, ERROR = 5;
-    /**
-     *
-     */
-    /**
-     *
-     */
-    /**
-     *
-     */
-    /**
-     *
-     */
+
     public float lon1, lat1, lon2, lat2;
+    public File polygonFile = null;
     private int state = NEW;
     /**
      *
@@ -177,5 +148,31 @@ public class Region {
             Logger.getLogger(Osm2garmin.class.getName()).log(Level.SEVERE, "", ex);
         }
 
+    }
+    
+    public static float[] envelope(File polyFile) {
+        try {
+            float lon1 = 181;
+            float lon2 = -181;
+            float lat1 = 91;
+            float lat2 = -91;
+            Scanner scanner = new Scanner(new FileInputStream(polyFile));
+            while (scanner.hasNextLine()) {
+                String[] s = scanner.nextLine().split(" +");
+                if (s.length != 3) {
+                    continue;
+                }
+                float lon = Float.parseFloat(s[1]);
+                float lat = Float.parseFloat(s[2]);
+                lon1 = Math.min(lon, lon1);
+                lon2 = Math.max(lon, lon2);
+                lat1 = Math.min(lat, lat1);
+                lat2 = Math.max(lat, lat2);
+            }
+            scanner.close();
+            return new float[] {lon1, lat1, lon2, lat2};
+        } catch (IOException ex) {
+            return new float[] {0,0,0,0};
+        }
     }
 }

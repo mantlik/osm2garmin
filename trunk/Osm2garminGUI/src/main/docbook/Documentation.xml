@@ -315,6 +315,16 @@
                 by a unique name and bounding coordinates.
             </para>
             <para>
+                When file named &lt;region_name&gt;.poly exists in the working directory, region is defined by 
+                polygon coordinates from the .poly file. Coordinates in the Regions table represent the bounding box 
+                of the polygon and are not editable.
+            </para>
+            <para>
+                More information about polygon file formats, download sources and examples can be found here:
+                <link xmlns:xlink="http://www.w3.org/1999/xlink" 
+                xlink:href="http://wiki.openstreetmap.org/wiki/Osmosis/Polygon_Filter_File_Format"/>
+            </para>
+            <para>
                 Regions are processed from top to the bottom of the list. You can change the sequence
                 with the Move up and Move down buttons. Uncheck the "Enabled" box to disable the region
                 from processing.
