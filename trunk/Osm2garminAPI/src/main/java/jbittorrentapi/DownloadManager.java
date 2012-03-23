@@ -45,8 +45,7 @@ import java.util.*;
 
 /**
  * Object that manages all concurrent downloads. It chooses which piece to
- * request
- * to which peer.
+ * request to which peer.
  */
 public class DownloadManager implements DTListener, PeerUpdateListener,
         ConListenerInterface {
@@ -64,7 +63,7 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
     private BitSet isRequested;
     private int nbPieces;
     private int startPiece;
-    private RandomAccessFile[] output_files;
+    private File[] output_files;
     private PeerUpdater pu = null;
     private ConnectionListener cl = null;
     private List unchokeList = new LinkedList();
@@ -115,7 +114,7 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
 
         this.isComplete = new BitSet(startPiece + nbPieces);
         this.isRequested = new BitSet(startPiece + nbPieces);
-        this.output_files = new RandomAccessFile[this.nbOfFiles];
+        this.output_files = new File[this.nbOfFiles];
 
         this.length = 0;
         this.left = 0;
@@ -194,8 +193,8 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
     }
 
     /**
-     * Periodically call the unchokePeers method. This is an infinite loop.
-     * User have to exit with Ctrl+C, which is not good... Todo is change this
+     * Periodically call the unchokePeers method. This is an infinite loop. User
+     * have to exit with Ctrl+C, which is not good... Todo is change this
      * method...
      */
     public void blockUntilCompletion() {
@@ -217,15 +216,14 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
         }
         /*
          * new IOManager().readUserInput(
-         * "\r\n*****************************************\r\n" +
-         * "* Press ENTER to stop sharing the files *\r\n" +
+         * "\r\n*****************************************\r\n" + "* Press ENTER
+         * to stop sharing the files *\r\n" +
          * "*****************************************");
          */
     }
 
     /*
-     * @return percentage of torrent init progress
-     * -1 if init finished
+     * @return percentage of torrent init progress -1 if init finished
      */
     public int init_progress() {
         if (initialized) {
@@ -353,8 +351,8 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
      *
      * @param minPort The minimal port number this client should listen on
      * @param maxPort The maximal port number this client should listen on
-     * @return True if the listening process is started, false else
-     * @todo Should it really be here? Better create it in the implementation
+     * @return True if the listening process is started, false else @todo Should
+     * it really be here? Better create it in the implementation
      */
     public boolean startListening(int minPort, int maxPort) {
         if (!initialized) {
@@ -375,22 +373,20 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
      * Close all open files
      */
     public void closeTempFiles() {
-        for (int i = 0; i < this.output_files.length; i++) {
-            try {
-                this.output_files[i].close();
-            } catch (Exception e) {
-                System.err.println(e.getMessage());
-            }
+        /*
+         * for (int i = 0; i < this.output_files.length; i++) { try {
+         * this.output_files[i].close(); } catch (Exception e) {
+         * System.err.println(e.getMessage()); }
         }
+         */
     }
 
     /**
      * Check the existence of the files specified in the torrent and if
-     * necessary,
-     * create them
+     * necessary, create them
      *
-     * @return int
-     * @todo Should return an integer representing some error message...
+     * @return int @todo Should return an integer representing some error
+     * message...
      */
     public int checkTempFiles() {
         String saveas = Constants.SAVEPATH; // Should be configurable
@@ -399,14 +395,14 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
         }
         new File(saveas).mkdirs();
         for (int i = 0; i < this.nbOfFiles; i++) {
-            File temp = new File(saveas + ((String) (this.torrent.name.get(i))));
+            this.output_files[i] = new File(saveas + ((String) (this.torrent.name.get(i))));
             try {
-                if (temp.getParentFile() != null) {
-                    temp.getParentFile().mkdirs();
+                if (this.output_files[i].getParentFile() != null) {
+                    this.output_files[i].getParentFile().mkdirs();
                 }
-                this.output_files[i] = new RandomAccessFile(temp, "rw");
-                this.output_files[i].setLength((Long) this.torrent.length.get(
-                        i));
+                RandomAccessFile temp = new RandomAccessFile(this.output_files[i], "rw");
+                temp.setLength((Long) this.torrent.length.get(i));
+                temp.close();
                 //System.out.println(temp.getPath() + " created.");
             } catch (IOException ioe) {
                 System.err.println("Could not create temp files");
@@ -432,11 +428,13 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
                 long remaining = ((Long) this.torrent.length.get(file.intValue())).longValue()
                         - ((Long) (this.pieceList.get(piece).getFileAndOffset().
                         get(file))).longValue();
-                this.output_files[file.intValue()].seek(((Long) (this.pieceList.get(piece).getFileAndOffset().get(file))).longValue());
-                this.output_files[file.intValue()].write(data,
+                RandomAccessFile temp = new RandomAccessFile(this.output_files[file.intValue()], "rw");
+                temp.seek(((Long) (this.pieceList.get(piece).getFileAndOffset().get(file))).longValue());
+                temp.write(data,
                         data.length - remainingData,
                         (remaining < remainingData) ? (int) remaining : remainingData);
                 remainingData -= remaining;
+                temp.close();
             } catch (IOException ioe) {
                 System.err.println(ioe.getMessage());
                 closeTempFiles();
@@ -522,8 +520,8 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
     }
 
     /**
-     * Returns a String representing the piece being requested by peers.
-     * Used only for pretty-printing.
+     * Returns a String representing the piece being requested by peers. Used
+     * only for pretty-printing.
      *
      * @return String
      */
@@ -601,13 +599,10 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
 
     /**
      * Received when a piece has been fully downloaded by a task. The piece
-     * might
-     * have been corrupted, in which case the manager will request it again
-     * later.
-     * If it has been successfully downloaded and verified, the piece status is
-     * set to 'complete', a 'HAVE' message is sent to all connected peers and
-     * the
-     * piece is saved into the corresponding file(s)
+     * might have been corrupted, in which case the manager will request it
+     * again later. If it has been successfully downloaded and verified, the
+     * piece status is set to 'complete', a 'HAVE' message is sent to all
+     * connected peers and the piece is saved into the corresponding file(s)
      *
      * @param peerID String
      * @param i int
@@ -684,8 +679,7 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
      * if it is interested and has one of the 5 highest download rate among the
      * interested peers. \r\n Every 3 times this method is called, calls the
      * optimisticUnchoke method, which unchoke a peer no matter its download
-     * rate,
-     * in a try to find a better source
+     * rate, in a try to find a better source
      */
     public void unchokePeers() {
         int nbNotInterested = 0;
@@ -857,7 +851,6 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
         }
         for (Iterator it = this.pieceList.get(piece).getFileAndOffset().keySet().
                 iterator(); it.hasNext();) {
-            boolean closeAfterRead = false;
             boolean success = false;
             Integer file = (Integer) (it.next());
             long remaining = ((Long) this.torrent.length.get(file.intValue())).longValue()
@@ -865,26 +858,17 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
                     get(file))).longValue();
             while (!success) {
                 try {
-                    if (closeAfterRead) {
-                        File temp = new File(saveas + ((String) (this.torrent.name.get(file))));
-                        this.output_files[file] = new RandomAccessFile(temp, "r");
-                    }
-                    this.output_files[file.intValue()].seek(((Long) (this.pieceList.get(piece).getFileAndOffset().get(file))).longValue());
-                    this.output_files[file.intValue()].read(data,
+                    RandomAccessFile temp = new RandomAccessFile(this.output_files[file], "r");
+                    temp.seek(((Long) (this.pieceList.get(piece).getFileAndOffset().get(file))).longValue());
+                    temp.read(data,
                             data.length - remainingData,
                             (remaining < remainingData) ? (int) remaining : remainingData);
                     remainingData -= remaining;
-                    if (closeAfterRead) {
-                        output_files[file].close();
-                    }
+                    temp.close();
                     success = true;
                 } catch (IOException ioe) {
-                    if (closeAfterRead) {
-                        System.err.println(ioe.getMessage());  // second attempt failed
-                        break;
-                    } else {  // first attempt - maybe file was closed
-                        closeAfterRead = true;
-                    }
+                    System.err.println(ioe.getMessage());  // second attempt failed
+                    break;
                 }
             }
         }
