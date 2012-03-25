@@ -67,6 +67,7 @@
                 <configuration>
                     <installerOsWindows>true</installerOsWindows>
                     <installerOsLinux>true</installerOsLinux>
+                    <installerOsMacosx>true</installerOsMacosx>
                     <installerLicenseFile>../LICENSE.txt</installerLicenseFile>
                     <installersFilePrefix>${project.name}-${project.version}-build-${buildNumber}</installersFilePrefix>
                     <installDirName>${brandingToken}_${project.version.short}</installDirName>
@@ -175,6 +176,15 @@
                                 <label>Featured</label>
                             </labels>
                             <summary>User's guide in PDF format</summary>
+                        </upload>
+                        <upload>
+                            <file>${project.build.directory}/Osm2garminGUI-${project.version}-build-${buildNumber}-macosx.tgz</file>
+                            <labels>
+                                <label>OpSys-OSX</label>
+                                <label>Type-Installer</label>
+                                <label>Featured</label>
+                            </labels>
+                            <summary>Osm2Garmin GUI Mac installer</summary>
                         </upload>
                         <upload>
                             <file>${project.build.directory}/Osm2garminGUI-${project.version}-build-${buildNumber}-linux.sh</file>
