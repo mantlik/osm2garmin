@@ -104,6 +104,11 @@
         <property name="icon.name" value="${suite.props.app.name}${icon.extension}"/>
 
         <copy file="${icon.path}" tofile="${installer.build.dir}/ext/components/products/helloworld/src/org/mycompany/${icon.name}"/>
+        
+        <copy file="${suite.location}/application/src/build.xml" tofile="${installer.build.dir}/build.xml" overwrite="true" />        
+
+        <copy file="${configuration.logic.file}"  overwrite="true"
+            tofile="${installer.build.dir}/ext/components/products/helloworld/src/org/mycompany/ConfigurationLogic.java"/>
 
         <condition property="icon16.path" value="${nbi.icon16.file}">
             <and>
