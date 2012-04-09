@@ -79,6 +79,7 @@
                         <nbi.instrightcorner.file>${basedir}/../irc.png</nbi.instrightcorner.file>
                         <nbi.instwelcometop.file>${basedir}/../wlt.png</nbi.instwelcometop.file>
                         <nbi.instwelcomebottom.file>${basedir}/../wlb.png</nbi.instwelcomebottom.file>
+                        <configuration.logic.file>${basedir}/src/ConfigurationLogic.java</configuration.logic.file>
                     </userSettings>
                 </configuration>
             </plugin>
