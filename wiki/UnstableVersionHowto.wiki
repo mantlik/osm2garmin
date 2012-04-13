@@ -15,7 +15,7 @@ Any feedback concerning the unstable version is highly appreciated. Please [http
 
  # Select Tools - Plugins. Select Settings tab and click on "!Osm2Garmin Update Center" item. At the right part of the window click Edit button and add /snapshot to the end of the "URL" value. New URL value should look like this:
 {{{
-http://bluewhaleprocessing.com/bwpupdates/updates.xml.php?lib=Osm2garmin/snapshot
+http://updates.mantlik.org/updates.xml.php?lib=Osm2garmin/snapshot
 }}}
  # Click OK to close Update Center Customizer.
  # Select Updates tab and click Reload Catalog. New update should show and Update button should become active. Press Update to finish the update process. After restart of the application the update will be finished.
@@ -23,7 +23,7 @@ http://bluewhaleprocessing.com/bwpupdates/updates.xml.php?lib=Osm2garmin/snapsho
 	
 Setting the URL value back to 
 {{{
-http://bluewhaleprocessing.com/bwpupdates/updates.xml.php?lib=Osm2garmin
+http://updates.mantlik.org/updates.xml.php?lib=Osm2garmin
 }}}
 will NOT roll back the software to the stable release! Please follow precedure described in the next section to replace unstable versions of the modules with stable ones.
 	
