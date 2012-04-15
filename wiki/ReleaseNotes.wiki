@@ -8,6 +8,7 @@ New features:
  * Changed installer wizard - removed "Run application when finished" option at the last installer wizard page - Issue 39
  * Added installer for !MacOsx - Issue 61
  * Added system recognition into installer. Default start-up parameters are adjusted in post-install step - Issue 21, Issue 41 and Issue 61
+ * Added support for Redaction-period updates structure change after 1-st of April 2012 - Issue 65
 
 Bug fixes:
 
