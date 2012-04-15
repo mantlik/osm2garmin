@@ -1,0 +1,35 @@
+=Update planet data in Redaction period=
+
+1-st of April at 8:00 planet updates of OSM data were stopped. Starting from 4-th of April, hourly replication updates are available in the redaction-period folder of the planet server. For details please read  http://blog.osmfoundation.org/2012/04/04/api-read-write-returns/ .
+
+Please follow the steps described below to switch from regular planet updates to the redaction-period updates:
+
+ * Run the processing with old settings. Wait at least until Planet file download, Planet update download and Planet update, i.e. all three tasks of the Planet file processing box, are completed. It is not necessary to wait for completion of all regions processing.
+
+ * Open file state.txt in the osmosiswork directory (in your working directory). It should look like this:
+
+{{{
+#Sun Apr 01 08:02:09 UTC 2012
+sequenceNumber=20722
+timestamp=2012-04-01T08\:00\:00Z
+}}}
+
+ * Replace sequence number 20722 with 0 (zero) and save the updated file. Updated state.txt file will look like this:
+
+{{{
+#Sun Apr 01 08:02:09 UTC 2012
+sequenceNumber=0
+timestamp=2012-04-01T08\:00\:00Z
+}}}
+
+ * Rename or completely delete hourly-replicate folder in your working directory.
+
+ * Start Osm2garmin software and open Tools -> Options dialog (or click planet icon).
+
+ * Add "/redaction-perid" to the end of each line in the Planet update mirrors box, e.g. like this:
+
+{{{
+http://planet.openstreetmap.org/redaction-period
+}}}
+
+ * Click OK to close Options dialog and start processing. Redaction period updates will be downloaded and your planet file will be updated to the newest version.
