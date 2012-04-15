@@ -1,3 +1,4 @@
+#labels Featured
 =Update planet data in Redaction period=
 
 1-st of April at 8:00 planet updates of OSM data were stopped. Starting from 4-th of April, hourly replication updates are available in the redaction-period folder of the planet server. For details please read  http://blog.osmfoundation.org/2012/04/04/api-read-write-returns/ .
