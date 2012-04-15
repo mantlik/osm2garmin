@@ -12,3 +12,5 @@ Please take into consideration following notes when using Osm2garmin version 1.1
  * Updates from redaction-period folder are currently implemented for !BitTorrent download method only. If you use HTTP download method, your updates will stop 1-st of April 2012. You can switch download method to !BitTorrent to recover download process safely.
 
  * When using !BitTorrent download method, after 1-st of April 8:00 a.m., sequence numbers of the state.txt file in the osmosiswork folder are increased further following updates from redaction-period folder. It is not compatible with Osmosis. Do NOT switch download method back to HTTP, otherwise structure of your working directory and planet.osm.pbf can be corrupted.
+
+ * Currently, updates extension works for data redaction period only. As soon as the final updates for the new !ODbL-licensed data will be available, current r187 updates procedure will stop again. Because of this, final 1.1 Osm2garmin release will be postponed until !OpensStreatMap data distribution structure will be stabilized.
