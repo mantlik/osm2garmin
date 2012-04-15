@@ -344,8 +344,13 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
      * name of the sequence file relative to planet directory
      */
     private String updateName(int fileno) {
+        String prefix = "";
+        if (fileno > 20722) {  // end of CC-BY-SA planet updates
+            fileno -= 20722;
+            prefix = "redaction-period/";
+        }
         String d = D9.format(fileno);
-        return "hour-replicate/" + d.substring(0, 3) + "/" + d.substring(3, 6) + "/" + d.substring(6) + ".osc.gz";
+        return prefix + "hour-replicate/" + d.substring(0, 3) + "/" + d.substring(3, 6) + "/" + d.substring(6) + ".osc.gz";
     }
 
     private int getSequenceNo(File osmosisstate) throws IOException {
