@@ -34,3 +34,8 @@ http://planet.openstreetmap.org/redaction-period
 }}}
 
  * Click OK to close Options dialog and start processing. Redaction period updates will be downloaded and your planet file will be updated to the newest version.
+
+==Note:==
+Upcoming new Osm2garmin version 1.1 will be able to handle update location change instantly without need of the migration described above and most probably *it will NOT be compatible with the above procedure*. It will be released as soon as possible after final updates structure will be published by Openstreetmap Foundation.
+
+If you do not need urgently current maps and can stay with 1-st of April version for a while, it is recommended *NOT* migrate at this moment and *wait for the Osm2garmin 1.1 release*.
