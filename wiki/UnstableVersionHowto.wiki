@@ -25,7 +25,7 @@ Setting the URL value back to
 {{{
 http://updates.mantlik.org/updates.xml.php?lib=Osm2garmin
 }}}
-will NOT roll back the software to the stable release! Please follow precedure described in the next section to replace unstable versions of the modules with stable ones.
+will stop further delivery of newly published snapshot updates. Nevertheless, it will NOT roll back the software to the stable release! Please follow precedure described in the next section to replace unstable versions of the modules with stable ones.
 	
 == Rolling back to the stable version ==
 	
