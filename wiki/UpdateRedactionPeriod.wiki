@@ -1,41 +1,14 @@
 #labels Featured
 =Update planet data in Redaction period=
 
-1-st of April at 8:00 planet updates of OSM data were stopped. Starting from 4-th of April, hourly replication updates are available in the redaction-period folder of the planet server. For details please read  http://blog.osmfoundation.org/2012/04/04/api-read-write-returns/ .
+1-st of April 2012 at 8:00 planet updates of OSM data were stopped. Starting from 4-th of April, hourly replication updates are available in the redaction-period folder of the planet server. For details please read  http://blog.osmfoundation.org/2012/04/04/api-read-write-returns/ .
 
-Please follow the steps described below to switch from regular planet updates to the redaction-period updates:
+*Osm2garmin 1.0* is NOT able to handle new structure of the planet updates. If you are using version 1.0 of the software, all planet updates will stop 1-st of April 2012.
 
- * Run the processing with old settings. Wait at least until Planet file download, Planet update download and Planet update, i.e. all three tasks of the Planet file processing box, are completed. It is not necessary to wait for completion of all regions processing.
+Starting from the *Release 187*, *Osm2garmin version 1.1* is able to download redaction-period updates, i.e. updates starting after 1-st of April 2012.
 
- * Open file state.txt in the osmosiswork directory (in your working directory). It should look like this:
+Please take into consideration following notes when using Osm2garmin version 1.1 Release 187 or later after 1-st of April:
 
-{{{
-#Sun Apr 01 08:02:09 UTC 2012
-sequenceNumber=20722
-timestamp=2012-04-01T08\:00\:00Z
-}}}
+ * Updates from redaction-period folder are currently implemented for !BitTorrent download method only. If you use HTTP download method, your updates will stop 1-st of April 2012. You can switch download method to !BitTorrent to recover download process safely.
 
- * Replace sequence number 20722 with 0 (zero) and save the updated file. Updated state.txt file will look like this:
-
-{{{
-#Sun Apr 01 08:02:09 UTC 2012
-sequenceNumber=0
-timestamp=2012-04-01T08\:00\:00Z
-}}}
-
- * Rename or completely delete hourly-replicate folder in your working directory.
-
- * Start Osm2garmin software and open Tools -> Options dialog (or click planet icon).
-
- * Add "/redaction-perid" to the end of each line in the Planet update mirrors box, e.g. like this:
-
-{{{
-http://planet.openstreetmap.org/redaction-period
-}}}
-
- * Click OK to close Options dialog and start processing. Redaction period updates will be downloaded and your planet file will be updated to the newest version.
-
-==Note:==
-Upcoming new Osm2garmin version 1.1 will be able to handle update location change instantly without need of the migration described above and most probably *it will NOT be compatible with the above procedure*. It will be released as soon as possible after final updates structure will be published by Openstreetmap Foundation.
-
-If you do not need urgently current maps and can stay with 1-st of April version for a while, it is recommended *NOT* migrate at this moment and *wait for the Osm2garmin 1.1 release*.
+ * When using !BitTorrent download method, after 1-st of April 8:00 a.m., sequence numbers of the state.txt file in the osmosiswork folder are increased further following updates from redaction-period folder. It is not compatible with Osmosis. Do NOT switch download method back to HTTP, otherwise structure of your working directory and planet.osm.pbf can be corrupted.
