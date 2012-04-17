@@ -549,25 +549,43 @@ public class Utilities {
      */
     public static boolean downloadOsmosisStateFile(Long date, String mirror,
             String targetPath) {
+        int max_retries = 60;
         if (!mirror.endsWith("/")) {
             mirror = mirror + "/";
         }
         long planetTime = date;
         long startReplTime = new SimpleDateFormat("yyyy-MM-dd").parse(
-                "2009-11-20", new ParsePosition(0)).getTime();
+                "2009-11-15", new ParsePosition(0)).getTime();
         int sequenceNo = (int) ((planetTime - startReplTime) / 1000 / 60 / 60); // hours
-        DecimalFormat nnn = new DecimalFormat("000000");
-        String sequence = nnn.format(sequenceNo);
-        String stateUrl = mirror + "hour-replicate/000/"
-                + sequence.substring(0, 3) + "/" + sequence.substring(3) + ".state.txt";
+        String stateUrl = mirror + updateName(sequenceNo);
+        while (! downloadFile(stateUrl, targetPath)) {
+            // try older file
+            sequenceNo--;
+            max_retries--;
+            if (max_retries <= 0) {
+                return false;
+            }
+            stateUrl = mirror + updateName(sequenceNo);
+        }
+        return true;
+    }
+    
+    /**
+     * Download file from url and save to destination file
+     * 
+     * @param url
+     * @param destination
+     * @return false means not downloaded
+     */
+    public static boolean downloadFile(String url, String destination) {
         URL surl;
         try {
-            surl = new URL(stateUrl);
+            surl = new URL(url);
         } catch (MalformedURLException ex) {
             Logger.getLogger(Osm2garmin.class.getName()).log(Level.SEVERE, "", ex);
             return false;
         }
-        Downloader downloader = new Downloader(surl, targetPath);
+        Downloader downloader = new Downloader(surl, destination);
         while (downloader.getStatus() != Downloader.COMPLETE) {
             if (downloader.getStatus() == Downloader.ERROR) {
                 return false;
@@ -581,5 +599,66 @@ public class Utilities {
             }
         }
         return true;
+    }
+    
+    /**
+     * Get timestamp from state.txt file
+     * 
+     * @param timestampFile
+     * @return
+     */
+    public static long getPlanetTimestamp(File timestampFile) {
+        Long time = -1l;
+        try {
+            Scanner scanner = new Scanner(new FileInputStream(timestampFile));
+            while (scanner.hasNext()) {
+                String tstamp = scanner.nextLine();
+                if (tstamp.startsWith("timestamp=")) {
+                    Date tdate = new SimpleDateFormat("yyyy-MM-dd'T'HH\\:mm\\:ss'Z'").parse(tstamp, new ParsePosition(10));
+                    time = tdate.getTime();
+                }
+            }
+            scanner.close();
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(Osm2garmin.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return time;
+    }
+
+    /**
+     * name of the sequence file relative to planet directory
+     * 
+     * @param fileno sequence number of the hour-replicate update file
+     * @return
+     */
+    public static String updateName(int fileno) {
+        final DecimalFormat D9 = new DecimalFormat("000000000");
+        String prefix = "";
+        if (fileno > 20722) {  // end of CC-BY-SA planet updates
+            fileno -= 20722;
+            prefix = "redaction-period/";
+        }
+        String d = D9.format(fileno);
+        return prefix + "hour-replicate/" + d.substring(0, 3) + "/" + d.substring(3, 6) + "/" + d.substring(6) + ".osc.gz";
+    }
+
+    /**
+     * Get sequence number from state.txt
+     * 
+     * @param osmosisstate
+     * @return
+     * @throws IOException
+     */
+    public static int getSequenceNo(File osmosisstate) throws IOException {
+        Scanner scanner = new Scanner(osmosisstate);
+        while (scanner.hasNextLine()) {
+            String line = scanner.nextLine().trim();
+            if (line.startsWith("sequenceNumber=")) {
+                int sequenceNo = Integer.parseInt(line.replace("sequenceNumber=", ""));
+                scanner.close();
+                return sequenceNo;
+            }
+        }
+        return -1;
     }
 }
