@@ -48,7 +48,6 @@ import org.xml.sax.SAXException;
 public class PlanetUpdateDownloader extends ThreadProcessor {
 
     private static final DecimalFormat DF = new DecimalFormat("0");
-    private static final DecimalFormat D9 = new DecimalFormat("000000000");
     public TorrentDownloader torrentDownloader = null;
     int startPiece = 0;
     int noOfPieces = 0;
@@ -127,7 +126,7 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
 
         // Download planet updates
         int i = 0;
-        long planet_timestamp = getPlanetTimestamp(osmosisState);
+        long planet_timestamp = Utilities.getPlanetTimestamp(osmosisState);
         long startTime = planet_timestamp;
 
         int minAge = Integer.parseInt(parameters.getProperty("planet_minimum_age"));
@@ -153,7 +152,7 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
                     return;
                 }
                 long oldPlanetTimestamp = planet_timestamp;
-                planet_timestamp = getPlanetTimestamp(osmosisState);
+                planet_timestamp = Utilities.getPlanetTimestamp(osmosisState);
                 if (planet_timestamp > oldPlanetTimestamp) {
                     i++;
                 }
@@ -217,7 +216,7 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
                 setStatus("Processing updates (" + ((int) getProgress()) + " %)...");
                 ii++;
                 l.add("--rxc");
-                l.add("file=" + Utilities.getUserdir(this) + updateName(fileno));
+                l.add("file=" + Utilities.getUserdir(this) + Utilities.updateName(fileno));
                 l.add("--buffer-change");
                 l.add("bufferCapacity=10000");
                 if (ii == 24) {
@@ -275,7 +274,7 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
                 if (!mirror.endsWith("/")) {
                     mirror += "/";
                 }
-                String stateUrl = (mirror + updateName(startPiece + noOfPieces - 1)).replace(".osc.gz", ".state.txt");
+                String stateUrl = (mirror + Utilities.updateName(startPiece + noOfPieces - 1)).replace(".osc.gz", ".state.txt");
                 URL surl;
                 try {
                     surl = new URL(stateUrl);
@@ -322,50 +321,6 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
         }
     }
 
-    private static long getPlanetTimestamp(File timestampFile) {
-        Long time = -1l;
-        try {
-            Scanner scanner = new Scanner(new FileInputStream(timestampFile));
-            while (scanner.hasNext()) {
-                String tstamp = scanner.nextLine();
-                if (tstamp.startsWith("timestamp=")) {
-                    Date tdate = new SimpleDateFormat("yyyy-MM-dd'T'HH\\:mm\\:ss'Z'").parse(tstamp, new ParsePosition(10));
-                    time = tdate.getTime();
-                }
-            }
-            scanner.close();
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(Osm2garmin.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return time;
-    }
-
-    /*
-     * name of the sequence file relative to planet directory
-     */
-    private String updateName(int fileno) {
-        String prefix = "";
-        if (fileno > 20722) {  // end of CC-BY-SA planet updates
-            fileno -= 20722;
-            prefix = "redaction-period/";
-        }
-        String d = D9.format(fileno);
-        return prefix + "hour-replicate/" + d.substring(0, 3) + "/" + d.substring(3, 6) + "/" + d.substring(6) + ".osc.gz";
-    }
-
-    private int getSequenceNo(File osmosisstate) throws IOException {
-        Scanner scanner = new Scanner(osmosisstate);
-        while (scanner.hasNextLine()) {
-            String line = scanner.nextLine().trim();
-            if (line.startsWith("sequenceNumber=")) {
-                int sequenceNo = Integer.parseInt(line.replace("sequenceNumber=", ""));
-                scanner.close();
-                return sequenceNo;
-            }
-        }
-        return -1;
-    }
-
     private class UpdateFileVerifier implements DataVerifier {
 
         public UpdateFileVerifier(TorrentFile torrent) {
@@ -377,7 +332,7 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
         @Override
         public boolean verify(int index, byte[] data) {
             InputStream is = null;
-            File hashfile = new File(Utilities.getUserdir(PlanetUpdateDownloader.this) + updateName(index) + ".sha1");
+            File hashfile = new File(Utilities.getUserdir(PlanetUpdateDownloader.this) + Utilities.updateName(index) + ".sha1");
             if (hashfile.exists()) {
                 int l = (int) hashfile.length();
                 byte[] hexhash = new byte[l];
@@ -497,7 +452,7 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
                 torrent.info_hash_as_binary);
         int sequence = -1;
         try {
-            sequence = getSequenceNo(osmosisstate) + 1;
+            sequence = Utilities.getSequenceNo(osmosisstate) + 1;
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
         }
@@ -516,17 +471,17 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
         // search for existing older files to seed
         while (size > 0) {
             sequence--;
-            String fname = Utilities.getUserdir(this) + updateName(sequence);
+            String fname = Utilities.getUserdir(this) + Utilities.updateName(sequence);
             size = (int) (new File(fname).length());
         }
         sequence++;
         startPiece = sequence;
         while (sequence < firstPieceToProcess) {
-            String fname = Utilities.getUserdir(this) + updateName(sequence);
+            String fname = Utilities.getUserdir(this) + Utilities.updateName(sequence);
             String hashname = fname + ".sha1";
             if (!new File(hashname).exists()) {
-                setStatus("Checking existing " + updateName(sequence));
-                String url = mirror + updateName(sequence);
+                setStatus("Checking existing " + Utilities.updateName(sequence));
+                String url = mirror + Utilities.updateName(sequence);
                 try {
                     size = (int) tryGetFileSize(new URL(url));
                 } catch (MalformedURLException ex) {
@@ -544,14 +499,14 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
                     temp));
             torrent.length.add(((long) size));
             torrent.total_length += size;
-            torrent.name.add(updateName(sequence));
+            torrent.name.add(Utilities.updateName(sequence));
             sequence++;
         }
         sequence = firstPieceToProcess;
         size = 1;
         while (size > 0) {
-            setStatus("Searching for updates - " + updateName(sequence));
-            String url = mirror + updateName(sequence);
+            setStatus("Searching for updates - " + Utilities.updateName(sequence));
+            String url = mirror + Utilities.updateName(sequence);
             try {
                 size = (int) tryGetFileSize(new URL(url));
             } catch (MalformedURLException ex) {
@@ -569,7 +524,7 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
                     temp));
             torrent.length.add(((long) size));
             torrent.total_length += size;
-            torrent.name.add(updateName(sequence));
+            torrent.name.add(Utilities.updateName(sequence));
             sequence++;
         }
         noOfPieces = torrent.name.size();
