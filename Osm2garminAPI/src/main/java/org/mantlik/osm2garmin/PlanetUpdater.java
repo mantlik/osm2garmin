@@ -66,6 +66,8 @@ public class PlanetUpdater extends ThreadProcessor {
             setStatus("Completed.");
             setProgress(100);
             return super.getStatus();
+        } else if (getState() == ERROR) {
+            return super.getStatus();
         }
         int npasses = (regions.size() + MAX_REGIONS_PASS - 1) / MAX_REGIONS_PASS + 2;
         double pass_progress = 0;
@@ -220,7 +222,7 @@ public class PlanetUpdater extends ThreadProcessor {
                 //    planetFile.delete();
                 //}
                 setStatus("Planet file has invalid size after update.");
-                Logger.getLogger(PlanetUpdater.class.getName()).log(Level.SEVERE, getStatus());
+                Logger.getLogger(PlanetUpdater.class.getName()).log(Level.SEVERE, "Planet file has invalid size after update.");
                 setState(ERROR);
                 synchronized (this) {
                     notify();
