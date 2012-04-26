@@ -17,4 +17,6 @@ Please take into consideration following notes when using Osm2garmin version 1.1
 
 *Release 193* introduced important bug fixes which should repair broken full planet download after 15-th of April 2012. Fixes will have effect for approx. next two weeks.
 
-*Osm2garmin 1.1 Release 193* temporarily replaces stable version 1.0 (Release 138) until final 1.1 release. It is offered to all Osm2garmin 1.0 users via automatic application updates.
+*Release 198* fixes serious bug in planet update routine blocking further planet updates when a successful planet update was completed after 1-st of April - see Issue 69. All users are advised to upgrade to Release 198. In addition, fix introduced in the Release 193 was extended for next 30 days, i.e. approx. to the end of May 2012.
+
+*Osm2garmin Release 198* temporarily replaces current stable version 1.0 until final 1.1 release. It is offered to all Osm2garmin 1.0 users via automatic application updates.
