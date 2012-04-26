@@ -40,6 +40,7 @@ public class WebseedTask extends DownloadTask implements Observer {
     private DownloadManager manager;
     private static final long MAX_IDLE_TIME = 120000;  // start download when no piece received 2 min
     public static boolean webseedActive = false;
+    private long sleepAfterError = 1000;
 
     public WebseedTask(byte[] fileID, byte[] myID, DownloadManager manager) {
         super(null, fileID, myID, false, null);
@@ -83,6 +84,7 @@ public class WebseedTask extends DownloadTask implements Observer {
                                 breakDownload = true;
                                 continue;
                             }
+                            sleepAfterError = 1000;
                             InputStream is = new FileInputStream(tempFileName);
                             byte[] block = new byte[downloadPiece.getLength()];
                             is.read(block);
@@ -94,6 +96,10 @@ public class WebseedTask extends DownloadTask implements Observer {
                             }
                         }
                         if (breakDownload) {
+                            Thread.sleep(sleepAfterError);
+                            if (sleepAfterError < MAX_IDLE_TIME) {
+                                sleepAfterError = Math.min(sleepAfterError * 2, MAX_IDLE_TIME);
+                            }
                             continue;
                         }
                         if (downloadPiece.verify()) {
