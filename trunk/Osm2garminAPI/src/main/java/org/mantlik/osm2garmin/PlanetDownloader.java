@@ -131,7 +131,7 @@ public class PlanetDownloader extends ThreadProcessor {
         Date planetDate = new Date(System.currentTimeMillis());
         try {
             int i = 0;
-            while (i < 30) {
+            while (i < 60) {
                 planet_found = true;
                 String planetUrl = mirror + "planet-" + sdf.format(planetDate) + ".osm.pbf";
                 if (!"http".equals(parameters.getProperty("download_method", "http"))) {
