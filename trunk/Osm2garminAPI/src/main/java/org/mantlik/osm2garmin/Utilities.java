@@ -634,7 +634,9 @@ public class Utilities {
     public static String updateName(int fileno) {
         final DecimalFormat D9 = new DecimalFormat("000000000");
         String prefix = "";
-        if (fileno > 20722) {  // end of CC-BY-SA planet updates
+        if (fileno < 15000) {
+            prefix = "redaction-period/";
+        } else if (fileno > 20722) {  // end of CC-BY-SA planet updates
             fileno -= 20722;
             prefix = "redaction-period/";
         }
