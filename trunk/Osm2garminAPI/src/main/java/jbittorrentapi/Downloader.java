@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Iterator;
 import java.util.Observable;
 
 /**
@@ -75,7 +76,7 @@ public class Downloader extends Observable implements Runnable {
      *
      * @param url
      * @param filename
-     * @param start  
+     * @param start
      */
     public Downloader(URL url, String filename, boolean start) {
         this.url = url;
@@ -211,6 +212,15 @@ public class Downloader extends Observable implements Runnable {
                 connection.setRequestProperty("Range",
                         "bytes=" + (downloaded + offset) + "-" + (downloaded + offset + size - 1));
             }
+            String requestProperties = "";
+            if (!connection.getRequestProperties().isEmpty()) {
+                requestProperties = "Request properties:\n";
+                Iterator<String> it = connection.getRequestProperties().keySet().iterator();
+                while (it.hasNext()) {
+                    String key = it.next();
+                    requestProperties += key + ": " + connection.getRequestProperty(key) + "\n";
+                }
+            }
 
             // Connect to server.
             connection.connect();
@@ -219,6 +229,7 @@ public class Downloader extends Observable implements Runnable {
             if (connection.getResponseCode() / 100 != 2) {
                 System.out.println("Bad response code from server " + connection.getResponseCode()
                         + " - " + connection.getResponseMessage() + ".");
+                System.out.print(requestProperties);
                 error();
             }
 
@@ -230,8 +241,7 @@ public class Downloader extends Observable implements Runnable {
             }
 
             /*
-             * Set the size for this download if it
-             * hasn't been already set.
+             * Set the size for this download if it hasn't been already set.
              */
             if (size == -1) {
                 size = contentLength + downloaded;
@@ -245,8 +255,8 @@ public class Downloader extends Observable implements Runnable {
             stream = connection.getInputStream();
             while (status == DOWNLOADING) {
                 /*
-                 * Size buffer according to how much of the
-                 * file is left to download.
+                 * Size buffer according to how much of the file is left to
+                 * download.
                  */
                 byte buffer[];
                 if (size - downloaded > MAX_BUFFER_SIZE) {
@@ -271,8 +281,8 @@ public class Downloader extends Observable implements Runnable {
             }
 
             /*
-             * Change status to complete if this point was
-             * reached because downloading has finished.
+             * Change status to complete if this point was reached because
+             * downloading has finished.
              */
             if (status == DOWNLOADING) {
                 status = COMPLETE;
