@@ -20,3 +20,5 @@ Please take into consideration following notes when using Osm2garmin version 1.1
 *Release 198* fixes serious bug in planet update routine blocking further planet updates when a successful planet update was completed after 1-st of April - see Issue 69. All users are advised to upgrade to Release 198. In addition, fix introduced in the Release 193 was extended for next 30 days, i.e. approx. to the end of May 2012.
 
 *Osm2garmin Release 198* temporarily replaces current stable version 1.0 until final 1.1 release. It is offered to all Osm2garmin 1.0 users via automatic application updates.
+
+* 8-th of May 2012* new full planet file was published at planet.openstreetmap.org. This extends proper functionality of Release 198 until approx. 7-th of June 2012.
