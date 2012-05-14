@@ -21,6 +21,10 @@
  */
 package org.mantlik.osm2garminspi;
 
+import java.io.IOException;
+import java.net.URL;
+import java.util.Enumeration;
+import java.util.jar.Manifest;
 import org.openide.DialogDisplayer;
 import org.openide.NotifyDescriptor;
 import org.openide.modules.ModuleInstall;
@@ -29,7 +33,20 @@ public class Installer extends ModuleInstall {
 
     @Override
     public void restored() {
-        System.setProperty("netbeans.buildnumber", "1.0");
+        String specVersion = "";
+        try {
+            Enumeration<URL> resources = getClass().getClassLoader().getResources("META-INF/MANIFEST.MF");
+            while (resources.hasMoreElements()) {
+                Manifest manifest = new Manifest(resources.nextElement().openStream());
+                String sv = manifest.getMainAttributes().getValue("OpenIDE-Module-Specification-Version");
+                if (sv != null) {
+                    specVersion = sv;
+                }
+            }
+        } catch (IOException E) {
+            // handle
+        }
+        System.setProperty("netbeans.buildnumber", specVersion);
     }
     private static boolean canClose = true;
 
