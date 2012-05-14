@@ -16,7 +16,7 @@ Bug fixes:
  * Fixed !PermGen Space error - Issue 41
  * Fixed missing license agreement when updating modules - Issue 33
  * Private tracker for BitTorrent planet updates download has been established - Issue 54
- * Minor fixes - Issue 25, Issue 35, Issue 42, Issue 49, Issue 50, Issue 51, Issue 59, Issue 63, Issue 64
+ * Minor fixes - Issue 25, Issue 35, Issue 42, Issue 49, Issue 50, Issue 51, Issue 59, Issue 63, Issue 64, Issue 69, Issue 73
 
 == 1.0 (build 138) - stable release ==
 
