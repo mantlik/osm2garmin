@@ -732,7 +732,7 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
                     nbDownloaders++;
                 }
 
-            } else {
+            } else if (dt != null && dt.ms != null) {
                 if (!p.isChoked()) {
                     dt.ms.addMessageToQueue(
                             new Message_PP(PeerProtocol.CHOKE));
