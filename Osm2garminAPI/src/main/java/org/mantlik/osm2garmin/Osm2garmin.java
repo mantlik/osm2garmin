@@ -198,7 +198,7 @@ public class Osm2garmin implements PropertyChangeListener {
         Utilities.loadProperties();
 
         // start contours updates
-        ThreadProcessor contoursProcessor = new ThreadProcessor(parameters) {
+        final ThreadProcessor contoursProcessor = new ThreadProcessor(parameters) {
 
             @Override
             public void run() {
@@ -217,15 +217,15 @@ public class Osm2garmin implements PropertyChangeListener {
                     } catch (InterruptedException ex) {
                         region.processor.setStatus("Interrupted.");
                         region.processor.setState(ContoursUpdater.ERROR);
-                        synchronized (Osm2garmin.this) {
-                            Osm2garmin.this.notify();
+                        synchronized (region) {
+                            region.notify();
                         }
                         return;
                     }
                     Utilities.getInstance().removeMonitoredProcess(region.processor);
                     region.setState(Region.CONTOURS_READY);
-                    synchronized (Osm2garmin.this) {
-                        Osm2garmin.this.notify();
+                    synchronized (region) {
+                        region.notify();
                     }
                 }
             }
@@ -296,9 +296,9 @@ public class Osm2garmin implements PropertyChangeListener {
             Region region = regions.get(reg);
             // wait for finishing contours unpacking if needed
             while (region.getState() == Region.MAKING_CONTOURS) {
-                synchronized (this) {
+                synchronized (region) {
                     try {
-                        wait();
+                        region.wait();
                     } catch (InterruptedException ex) {
                         region.processor.setStatus("Interrupted.");
                         region.processor.setState(PlanetDownloader.ERROR);
