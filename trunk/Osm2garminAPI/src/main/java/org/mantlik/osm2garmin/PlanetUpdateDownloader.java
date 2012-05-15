@@ -176,6 +176,9 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
             if (noOfPieces < 1) {
                 setStatus("Nothing to download.");
                 setState(COMPLETED);
+                synchronized (this) {
+                    notify();
+                }
                 return;
             }
             torrentDownloader =
