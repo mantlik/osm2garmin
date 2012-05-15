@@ -89,15 +89,15 @@ public class PlanetDownloader extends ThreadProcessor {
             if (!downloadPlanetFile(planetFile)) {
                 Logger.getLogger(Osm2garmin.class.getName()).log(Level.SEVERE, "Planet file download failed.");
                 setState(ERROR);
-                synchronized (this) {
-                    notify();
-                }
-                return;
             } else {
                 setProgress(100);
                 setStatus("Completed.");
                 setState(COMPLETED);
             }
+            synchronized (this) {
+                notify();
+            }
+            return;
         }
         String parent = planetFile.getParent();
         if (parent != null) {

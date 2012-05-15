@@ -140,6 +140,9 @@ public class OsmMaker extends ThreadProcessor {
             } catch (InterruptedException ex1) {
                 setState(ERROR);
                 setStatus("Interrupted.");
+                synchronized (this) {
+                    notify();
+                }
                 return;
             }
             region.setState(Region.CONTOURS_READY);
