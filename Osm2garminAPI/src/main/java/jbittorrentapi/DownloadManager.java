@@ -155,7 +155,7 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
                 tm.put(file, fileoffset);
                 if (fileoffset + this.torrent.getPieceLength(i) - pieceoffset
                         >= (Long) (torrent.length.get(file))
-                        && i != this.nbPieces - 1) {
+                        && i != (startPiece + nbPieces - 1)) {
                     pieceoffset += ((Long) (torrent.length.get(file))).longValue() - fileoffset;
                     file++;
                     fileoffset = 0;
