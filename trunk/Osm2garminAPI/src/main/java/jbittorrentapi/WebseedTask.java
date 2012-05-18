@@ -38,7 +38,7 @@ import java.util.TreeMap;
 public class WebseedTask extends DownloadTask implements Observer {
 
     private DownloadManager manager;
-    private static final long MAX_IDLE_TIME = 120000;  // start download when no piece received 2 min
+    private static final long MAX_IDLE_TIME = 60000;  // start download when no piece received for 60 sec
     public static boolean webseedActive = false;
     private long sleepAfterError = 1000;
 
