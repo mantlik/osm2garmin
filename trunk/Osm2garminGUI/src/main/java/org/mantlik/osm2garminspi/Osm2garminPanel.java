@@ -652,9 +652,9 @@ final class Osm2garminPanel extends javax.swing.JPanel {
         NbPreferences.forModule(Osm2garmin.class).put("exclusive_utils", 
                 exclusiveUtilsItem.isSelected() ? "true": "false");
         NbPreferences.forModule(Osm2garmin.class).put("srtm_dir", srtmdirItem.getText());
-        NbPreferences.forModule(Osm2garmin.class).put("contours_minor_interval", minorintervalItem.getText());
-        NbPreferences.forModule(Osm2garmin.class).put("contours_medium_interval", mediumintervalItem.getText());
-        NbPreferences.forModule(Osm2garmin.class).put("contours_major_interval", majorintervalItem.getText());
+        NbPreferences.forModule(Osm2garmin.class).put("contour_minor_interval", minorintervalItem.getText());
+        NbPreferences.forModule(Osm2garmin.class).put("contour_medium_interval", mediumintervalItem.getText());
+        NbPreferences.forModule(Osm2garmin.class).put("contour_major_interval", majorintervalItem.getText());
         NbPreferences.forModule(Osm2garmin.class).put("srtm_offs_lat", srtmOffsLatItem.getText());
         NbPreferences.forModule(Osm2garmin.class).put("srtm_offs_lon", srtmOffsLonItem.getText());
         NbPreferences.forModule(Osm2garmin.class).put("plot_minor_threshold", thresholdminorItem.getText());
