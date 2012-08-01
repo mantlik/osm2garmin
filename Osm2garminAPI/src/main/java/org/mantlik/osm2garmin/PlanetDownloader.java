@@ -217,7 +217,7 @@ public class PlanetDownloader extends ThreadProcessor {
             // check MD5 digest
 
             try {
-                url = new URL(downloadParameters.getProperty("planet_name") + ".md5");
+                url = new URL(mirror + downloadParameters.getProperty("planet_name") + ".md5");
             } catch (MalformedURLException ex) {
                 Logger.getLogger(Osm2garmin.class.getName()).log(Level.SEVERE, "Interrupted.", ex);
                 return false;
