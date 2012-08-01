@@ -23,4 +23,4 @@ Please take into consideration following notes when using Osm2garmin version 1.1
 
 * 8-th of May 2012* new full planet file was published at planet.openstreetmap.org. This extends proper functionality of Release 198 until approx. 7-th of June 2012.
 
-* 1-st of August 2012* According to information at http://blog.osmfoundation.org/ redaction of the planet data has been finished, nevertheless final structure of updates has not been published yet. Updates are still published in the redaction-period folder and new planet snapshots are updated every month. This keeps current Osm2Garmin release 1.1 build 209 operational until further announce.
+* 1-st of August 2012* According to information at http://blog.osmfoundation.org/2012/07/26/automated-redactions-complete/, redaction of the planet data has been finished, nevertheless final structure of updates has not been published yet. Despite of this lack of information, new updates are still published in the redaction-period folder and new planet snapshots are updated every month. This keeps current Osm2garmin release 1.1 build 209 operational until further announcement.
