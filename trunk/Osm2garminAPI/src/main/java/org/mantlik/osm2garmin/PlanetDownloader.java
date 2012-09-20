@@ -42,6 +42,8 @@ import java.util.logging.Logger;
  */
 public class PlanetDownloader extends ThreadProcessor {
 
+    private static final long FIRST_ODBL_PLANET_LENGTH = 18464764609l;
+    
     private SimpleDateFormat sdf;
     private DecimalFormat df;
     private File planetFile, oldPlanetFile;
@@ -84,8 +86,18 @@ public class PlanetDownloader extends ThreadProcessor {
                 return;
             }
         }
-        if (!(oldPlanetFile.exists() || planetFile.exists() || downloadParameters.containsKey("planet_name"))) {
-            System.out.println("Planet file does not exist. Trying to download the newest one. This can take long time.");
+        boolean terminateCddl = false;
+        if (planetFile.exists()) {
+            terminateCddl = (planetFile.length() < FIRST_ODBL_PLANET_LENGTH);
+        } else if (oldPlanetFile.exists()) {
+            terminateCddl = (oldPlanetFile.length() < FIRST_ODBL_PLANET_LENGTH);
+        }
+        if (terminateCddl || !(oldPlanetFile.exists() || planetFile.exists() || downloadParameters.containsKey("planet_name"))) {
+            if (terminateCddl) {
+                System.out.println("Planet file license has been changed. Newly licensed Planet file has to be downloaded.");
+            } else {
+                System.out.println("Planet file does not exist. Trying to download the newest one. This can take long time.");
+            }
             if (!downloadPlanetFile(planetFile)) {
                 Logger.getLogger(Osm2garmin.class.getName()).log(Level.SEVERE, "Planet file download failed.");
                 setState(ERROR);
