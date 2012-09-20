@@ -126,8 +126,6 @@ public class Osm2garmin implements PropertyChangeListener {
      */
     public int start(Properties params) {
         stop = false;
-        boolean splitterBusy = false;
-        boolean contoursSplitterBusy = false;
         parameters = params;
         userdir = parameters.getProperty("userdir", userdir);
         // Delete libraries - ensure newest libraries versions are used

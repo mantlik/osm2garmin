@@ -555,7 +555,7 @@ public class Utilities {
         }
         long planetTime = date;
         long startReplTime = new SimpleDateFormat("yyyy-MM-dd").parse(
-                "2009-11-15", new ParsePosition(0)).getTime();
+                "2012-09-12", new ParsePosition(0)).getTime();
         int sequenceNo = (int) ((planetTime - startReplTime) / 1000 / 60 / 60); // hours
         String stateUrl = mirror + updateName(sequenceNo);
         while (! downloadFile(stateUrl, targetPath)) {
@@ -633,15 +633,9 @@ public class Utilities {
      */
     public static String updateName(int fileno) {
         final DecimalFormat D9 = new DecimalFormat("000000000");
-        String prefix = "";
-        if (fileno < 15000) {
-            prefix = "redaction-period/";
-        } else if (fileno > 20722) {  // end of CC-BY-SA planet updates
-            fileno -= 20722;
-            prefix = "redaction-period/";
-        }
+        String prefix = "replication/";
         String d = D9.format(fileno);
-        return prefix + "hour-replicate/" + d.substring(0, 3) + "/" + d.substring(3, 6) + "/" + d.substring(6) + ".osc.gz";
+        return prefix + "hour/" + d.substring(0, 3) + "/" + d.substring(3, 6) + "/" + d.substring(6) + ".osc.gz";
     }
 
     /**

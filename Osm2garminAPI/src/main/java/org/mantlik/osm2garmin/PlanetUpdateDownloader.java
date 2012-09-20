@@ -426,9 +426,9 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
     private TorrentFile createUpdatesTorrent(File osmosisstate) {
         TorrentFile torrent = new TorrentFile();
         torrent.announceURL = "http://www.mantlik.cz:80/tracker/announce.php";
-        torrent.comment = "Original planets from http://planet.openstreetmap.org/ "
-                + "licensed under CC-BY-SA 2.0 by OpenStreetMap and contributors";
-        torrent.createdBy = "Osm2garmin 1.0";
+        torrent.comment = "Original data from http://planet.openstreetmap.org/ "
+                + "(C) OpenStreetMap contributors";
+        torrent.createdBy = "Osm2garmin 1.1";
         torrent.creationDate = System.currentTimeMillis() / 1000;
         ArrayList<String> tier = new ArrayList<String>();
         tier.add("http://www.mantlik.cz:80/tracker/announce.php");
@@ -450,7 +450,7 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
         torrent.changeAnnounce();
         String[] mirrors = parameters.getProperty("planet_file_update_urls").split(",");
         torrent.urlList.addAll(Arrays.asList(mirrors));
-        torrent.info_hash_as_binary = Utils.hash("Osm2Garmin planet update pseudo-torrent".getBytes());
+        torrent.info_hash_as_binary = Utils.hash("Osm2Garmin ODbL planet update pseudo-torrent".getBytes());
         torrent.info_hash_as_hex = Utils.byteArrayToByteString(
                 torrent.info_hash_as_binary);
         torrent.info_hash_as_url = Utils.byteArrayToURLString(
