@@ -298,6 +298,20 @@ public class PlanetDownloader extends ThreadProcessor {
                 Logger.getLogger(Osm2garmin.class.getName()).log(Level.SEVERE, null, ex);
                 return false;
             }
+            if (planetFile.exists()) {
+                if (! planetFile.delete()) {
+                    try {
+                        Thread.sleep(1000);
+                        if (! planetFile.delete()) {
+                            setStatus("Can not delete old planet file " + planetFile.getName());
+                            return false;
+                        }
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(Osm2garmin.class.getName()).log(Level.SEVERE, null, ex);
+                        return false;
+                    }
+                }
+            }
             if (!planetDownload.renameTo(planetFile)) {
                 setStatus("Can not rename " + planetDownload.getName() + " to "
                         + planetFile.getName());
