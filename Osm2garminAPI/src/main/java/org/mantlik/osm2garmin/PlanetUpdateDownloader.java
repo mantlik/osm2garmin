@@ -132,127 +132,73 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
         long startTime = planet_timestamp;
 
         int minAge = Integer.parseInt(parameters.getProperty("planet_minimum_age"));
-        if (parameters.getProperty("download_method", "http").equals("http")) {
-            while (System.currentTimeMillis() - planet_timestamp > 1000 * 60 * 60 * minAge) {
-                setProgress((float) ((planet_timestamp - startTime) * 100.0 / (System.currentTimeMillis() - startTime)));
-                setStatus("Downloading planet updates (" + new SimpleDateFormat("yyyy-MM-dd").format(new Date(planet_timestamp)) + ") - "
-                        + DF.format(getProgress()) + " % completed.");
-                String[] osargs = new String[]{
-                    "--rri", "workingDirectory=" + osmosiswork,
-                    "--wxc", "file=" + Utilities.getUserdir(this) + "update" + i + ".osc.gz"
-                };
-
-                try {
-                    Utilities.getInstance().runExternal("org.openstreetmap.osmosis.core.Osmosis", "run", "osmosis",
-                            osargs, this);
-                } catch (Exception ex) {
-                    Logger.getLogger(PlanetUpdateDownloader.class.getName()).log(Level.SEVERE, null, ex);
-                    setState(ERROR);
-                    synchronized (this) {
-                        notify();
-                    }
-                    return;
-                }
-                long oldPlanetTimestamp = planet_timestamp;
-                planet_timestamp = Utilities.getPlanetTimestamp(osmosisState);
-                if (planet_timestamp > oldPlanetTimestamp) {
-                    i++;
-                }
-            }
-        } else {  // pseudo-torrent download
-            setStatus("Searching for updates.");
-            int doDownload = 0;
-            TorrentFile torrent = null;
-            while ((noOfPieces < 1) && (doDownload < 3)) {
-                torrent = createUpdatesTorrent(osmosisState);
-                if (torrent == null) {
-                    setStatus("Error creating updates pseudo-torrent.");
-                    setState(ERROR);
-                    synchronized (this) {
-                        notify();
-                    }
-                    return;
-                }
-                doDownload++;
-            }
-            if (noOfPieces < 1) {
-                setStatus("Nothing to download.");
-                setState(COMPLETED);
+        setStatus("Searching for updates.");
+        int doDownload = 0;
+        TorrentFile torrent = null;
+        while ((noOfPieces < 1) && (doDownload < 3)) {
+            torrent = createUpdatesTorrent(osmosisState);
+            if (torrent == null) {
+                setStatus("Error creating updates pseudo-torrent.");
+                setState(ERROR);
                 synchronized (this) {
                     notify();
                 }
                 return;
             }
-            torrentDownloader =
-                    new TorrentDownloader(parameters, torrent, new File(Utilities.getUserdir(this)),
-                    startPiece, noOfPieces, new UpdateFileVerifier(torrent));
-            Utilities.getInstance().addProcessToMonitor(torrentDownloader);
-            torrentDownloader.changeSupport.addPropertyChangeListener(this);
-            while (torrentDownloader.getState() != TorrentDownloader.COMPLETED) {
-                if (torrentDownloader.getState() == Downloader.ERROR) {
-                    setState(ERROR);
-                    synchronized (this) {
-                        notify();
-                    }
-                    return;
-                }
-                try {
-                    setStatus(torrentDownloader.getStatus());
-                    setProgress(torrentDownloader.getProgress());
-                    Thread.sleep(1000);
-                } catch (InterruptedException ex) {
-                    //Logger.getLogger(PlanetDownloader.class.getName()).log(Level.SEVERE, null, ex);
-                    setState(ERROR);
-                    synchronized (this) {
-                        notify();
-                    }
-                    return;
-                }
+            doDownload++;
+        }
+        if (noOfPieces < 1) {
+            setStatus("Nothing to download.");
+            setState(COMPLETED);
+            synchronized (this) {
+                notify();
             }
-            int sequence = 0;
-            String[] args;
-            ArrayList<String> l = new ArrayList<String>();
-            int ii = 0;
-            int fileno;
-            // process downloads with Osmosis - 24 files in a single pass
-            for (fileno = firstPieceToProcess; fileno < (startPiece + noOfPieces); fileno++) {
-                setProgress((float) (100.0 * (fileno - firstPieceToProcess)
-                        / (startPiece + noOfPieces - firstPieceToProcess + 24)));
-                setStatus("Processing updates (" + ((int) getProgress()) + " %)...");
-                ii++;
-                l.add("--rxc");
-                l.add("file=" + Utilities.getUserdir(this) + Utilities.updateName(fileno));
-                l.add("--buffer-change");
-                l.add("bufferCapacity=10000");
-                if (ii == 24) {
-                    l.add("--apc");
-                    l.add("sourceCount=24");
-                    l.add("--sc");
-                    l.add("--simc");
-                    l.add("--wxc");
-                    l.add("file=" + Utilities.getUserdir(this) + "update" + sequence + ".osc.gz");
-                    args = l.toArray(new String[0]);
-                    try {
-                        Utilities.getInstance().runExternal("org.openstreetmap.osmosis.core.Osmosis", "run", "osmosis",
-                                args, this);
-                    } catch (Exception ex) {
-                        setStatus(ex.getMessage());
-                        setState(ERROR);
-                        synchronized (this) {
-                            notify();
-                        }
-                        return;
-                    }
-                    sequence++;
-                    l.clear();
-                    ii = 0;
+            return;
+        }
+        torrentDownloader =
+                new TorrentDownloader(parameters, torrent, new File(Utilities.getUserdir(this)),
+                startPiece, noOfPieces, new UpdateFileVerifier(torrent));
+        Utilities.getInstance().addProcessToMonitor(torrentDownloader);
+        torrentDownloader.changeSupport.addPropertyChangeListener(this);
+        while (torrentDownloader.getState() != TorrentDownloader.COMPLETED) {
+            if (torrentDownloader.getState() == Downloader.ERROR) {
+                setState(ERROR);
+                synchronized (this) {
+                    notify();
                 }
+                return;
             }
-            if (!l.isEmpty()) {
-                setProgress((float) (100.0 * (fileno - firstPieceToProcess)
-                        / (startPiece + noOfPieces - firstPieceToProcess + 24)));
+            try {
+                setStatus(torrentDownloader.getStatus());
+                setProgress(torrentDownloader.getProgress());
+                Thread.sleep(1000);
+            } catch (InterruptedException ex) {
+                //Logger.getLogger(PlanetDownloader.class.getName()).log(Level.SEVERE, null, ex);
+                setState(ERROR);
+                synchronized (this) {
+                    notify();
+                }
+                return;
+            }
+        }
+        int sequence = 0;
+        String[] args;
+        ArrayList<String> l = new ArrayList<String>();
+        int ii = 0;
+        int fileno;
+        // process downloads with Osmosis - 24 files in a single pass
+        for (fileno = firstPieceToProcess; fileno < (startPiece + noOfPieces); fileno++) {
+            setProgress((float) (100.0 * (fileno - firstPieceToProcess)
+                    / (startPiece + noOfPieces - firstPieceToProcess + 24)));
+            setStatus("Processing updates (" + ((int) getProgress()) + " %)...");
+            ii++;
+            l.add("--rxc");
+            l.add("file=" + Utilities.getUserdir(this) + Utilities.updateName(fileno));
+            l.add("--buffer-change");
+            l.add("bufferCapacity=10000");
+            if (ii == 24) {
                 l.add("--apc");
-                l.add("sourceCount=" + ii);
+                l.add("sourceCount=24");
                 l.add("--sc");
                 l.add("--simc");
                 l.add("--wxc");
@@ -269,54 +215,78 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
                     }
                     return;
                 }
+                sequence++;
+                l.clear();
+                ii = 0;
             }
-            // download latest osmosiswork/state.txt
-            setStatus("Downloading current state.txt");
-            String[] mirrors = parameters.getProperty("planet_file_update_urls").split(",");
-            boolean ok = false;
-            while (!ok) {
-                String mirror = mirrors[((int) (Math.random() * 1.0 * mirrors.length))];
-                if (!mirror.endsWith("/")) {
-                    mirror += "/";
+        }
+        if (!l.isEmpty()) {
+            setProgress((float) (100.0 * (fileno - firstPieceToProcess)
+                    / (startPiece + noOfPieces - firstPieceToProcess + 24)));
+            l.add("--apc");
+            l.add("sourceCount=" + ii);
+            l.add("--sc");
+            l.add("--simc");
+            l.add("--wxc");
+            l.add("file=" + Utilities.getUserdir(this) + "update" + sequence + ".osc.gz");
+            args = l.toArray(new String[0]);
+            try {
+                Utilities.getInstance().runExternal("org.openstreetmap.osmosis.core.Osmosis", "run", "osmosis",
+                        args, this);
+            } catch (Exception ex) {
+                setStatus(ex.getMessage());
+                setState(ERROR);
+                synchronized (this) {
+                    notify();
                 }
-                String stateUrl = (mirror + Utilities.updateName(startPiece + noOfPieces - 1)).replace(".osc.gz", ".state.txt");
-                URL surl;
+                return;
+            }
+        }
+        // download latest osmosiswork/state.txt
+        setStatus("Downloading current state.txt");
+        String[] mirrors = parameters.getProperty("planet_file_update_urls").split(",");
+        boolean ok = false;
+        while (!ok) {
+            String mirror = mirrors[((int) (Math.random() * 1.0 * mirrors.length))];
+            if (!mirror.endsWith("/")) {
+                mirror += "/";
+            }
+            String stateUrl = (mirror + Utilities.updateName(startPiece + noOfPieces - 1)).replace(".osc.gz", ".state.txt");
+            URL surl;
+            try {
+                surl = new URL(stateUrl);
+            } catch (MalformedURLException ex) {
+                Logger.getLogger(Osm2garmin.class.getName()).log(Level.SEVERE, "", ex);
+                setStatus(ex.getMessage());
+                setState(ERROR);
+                synchronized (this) {
+                    notify();
+                }
+                return;
+            }
+            String state = osmosiswork + "state.txt";
+            new File(state).delete();
+            Downloader downloader = new Downloader(surl, state);
+            while (downloader.getStatus() != Downloader.COMPLETE) {
+                if (downloader.getStatus() == Downloader.ERROR) {
+                    break;
+                }
                 try {
-                    surl = new URL(stateUrl);
-                } catch (MalformedURLException ex) {
-                    Logger.getLogger(Osm2garmin.class.getName()).log(Level.SEVERE, "", ex);
-                    setStatus(ex.getMessage());
+                    Thread.sleep(1000);
+                } catch (InterruptedException ex) {
+                    //Logger.getLogger(PlanetUpdateDownloader.class.getName()).log(Level.SEVERE, null, ex);
+                    //setState(ERROR);
+                    setStatus("Interrupted.");
                     setState(ERROR);
                     synchronized (this) {
                         notify();
                     }
                     return;
                 }
-                String state = osmosiswork + "state.txt";
-                new File(state).delete();
-                Downloader downloader = new Downloader(surl, state);
-                while (downloader.getStatus() != Downloader.COMPLETE) {
-                    if (downloader.getStatus() == Downloader.ERROR) {
-                        break;
-                    }
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException ex) {
-                        //Logger.getLogger(PlanetUpdateDownloader.class.getName()).log(Level.SEVERE, null, ex);
-                        //setState(ERROR);
-                        setStatus("Interrupted.");
-                        setState(ERROR);
-                        synchronized (this) {
-                            notify();
-                        }
-                        return;
-                    }
-                }
-                if (downloader.getStatus() == Downloader.COMPLETE) {
-                    ok = true;
-                }
             }
-
+            if (downloader.getStatus() == Downloader.COMPLETE) {
+                ok = true;
+            }
         }
         setProgress(100);
         setStatus("Completed.");
