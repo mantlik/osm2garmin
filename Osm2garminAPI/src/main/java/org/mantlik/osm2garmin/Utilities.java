@@ -38,7 +38,6 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
-import org.openide.util.Exceptions;
 
 /**
  *
@@ -47,6 +46,8 @@ import org.openide.util.Exceptions;
 public class Utilities {
 
     public static final long REFRESH_INTERVAL = 1000;
+    private static final long START_DATE_ODBL = new SimpleDateFormat("yyyy-MM-dd'T'HH\\:mm\\:ss'Z'").
+            parse("timestamp=2012-09-12T08\\:00\\:00Z", new ParsePosition(10)).getTime();
     private static ArrayList<String> runningClasses = new ArrayList<String>();
     private static Utilities instance = null;
     private static ArrayList<ThreadProcessor> processesToMonitor = new ArrayList<ThreadProcessor>();
@@ -646,6 +647,9 @@ public class Utilities {
      * @throws IOException
      */
     public static int getSequenceNo(File osmosisstate) throws IOException {
+        if (getPlanetTimestamp(osmosisstate) < START_DATE_ODBL) {
+            return 0;
+        }
         Scanner scanner = new Scanner(osmosisstate);
         while (scanner.hasNextLine()) {
             String line = scanner.nextLine().trim();
