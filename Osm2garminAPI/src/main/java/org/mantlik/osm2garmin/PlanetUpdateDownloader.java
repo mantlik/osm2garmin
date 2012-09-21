@@ -26,10 +26,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -127,11 +125,6 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
         }
 
         // Download planet updates
-        int i = 0;
-        long planet_timestamp = Utilities.getPlanetTimestamp(osmosisState);
-        long startTime = planet_timestamp;
-
-        int minAge = Integer.parseInt(parameters.getProperty("planet_minimum_age"));
         setStatus("Searching for updates.");
         int doDownload = 0;
         TorrentFile torrent = null;
