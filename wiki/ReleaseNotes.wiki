@@ -10,13 +10,14 @@ New features:
  * Added installer for !MacOsx - Issue 61
  * Added system recognition into installer. Default start-up parameters are adjusted in post-install step - Issue 21, Issue 41 and Issue 61
  * Added support for Redaction-period updates structure change after 1-st of April 2012 - Issue 65
+ * Removed HTTP download for updates. Only planet file can be downloaded via HTTP, updates are downloaded via BitTorrent only - Issue 65
 
 Bug fixes:
 
  * Fixed !PermGen Space error - Issue 41
  * Fixed missing license agreement when updating modules - Issue 33
  * Private tracker for BitTorrent planet updates download has been established - Issue 54
- * Minor fixes - Issue 25, Issue 35, Issue 42, Issue 49, Issue 50, Issue 51, Issue 59, Issue 63, Issue 64, Issue 69, Issue 73, Issue 75
+ * Minor fixes - Issue 25, Issue 35, Issue 42, Issue 49, Issue 50, Issue 51, Issue 59, Issue 63, Issue 64, Issue 69, Issue 73, Issue 75, Issue 86
 
 == 1.0 (build 138) - stable release ==
 
