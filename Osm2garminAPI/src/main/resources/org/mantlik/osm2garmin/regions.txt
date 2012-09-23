@@ -6,7 +6,7 @@
 -179 26 -95 49 usa_west
 -179 5 -24 33 central_america
 -179 -60 -24 15 south_america
-40 -10 180 35 asia_south
+40 0 180 35 asia_south
 40 35 180 85 asia_north
 -24 -5 60 40 africa_north
 -24 -40 60 15 africa_south
