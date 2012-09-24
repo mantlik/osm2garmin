@@ -149,7 +149,7 @@ public class Osm2garmin implements PropertyChangeListener {
                     System.out.println("Preparing region " + l[4] + " directory.");
                     Region region = new Region(l[4], parameters.getProperty("maps_dir"),
                             parameters.getProperty("delete_old_maps", "false").equals("true")
-                            && (! parameters.getProperty("skip_planet_update", "false").equals("true")), 
+                            && (!parameters.getProperty("skip_planet_update", "false").equals("true")),
                             familyID);
                     familyID++;
                     region.lon1 = Float.parseFloat(l[0]);
@@ -200,7 +200,6 @@ public class Osm2garmin implements PropertyChangeListener {
 
         // start contours updates
         final ThreadProcessor contoursProcessor = new ThreadProcessor(parameters) {
-
             @Override
             public void run() {
                 for (int reg = 0; reg < regions.size(); reg++) {
@@ -239,12 +238,14 @@ public class Osm2garmin implements PropertyChangeListener {
         System.out.println("Planet file download started.");
         final ThreadProcessor pd = planetDownloader;
         synchronized (pd) {
-            try {
-                pd.wait();
-            } catch (InterruptedException ex) {
-                planetDownloader.setStatus("Interrupted.");
-                planetDownloader.setState(PlanetDownloader.ERROR);
-                return 1;
+            if (pd.getState() == PlanetDownloader.RUNNING) {
+                try {
+                    pd.wait();
+                } catch (InterruptedException ex) {
+                    planetDownloader.setStatus("Interrupted.");
+                    planetDownloader.setState(PlanetDownloader.ERROR);
+                    return 1;
+                }
             }
         }
         Utilities.getInstance().removeMonitoredProcess(planetDownloader);
@@ -259,12 +260,14 @@ public class Osm2garmin implements PropertyChangeListener {
         System.out.println("Planet updates download started.");
         final ThreadProcessor pud = planetUpdateDownloader;
         synchronized (pud) {
-            try {
-                pud.wait();
-            } catch (InterruptedException ex) {
-                planetUpdateDownloader.setStatus("Interrupted.");
-                planetUpdateDownloader.setState(PlanetDownloader.ERROR);
-                return 3;
+            if (pud.getState() == PlanetUpdateDownloader.RUNNING) {
+                try {
+                    pud.wait();
+                } catch (InterruptedException ex) {
+                    planetUpdateDownloader.setStatus("Interrupted.");
+                    planetUpdateDownloader.setState(PlanetDownloader.ERROR);
+                    return 3;
+                }
             }
         }
         Utilities.getInstance().removeMonitoredProcess(planetUpdateDownloader);
