@@ -7,9 +7,7 @@
         <version>1.2-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.mantlik</groupId>
     <artifactId>osm2garminspi</artifactId>
-    <version>1.1-SNAPSHOT</version>
     <packaging>nbm</packaging>
 
     <name>Osm2garmin-UI</name>
