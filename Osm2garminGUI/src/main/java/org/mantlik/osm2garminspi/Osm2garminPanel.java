@@ -87,6 +87,7 @@ final class Osm2garminPanel extends javax.swing.JPanel {
         thresholdmediumItem = new javax.swing.JTextField();
         jLabel13 = new javax.swing.JLabel();
         jLabel10 = new javax.swing.JLabel();
+        skipPlanetUpdateItem = new javax.swing.JCheckBox();
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(null, org.openide.util.NbBundle.getMessage(Osm2garminPanel.class, "Osm2garminPanel.jPanel1.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, null, new java.awt.Color(51, 153, 255))); // NOI18N
 
@@ -282,6 +283,8 @@ final class Osm2garminPanel extends javax.swing.JPanel {
 
         org.openide.awt.Mnemonics.setLocalizedText(jLabel10, org.openide.util.NbBundle.getMessage(Osm2garminPanel.class, "Osm2garminPanel.jLabel10.text")); // NOI18N
 
+        org.openide.awt.Mnemonics.setLocalizedText(skipPlanetUpdateItem, org.openide.util.NbBundle.getMessage(Osm2garminPanel.class, "Osm2garminPanel.skipPlanetUpdateItem.text")); // NOI18N
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -326,13 +329,17 @@ final class Osm2garminPanel extends javax.swing.JPanel {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(thresholdmediumItem, javax.swing.GroupLayout.PREFERRED_SIZE, 46, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel20, javax.swing.GroupLayout.PREFERRED_SIZE, 12, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(jLabel20, javax.swing.GroupLayout.PREFERRED_SIZE, 12, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(skipPlanetUpdateItem)
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
+                .addComponent(skipPlanetUpdateItem)
+                .addGap(12, 12, 12)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel9)
                     .addComponent(minorintervalItem, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -626,6 +633,8 @@ final class Osm2garminPanel extends javax.swing.JPanel {
                 "2400"));
         cyclingFeaturesItem.setSelected(NbPreferences.forModule(Osm2garmin.class).get("cycling_features",
                 "false").equals("true"));
+        skipPlanetUpdateItem.setSelected(NbPreferences.forModule(Osm2garmin.class).get("skip_planet_update",
+                "false").equals("true"));
         srtmStepItem.setText(NbPreferences.forModule(Osm2garmin.class).get("srtm_step",
                 "5"));
         contoursDensityItem.setText(NbPreferences.forModule(Osm2garmin.class).get("contours_density",
@@ -661,6 +670,8 @@ final class Osm2garminPanel extends javax.swing.JPanel {
         NbPreferences.forModule(Osm2garmin.class).put("plot_medium_threshold", thresholdmediumItem.getText());
         NbPreferences.forModule(Osm2garmin.class).put("cycling_features", 
                 cyclingFeaturesItem.isSelected() ? "true": "false");
+        NbPreferences.forModule(Osm2garmin.class).put("skip_planet_update", 
+                skipPlanetUpdateItem.isSelected() ? "true": "false");
         NbPreferences.forModule(Osm2garmin.class).put("srtm_step", srtmStepItem.getText());
         NbPreferences.forModule(Osm2garmin.class).put("contours_density", contoursDensityItem.getText());
     }
@@ -704,6 +715,7 @@ final class Osm2garminPanel extends javax.swing.JPanel {
     private javax.swing.JTextField mapsdirItem;
     private javax.swing.JTextField mediumintervalItem;
     private javax.swing.JTextField minorintervalItem;
+    private javax.swing.JCheckBox skipPlanetUpdateItem;
     private javax.swing.JTextField srtmOffsLatItem;
     private javax.swing.JTextField srtmOffsLonItem;
     private javax.swing.JTextField srtmStepItem;
