@@ -97,6 +97,15 @@ public class PlanetUpdater extends ThreadProcessor {
 
     @Override
     public void run() {
+        if (parameters.getProperty("skip_planet_update", "false").equals("true")) {
+            setProgress(100);
+            setStatus("Skipped.");
+            setState(COMPLETED);
+            synchronized (this) {
+                notify();
+            }
+            return;
+        }
         try {
             File f = new File(Utilities.getUserdir(this) + "update.osc.gz");
             if (f.exists()) {
