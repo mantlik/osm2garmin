@@ -56,7 +56,6 @@ final class Osm2garminPanel extends javax.swing.JPanel {
         srtmdirItem = new javax.swing.JTextField();
         srtmdirBrowseItem = new javax.swing.JButton();
         exclusiveUtilsItem = new javax.swing.JCheckBox();
-        cyclingFeaturesItem = new javax.swing.JCheckBox();
         srtmStepItem = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
@@ -149,13 +148,6 @@ final class Osm2garminPanel extends javax.swing.JPanel {
         exclusiveUtilsItem.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
             public void propertyChange(java.beans.PropertyChangeEvent evt) {
                 exclusiveUtilsItemPropertyChange(evt);
-            }
-        });
-
-        org.openide.awt.Mnemonics.setLocalizedText(cyclingFeaturesItem, org.openide.util.NbBundle.getMessage(Osm2garminPanel.class, "Osm2garminPanel.cyclingFeaturesItem.text")); // NOI18N
-        cyclingFeaturesItem.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
-            public void propertyChange(java.beans.PropertyChangeEvent evt) {
-                cyclingFeaturesItemPropertyChange(evt);
             }
         });
 
@@ -392,7 +384,6 @@ final class Osm2garminPanel extends javax.swing.JPanel {
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(exclusiveUtilsItem, javax.swing.GroupLayout.PREFERRED_SIZE, 399, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(cyclingFeaturesItem, javax.swing.GroupLayout.PREFERRED_SIZE, 399, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(deleteOldMapsItem, javax.swing.GroupLayout.PREFERRED_SIZE, 399, javax.swing.GroupLayout.PREFERRED_SIZE))
                                 .addGap(0, 0, Short.MAX_VALUE))
                             .addGroup(jPanel1Layout.createSequentialGroup()
@@ -456,8 +447,6 @@ final class Osm2garminPanel extends javax.swing.JPanel {
                 .addComponent(exclusiveUtilsItem)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(deleteOldMapsItem)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(cyclingFeaturesItem)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(srtmStepItem, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -486,25 +475,70 @@ final class Osm2garminPanel extends javax.swing.JPanel {
         );
     }// </editor-fold>//GEN-END:initComponents
 
-    private void userdirBrowseItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_userdirBrowseItemActionPerformed
-        JFileChooser dial = new JFileChooser("Working directory");
-        dial.setLocation(150, 150);
-        dial.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        dial.setCurrentDirectory(new File(userdirItem.getText()));
-        if (dial.showDialog(this, "Select") == JFileChooser.APPROVE_OPTION) {
-            userdirItem.setText(dial.getSelectedFile().getPath());
-        }
-    }//GEN-LAST:event_userdirBrowseItemActionPerformed
+    private void thresholdmediumItemPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_thresholdmediumItemPropertyChange
+        if (!thresholdmediumItem.getText().equals(NbPreferences.forModule(Osm2garmin.class).get("plot_medium_threshold",
+            "3200"))) {
+    controller.changed();
+    }
+    }//GEN-LAST:event_thresholdmediumItemPropertyChange
 
-    private void mapsdirBrowseItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mapsdirBrowseItemActionPerformed
-        JFileChooser dial = new JFileChooser("Maps directory");
-        dial.setLocation(150, 150);
-        dial.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        dial.setCurrentDirectory(new File(mapsdirItem.getText()));
-        if (dial.showDialog(this, "Select") == JFileChooser.APPROVE_OPTION) {
-            mapsdirItem.setText(dial.getSelectedFile().getPath());
-        }
-    }//GEN-LAST:event_mapsdirBrowseItemActionPerformed
+    private void mediumintervalItemPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_mediumintervalItemPropertyChange
+        if (!mediumintervalItem.getText().equals(NbPreferences.forModule(Osm2garmin.class).get("contour_medium_interval",
+            "50"))) {
+    controller.changed();
+    }
+    }//GEN-LAST:event_mediumintervalItemPropertyChange
+
+    private void thresholdminorItemPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_thresholdminorItemPropertyChange
+        if (!thresholdminorItem.getText().equals(NbPreferences.forModule(Osm2garmin.class).get("plot_minor_threshold",
+            "800"))) {
+    controller.changed();
+    }
+    }//GEN-LAST:event_thresholdminorItemPropertyChange
+
+    private void majorintervalItemPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_majorintervalItemPropertyChange
+        if (!majorintervalItem.getText().equals(NbPreferences.forModule(Osm2garmin.class).get("contour_major_interval",
+            "100"))) {
+    controller.changed();
+    }
+    }//GEN-LAST:event_majorintervalItemPropertyChange
+
+    private void minorintervalItemPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_minorintervalItemPropertyChange
+        if (!minorintervalItem.getText().equals(NbPreferences.forModule(Osm2garmin.class).get("contour_minor_interval",
+            "25"))) {
+    controller.changed();
+    }
+    }//GEN-LAST:event_minorintervalItemPropertyChange
+
+    private void srtmOffsLonItemPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_srtmOffsLonItemPropertyChange
+        controller.changed();
+    }//GEN-LAST:event_srtmOffsLonItemPropertyChange
+
+    private void srtmOffsLatItemPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_srtmOffsLatItemPropertyChange
+        controller.changed();
+    }//GEN-LAST:event_srtmOffsLatItemPropertyChange
+
+    private void deleteOldMapsItemPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_deleteOldMapsItemPropertyChange
+        controller.changed();
+    }//GEN-LAST:event_deleteOldMapsItemPropertyChange
+
+    private void contoursDensityItemPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_contoursDensityItemPropertyChange
+        if (!contoursDensityItem.getText().equals(NbPreferences.forModule(Osm2garmin.class).get("contours_density",
+            "1"))) {
+    controller.changed();
+    }
+    }//GEN-LAST:event_contoursDensityItemPropertyChange
+
+    private void srtmStepItemPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_srtmStepItemPropertyChange
+        if (!srtmStepItem.getText().equals(NbPreferences.forModule(Osm2garmin.class).get("srtm_step",
+            "2"))) {
+    controller.changed();
+    }
+    }//GEN-LAST:event_srtmStepItemPropertyChange
+
+    private void exclusiveUtilsItemPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_exclusiveUtilsItemPropertyChange
+        controller.changed();
+    }//GEN-LAST:event_exclusiveUtilsItemPropertyChange
 
     private void srtmdirBrowseItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_srtmdirBrowseItemActionPerformed
         JFileChooser dial = new JFileChooser("Working directory");
@@ -516,95 +550,46 @@ final class Osm2garminPanel extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_srtmdirBrowseItemActionPerformed
 
-    private void userdirItemPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_userdirItemPropertyChange
-        if (!userdirItem.getText().equals(NbPreferences.forModule(Osm2garmin.class).get("userdir",
-                System.getProperty("netbeans.user") + "/"))) {
-            controller.changed();
+    private void srtmdirItemPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_srtmdirItemPropertyChange
+        if (!srtmdirItem.getText().equals(NbPreferences.forModule(Osm2garmin.class).get("srtm_dir",
+            System.getProperty("netbeans.user") + "/SRTM/"))) {
+    controller.changed();
+    }
+    }//GEN-LAST:event_srtmdirItemPropertyChange
+
+    private void mapsdirBrowseItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mapsdirBrowseItemActionPerformed
+        JFileChooser dial = new JFileChooser("Maps directory");
+        dial.setLocation(150, 150);
+        dial.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        dial.setCurrentDirectory(new File(mapsdirItem.getText()));
+        if (dial.showDialog(this, "Select") == JFileChooser.APPROVE_OPTION) {
+            mapsdirItem.setText(dial.getSelectedFile().getPath());
         }
-    }//GEN-LAST:event_userdirItemPropertyChange
+    }//GEN-LAST:event_mapsdirBrowseItemActionPerformed
 
     private void mapsdirItemPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_mapsdirItemPropertyChange
         if (!mapsdirItem.getText().equals(NbPreferences.forModule(Osm2garmin.class).get("maps_dir",
-                System.getProperty("netbeans.user") + "/maps/"))) {
-            controller.changed();
-        }
+            System.getProperty("netbeans.user") + "/maps/"))) {
+    controller.changed();
+    }
     }//GEN-LAST:event_mapsdirItemPropertyChange
 
-    private void srtmdirItemPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_srtmdirItemPropertyChange
-        if (!srtmdirItem.getText().equals(NbPreferences.forModule(Osm2garmin.class).get("srtm_dir",
-                System.getProperty("netbeans.user") + "/SRTM/"))) {
-            controller.changed();
+    private void userdirItemPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_userdirItemPropertyChange
+        if (!userdirItem.getText().equals(NbPreferences.forModule(Osm2garmin.class).get("userdir",
+            System.getProperty("netbeans.user") + "/"))) {
+    controller.changed();
+    }
+    }//GEN-LAST:event_userdirItemPropertyChange
+
+    private void userdirBrowseItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_userdirBrowseItemActionPerformed
+        JFileChooser dial = new JFileChooser("Working directory");
+        dial.setLocation(150, 150);
+        dial.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        dial.setCurrentDirectory(new File(userdirItem.getText()));
+        if (dial.showDialog(this, "Select") == JFileChooser.APPROVE_OPTION) {
+            userdirItem.setText(dial.getSelectedFile().getPath());
         }
-    }//GEN-LAST:event_srtmdirItemPropertyChange
-
-    private void minorintervalItemPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_minorintervalItemPropertyChange
-        if (!minorintervalItem.getText().equals(NbPreferences.forModule(Osm2garmin.class).get("contour_minor_interval",
-                "25"))) {
-            controller.changed();
-        }
-    }//GEN-LAST:event_minorintervalItemPropertyChange
-
-    private void mediumintervalItemPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_mediumintervalItemPropertyChange
-        if (!mediumintervalItem.getText().equals(NbPreferences.forModule(Osm2garmin.class).get("contour_medium_interval",
-                "50"))) {
-            controller.changed();
-        }
-    }//GEN-LAST:event_mediumintervalItemPropertyChange
-
-    private void majorintervalItemPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_majorintervalItemPropertyChange
-        if (!majorintervalItem.getText().equals(NbPreferences.forModule(Osm2garmin.class).get("contour_major_interval",
-                "100"))) {
-            controller.changed();
-        }
-    }//GEN-LAST:event_majorintervalItemPropertyChange
-
-    private void thresholdminorItemPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_thresholdminorItemPropertyChange
-        if (!thresholdminorItem.getText().equals(NbPreferences.forModule(Osm2garmin.class).get("plot_minor_threshold",
-                "800"))) {
-            controller.changed();
-        }
-    }//GEN-LAST:event_thresholdminorItemPropertyChange
-
-    private void thresholdmediumItemPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_thresholdmediumItemPropertyChange
-        if (!thresholdmediumItem.getText().equals(NbPreferences.forModule(Osm2garmin.class).get("plot_medium_threshold",
-                "3200"))) {
-            controller.changed();
-        }
-    }//GEN-LAST:event_thresholdmediumItemPropertyChange
-
-    private void exclusiveUtilsItemPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_exclusiveUtilsItemPropertyChange
-        controller.changed();
-    }//GEN-LAST:event_exclusiveUtilsItemPropertyChange
-
-    private void cyclingFeaturesItemPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_cyclingFeaturesItemPropertyChange
-        controller.changed();
-    }//GEN-LAST:event_cyclingFeaturesItemPropertyChange
-
-    private void srtmStepItemPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_srtmStepItemPropertyChange
-        if (!srtmStepItem.getText().equals(NbPreferences.forModule(Osm2garmin.class).get("srtm_step",
-                "2"))) {
-            controller.changed();
-        }
-    }//GEN-LAST:event_srtmStepItemPropertyChange
-
-    private void contoursDensityItemPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_contoursDensityItemPropertyChange
-        if (!contoursDensityItem.getText().equals(NbPreferences.forModule(Osm2garmin.class).get("contours_density",
-                "1"))) {
-            controller.changed();
-        }
-    }//GEN-LAST:event_contoursDensityItemPropertyChange
-
-    private void deleteOldMapsItemPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_deleteOldMapsItemPropertyChange
-        controller.changed();
-    }//GEN-LAST:event_deleteOldMapsItemPropertyChange
-
-    private void srtmOffsLatItemPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_srtmOffsLatItemPropertyChange
-        controller.changed();
-    }//GEN-LAST:event_srtmOffsLatItemPropertyChange
-
-    private void srtmOffsLonItemPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_srtmOffsLonItemPropertyChange
-        controller.changed();
-    }//GEN-LAST:event_srtmOffsLonItemPropertyChange
+    }//GEN-LAST:event_userdirBrowseItemActionPerformed
 
     void load() {
         userdirItem.setText(NbPreferences.forModule(Osm2garmin.class).get("userdir",
@@ -631,8 +616,6 @@ final class Osm2garminPanel extends javax.swing.JPanel {
                 "500"));
         thresholdmediumItem.setText(NbPreferences.forModule(Osm2garmin.class).get("plot_medium_threshold",
                 "2400"));
-        cyclingFeaturesItem.setSelected(NbPreferences.forModule(Osm2garmin.class).get("cycling_features",
-                "false").equals("true"));
         skipPlanetUpdateItem.setSelected(NbPreferences.forModule(Osm2garmin.class).get("skip_planet_update",
                 "false").equals("true"));
         srtmStepItem.setText(NbPreferences.forModule(Osm2garmin.class).get("srtm_step",
@@ -668,8 +651,6 @@ final class Osm2garminPanel extends javax.swing.JPanel {
         NbPreferences.forModule(Osm2garmin.class).put("srtm_offs_lon", srtmOffsLonItem.getText());
         NbPreferences.forModule(Osm2garmin.class).put("plot_minor_threshold", thresholdminorItem.getText());
         NbPreferences.forModule(Osm2garmin.class).put("plot_medium_threshold", thresholdmediumItem.getText());
-        NbPreferences.forModule(Osm2garmin.class).put("cycling_features", 
-                cyclingFeaturesItem.isSelected() ? "true": "false");
         NbPreferences.forModule(Osm2garmin.class).put("skip_planet_update", 
                 skipPlanetUpdateItem.isSelected() ? "true": "false");
         NbPreferences.forModule(Osm2garmin.class).put("srtm_step", srtmStepItem.getText());
@@ -682,7 +663,6 @@ final class Osm2garminPanel extends javax.swing.JPanel {
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextField contoursDensityItem;
-    private javax.swing.JCheckBox cyclingFeaturesItem;
     private javax.swing.JCheckBox deleteOldMapsItem;
     private javax.swing.ButtonGroup downloadMethodItem;
     private javax.swing.JCheckBox exclusiveUtilsItem;

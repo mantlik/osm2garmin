@@ -1,0 +1,7 @@
+# This is mkgmap arguments file used for generating contours layer.
+# Osm2garmin uses the file in the contours creation phase as follows:
+# java -jar mkgmap.jar --output-dir=<output_dir> -c contours.args <list of files>
+
+draw-priority: 30
+transparent
+merge-lines
