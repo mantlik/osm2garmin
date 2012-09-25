@@ -22,6 +22,7 @@
 package org.mantlik.osm2garmin;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -107,6 +108,10 @@ public class OsmMaker extends ThreadProcessor {
     public void run() {
         String args[];
         setProgress(0);
+        Utilities.checkArgFiles(Utilities.getUserdir(this));
+        String osm2imgArgsFileName = Utilities.getUserdir(this) + "osm2img.args";
+        String gmapsuppArgsFileName = Utilities.getUserdir(this) + "gmapsupp.args";
+        String gmapsuppContoursArgsFileName = Utilities.getUserdir(this) + "gmapsupp_contours.args";
         setStatus(region.name + " Splitting planet file.");
         String splitFile = region.dir.getPath() + "/" + "areas.list";
         if (!new File(splitFile).exists()) {
@@ -173,16 +178,10 @@ public class OsmMaker extends ThreadProcessor {
         setProgress(50);
         setStatus(region.name + " converting to Garmin format");
         args = new String[]{
-            "--output-dir=" + region.dir.getPath(), "--draw-priority=20",
-            "--net", "--route", "--add-pois-to-areas", "--series-name=" + region.name,
-            "-c", region.dir.getPath() + "/" + "template.args",
-            "--remove-short-arcs"
+            "--output-dir=" + region.dir.getPath(), "--series-name=" + region.name,
+            "-c", osm2imgArgsFileName,
+            "-c", region.dir.getPath() + "/" + "template.args"
         };
-        if (parameters.getProperty("cycling_features", "false").equals("true")) {
-            ArrayList<String> l = new ArrayList(Arrays.asList(args));
-            l.add("--make-all-cycleways");
-            args = l.toArray(new String[0]);
-        }
         try {
             //uk.me.parabola.mkgmap.main.Main.main(args);
             Utilities.getInstance().runExternal("uk.me.parabola.mkgmap.main.Main", "main", "mkgmap", args, this);
@@ -222,16 +221,10 @@ public class OsmMaker extends ThreadProcessor {
                 // convert to Garmin
                 setStatus(region.name + " converting to Garmin format");
                 args = new String[]{
-                    "--output-dir=" + region.dir.getPath(), "--draw-priority=20",
-                    "--net", "--route", "--add-pois-to-areas", "--series-name=" + region.name,
-                    "-c", region.dir.getPath() + "/" + "template.args",
-                    "--remove-short-arcs"
+                    "--output-dir=" + region.dir.getPath(),
+                    "-c", osm2imgArgsFileName,
+                    "-c", region.dir.getPath() + "/" + "template.args"
                 };
-                if (parameters.getProperty("cycling_features", "false").equals("true")) {
-                    ArrayList<String> l = new ArrayList(Arrays.asList(args));
-                    l.add("--make-all-cycleways");
-                    args = l.toArray(new String[0]);
-                }
                 try {
                     //uk.me.parabola.mkgmap.main.Main.main(args);
                     Utilities.getInstance().runExternal("uk.me.parabola.mkgmap.main.Main", "main", "mkgmap", args, this);
@@ -279,9 +272,11 @@ public class OsmMaker extends ThreadProcessor {
         aa.add("--family-id=" + region.familyID);
         aa.add("--family-name=" + region.name);
         aa.add("--series-name=" + region.name);
-        aa.add("--product-id=1");
+        aa.add("--c");
+        aa.add(gmapsuppArgsFileName);
         aa.addAll(osmMaps);
-        aa.add("--show-profiles");
+        aa.add("--c");
+        aa.add(gmapsuppContoursArgsFileName);
         aa.addAll(contourMaps);
         args = aa.toArray(new String[0]);
         try {
@@ -302,7 +297,7 @@ public class OsmMaker extends ThreadProcessor {
 
         // create MapSource registration files
         aa.set(0, "--tdbfile"); // replace --gmapsupp with --tdbfile
-        aa.add("--nsis");
+        aa.add(1, "--nsis");
         args = aa.toArray(new String[0]);
         try {
             Utilities.getInstance().runExternal("uk.me.parabola.mkgmap.main.Main", "main", "mkgmap", args, this);

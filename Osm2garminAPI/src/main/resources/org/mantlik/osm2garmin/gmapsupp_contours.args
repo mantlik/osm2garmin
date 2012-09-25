@@ -1,0 +1,14 @@
+# This is mkgmap arguments file used for both creating gmapsupp.img file and 
+# generating files for mapsource registration.
+# The file is used together with additional contours arguments gmapsupp.args
+# Osm2garmin uses the file depending on current phase and available memory as follows:
+# Systems with less than 1.8G memory:
+# java -jar mkgmap.jar [--gmapsupp | --tdbfile --nsis ] --family-id=<region-sequence-number> \
+#             --output-dir=<output-dir> --family-name=<region> --series-name=<region> \
+#             -c gmapsupp.args <OSM files list> -c gmapsupp_contours.args <contours files list>
+# Systems with more than 1.8G memory:
+# java -jar mkgmap.jar [--gmapsupp | --tdbfile --nsis ] --index --location-autofill=nearest \
+#             --output-dir=<output-dir> --family-name=<region> --series-name=<region> \
+#             -c gmapsupp.args <OSM files list> -c gmapsupp_contours.args <contours files list>
+
+show-profiles
