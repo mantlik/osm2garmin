@@ -282,12 +282,14 @@ public class Osm2garmin implements PropertyChangeListener {
         Utilities.getInstance().addProcessToMonitor(planetUpdater);
         final ThreadProcessor procpu = planetUpdater;
         synchronized (procpu) {
-            try {
-                procpu.wait();
-            } catch (InterruptedException ex) {
-                planetUpdater.setStatus("Interrupted.");
-                planetUpdater.setState(PlanetDownloader.ERROR);
-                return 3;
+            if (procpu.getState() == PlanetUpdater.RUNNING) {
+                try {
+                    procpu.wait();
+                } catch (InterruptedException ex) {
+                    planetUpdater.setStatus("Interrupted.");
+                    planetUpdater.setState(PlanetDownloader.ERROR);
+                    return 3;
+                }
             }
         }
         Utilities.getInstance().removeMonitoredProcess(planetUpdater);
@@ -320,14 +322,16 @@ public class Osm2garmin implements PropertyChangeListener {
             Utilities.getInstance().addProcessToMonitor(region.processor);
             region.setState(Region.MAKING_OSM);
             final ThreadProcessor preg = region.processor;
-            try {
-                synchronized (preg) {
-                    preg.wait();
+            synchronized (preg) {
+                if (preg.getState() == ThreadProcessor.RUNNING) {
+                    try {
+                        preg.wait();
+                    } catch (InterruptedException ex) {
+                        region.processor.setStatus("Interrupted.");
+                        region.processor.setState(ContoursUpdater.ERROR);
+                        return 7;
+                    }
                 }
-            } catch (InterruptedException ex) {
-                region.processor.setStatus("Interrupted.");
-                region.processor.setState(ContoursUpdater.ERROR);
-                return 7;
             }
             Utilities.getInstance().removeMonitoredProcess(region.processor);
             region.setState(Region.READY);
