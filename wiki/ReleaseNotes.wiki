@@ -1,7 +1,16 @@
 #labels Featured
 = Release notes =
 
-== 1.1 - development release ==
+== 1.2 - Unstable Development branch ==
+New features:
+
+ * Skip planet update option avoids planet updates and re-splitting of regions OSM data - Issue 60
+
+Bug fixes: 
+
+No new bug fixes in this branch yet.
+
+== 1.1 - Pre-release (Build 223) ==
 New features:
 
  * Regions can be newly defined by bounding polygons in addition to rectangles. Polygon definition file `<region_name>.poly` in the working directory overrides region rectangular boundaries - Issue 55
@@ -19,6 +28,8 @@ Bug fixes:
  * Private tracker for BitTorrent planet updates download has been established - Issue 54
  * Minor fixes - Issue 25, Issue 35, Issue 42, Issue 49, Issue 50, Issue 51, Issue 59, Issue 63, Issue 64, Issue 69, Issue 73, Issue 75, Issue 86
 
-== 1.0 (build 138) - stable release ==
+== 1.0 (Build 138) - Previous stable release ==
 
 Initial release.
+
+This release is obsolete and is not working anymore - see UpdateRedactionPeriod Wiki.
