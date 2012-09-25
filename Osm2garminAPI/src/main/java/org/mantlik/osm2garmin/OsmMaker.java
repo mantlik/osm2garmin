@@ -272,10 +272,10 @@ public class OsmMaker extends ThreadProcessor {
         aa.add("--family-id=" + region.familyID);
         aa.add("--family-name=" + region.name);
         aa.add("--series-name=" + region.name);
-        aa.add("--c");
+        aa.add("-c");
         aa.add(gmapsuppArgsFileName);
         aa.addAll(osmMaps);
-        aa.add("--c");
+        aa.add("-c");
         aa.add(gmapsuppContoursArgsFileName);
         aa.addAll(contourMaps);
         args = aa.toArray(new String[0]);
