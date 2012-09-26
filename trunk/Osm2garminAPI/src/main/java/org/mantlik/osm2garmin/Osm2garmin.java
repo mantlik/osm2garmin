@@ -173,6 +173,8 @@ public class Osm2garmin implements PropertyChangeListener {
                     region.changeSupport.addPropertyChangeListener(this);
                     //System.out.println(region.name+": "+region.lon1+" "+region.lat1
                     //        +" to "+region.lon2+" "+region.lat2);
+                } else if (l[0].startsWith("x")) {
+                    familyID++;
                 }
             }
             s.close();
