@@ -149,7 +149,8 @@ public class Osm2garmin implements PropertyChangeListener {
                     System.out.println("Preparing region " + l[4] + " directory.");
                     Region region = new Region(l[4], parameters.getProperty("maps_dir"),
                             parameters.getProperty("delete_old_maps", "false").equals("true")
-                            && (!parameters.getProperty("skip_planet_update", "false").equals("true")),
+                            && (!parameters.getProperty("skip_planet_update", "false").equals("true") 
+                            || parameters.getProperty("update_regions", "false").equals("true")),
                             familyID);
                     familyID++;
                     region.lon1 = Float.parseFloat(l[0]);
