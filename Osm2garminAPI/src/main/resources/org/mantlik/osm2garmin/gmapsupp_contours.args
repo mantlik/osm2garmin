@@ -11,4 +11,7 @@
 #             --output-dir=<output-dir> --family-name=<region> --series-name=<region> \
 #             -c gmapsupp.args <OSM files list> -c gmapsupp_contours.args <contours files list>
 
+# Uncomment and edit next line to include typ file. This has to be the first line in this file.
+#input-file: mytyp.txt
+
 show-profiles
