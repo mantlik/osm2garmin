@@ -61,8 +61,6 @@ public class ContoursUpdater extends ThreadProcessor {
         setStatus("Starting contours update - " + region.name);
         setProgress(0);
         String contoursDir = parameters.getProperty("contours_dir");
-        Utilities.checkArgFiles(Utilities.getUserdir(this));
-        String argsFileName = Utilities.getUserdir(this) + "contours.args";
         if (!contoursDir.endsWith("/")) {
             contoursDir = contoursDir + "/";
         }
@@ -209,8 +207,9 @@ public class ContoursUpdater extends ThreadProcessor {
                     setStatus(coords + "Convert contours to Garmin "
                             + " - " + region.name + " " + perc + " % completed.");
                     String args[] = new String[]{
-                        "--output-dir=" + contoursDir,
-                        "-c", argsFileName};
+                        "--draw-priority=30", "--transparent",
+                        "--merge-lines", "--output-dir=" + contoursDir
+                    };
                     ArrayList<String> aa = new ArrayList<String>();
                     aa.addAll(Arrays.asList(args));
                     aa.addAll(Arrays.asList(osmFiles));

@@ -118,13 +118,6 @@ public class Region {
         hexid = hexid.substring(2) + hexid.substring(0, 2);
 
         try {
-            String typFileName = null;
-            for (File file : dir.listFiles()) {
-                if (file.getName().toLowerCase().endsWith(".typ")) {
-                    typFileName = file.getName();
-                    break;
-                }
-            }
             PrintStream installer = new PrintStream(new File(dir.getPath() + "/installer.bat"));
             PrintStream uninstaller = new PrintStream(new File(dir.getPath() + "/uninstaller.bat"));
 
@@ -137,9 +130,6 @@ public class Region {
             if (withIndexes) {
                 installer.print("reg ADD %KEY%\\Families\\FAMILY_" + familyID + " /v IDX /t REG_SZ /d \"%~dp0osmmap.mdx\" /f\r\n");
                 installer.print("reg ADD %KEY%\\Families\\FAMILY_" + familyID + " /v MDR /t REG_SZ /d \"%~dp0osmmap_mdr.img\" /f\r\n");
-            }
-            if (typFileName != null) {
-                installer.print("reg ADD %KEY%\\Families\\FAMILY_" + familyID + " /v TYP /t REG_SZ /d \"%~dp0" + typFileName + "\" /f\r\n");
             }
             installer.print("reg ADD %KEY%\\Families\\FAMILY_" + familyID + "\\1 /v LOC /t REG_SZ /d \"%~dp0\\\" /f\r\n");
             installer.print("reg ADD %KEY%\\Families\\FAMILY_" + familyID + "\\1 /v BMAP /t REG_SZ /d \"%~dp0osmmap.img\" /f\r\n");

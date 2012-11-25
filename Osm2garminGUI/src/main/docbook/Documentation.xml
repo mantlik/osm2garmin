@@ -216,17 +216,6 @@
                     </listitem>
                 </varlistentry>
                 <varlistentry>
-                    <term>Skip planet updates</term>
-                    <listitem>
-                        <para>
-                            Skip downloading planet file updates and updating. Regions directories are not cleared
-                            when this option is checked. Regions maps are not refreshed. If regions boundaries were
-                            changed since last update, processing results will be incorrect or processing of the
-                            affected regions will fail.
-                        </para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
                     <term>Contours interval</term>
                     <listitem>
                         <para>

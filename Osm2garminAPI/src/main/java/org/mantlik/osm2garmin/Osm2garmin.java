@@ -148,10 +148,7 @@ public class Osm2garmin implements PropertyChangeListener {
                 if (l.length >= 5 && !(l[0].startsWith("#") || l[0].startsWith("x"))) {
                     System.out.println("Preparing region " + l[4] + " directory.");
                     Region region = new Region(l[4], parameters.getProperty("maps_dir"),
-                            parameters.getProperty("delete_old_maps", "false").equals("true")
-                            && (!parameters.getProperty("skip_planet_update", "false").equals("true") 
-                            || parameters.getProperty("update_regions", "false").equals("true")),
-                            familyID);
+                            parameters.getProperty("delete_old_maps", "false").equals("true"), familyID);
                     familyID++;
                     region.lon1 = Float.parseFloat(l[0]);
                     region.lat1 = Float.parseFloat(l[1]);
@@ -174,8 +171,6 @@ public class Osm2garmin implements PropertyChangeListener {
                     region.changeSupport.addPropertyChangeListener(this);
                     //System.out.println(region.name+": "+region.lon1+" "+region.lat1
                     //        +" to "+region.lon2+" "+region.lat2);
-                } else if (l[0].startsWith("x")) {
-                    familyID++;
                 }
             }
             s.close();
@@ -203,6 +198,7 @@ public class Osm2garmin implements PropertyChangeListener {
 
         // start contours updates
         final ThreadProcessor contoursProcessor = new ThreadProcessor(parameters) {
+
             @Override
             public void run() {
                 for (int reg = 0; reg < regions.size(); reg++) {
@@ -241,14 +237,12 @@ public class Osm2garmin implements PropertyChangeListener {
         System.out.println("Planet file download started.");
         final ThreadProcessor pd = planetDownloader;
         synchronized (pd) {
-            if (pd.getState() == PlanetDownloader.RUNNING) {
-                try {
-                    pd.wait();
-                } catch (InterruptedException ex) {
-                    planetDownloader.setStatus("Interrupted.");
-                    planetDownloader.setState(PlanetDownloader.ERROR);
-                    return 1;
-                }
+            try {
+                pd.wait();
+            } catch (InterruptedException ex) {
+                planetDownloader.setStatus("Interrupted.");
+                planetDownloader.setState(PlanetDownloader.ERROR);
+                return 1;
             }
         }
         Utilities.getInstance().removeMonitoredProcess(planetDownloader);
@@ -263,14 +257,12 @@ public class Osm2garmin implements PropertyChangeListener {
         System.out.println("Planet updates download started.");
         final ThreadProcessor pud = planetUpdateDownloader;
         synchronized (pud) {
-            if (pud.getState() == PlanetUpdateDownloader.RUNNING) {
-                try {
-                    pud.wait();
-                } catch (InterruptedException ex) {
-                    planetUpdateDownloader.setStatus("Interrupted.");
-                    planetUpdateDownloader.setState(PlanetDownloader.ERROR);
-                    return 3;
-                }
+            try {
+                pud.wait();
+            } catch (InterruptedException ex) {
+                planetUpdateDownloader.setStatus("Interrupted.");
+                planetUpdateDownloader.setState(PlanetDownloader.ERROR);
+                return 3;
             }
         }
         Utilities.getInstance().removeMonitoredProcess(planetUpdateDownloader);
@@ -285,14 +277,12 @@ public class Osm2garmin implements PropertyChangeListener {
         Utilities.getInstance().addProcessToMonitor(planetUpdater);
         final ThreadProcessor procpu = planetUpdater;
         synchronized (procpu) {
-            if (procpu.getState() == PlanetUpdater.RUNNING) {
-                try {
-                    procpu.wait();
-                } catch (InterruptedException ex) {
-                    planetUpdater.setStatus("Interrupted.");
-                    planetUpdater.setState(PlanetDownloader.ERROR);
-                    return 3;
-                }
+            try {
+                procpu.wait();
+            } catch (InterruptedException ex) {
+                planetUpdater.setStatus("Interrupted.");
+                planetUpdater.setState(PlanetDownloader.ERROR);
+                return 3;
             }
         }
         Utilities.getInstance().removeMonitoredProcess(planetUpdater);
@@ -325,16 +315,14 @@ public class Osm2garmin implements PropertyChangeListener {
             Utilities.getInstance().addProcessToMonitor(region.processor);
             region.setState(Region.MAKING_OSM);
             final ThreadProcessor preg = region.processor;
-            synchronized (preg) {
-                if (preg.getState() == ThreadProcessor.RUNNING) {
-                    try {
-                        preg.wait();
-                    } catch (InterruptedException ex) {
-                        region.processor.setStatus("Interrupted.");
-                        region.processor.setState(ContoursUpdater.ERROR);
-                        return 7;
-                    }
+            try {
+                synchronized (preg) {
+                    preg.wait();
                 }
+            } catch (InterruptedException ex) {
+                region.processor.setStatus("Interrupted.");
+                region.processor.setState(ContoursUpdater.ERROR);
+                return 7;
             }
             Utilities.getInstance().removeMonitoredProcess(region.processor);
             region.setState(Region.READY);

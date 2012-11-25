@@ -46,7 +46,7 @@ import org.xml.sax.SAXException;
  * @author fm
  */
 public class PlanetUpdateDownloader extends ThreadProcessor {
-    
+
     private static final DecimalFormat DF = new DecimalFormat("0");
     public TorrentDownloader torrentDownloader = null;
     int startPiece = 0;
@@ -60,18 +60,9 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
     public PlanetUpdateDownloader(Properties parameters) {
         super(parameters);
     }
-    
+
     @Override
     public void run() {
-        if (parameters.getProperty("skip_planet_update", "false").equals("true")) {
-            setProgress(100);
-            setStatus("Skipped.");
-            setState(COMPLETED);
-            synchronized (this) {
-                notify();
-            }
-            return;
-        }
         String osmosiswork = parameters.getProperty("osmosiswork");
         File osmosisState = new File(osmosiswork, "state.txt");
         File osmosisStateBackup = new File(osmosiswork, "state_old.txt");
@@ -297,9 +288,9 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
             notify();
         }
     }
-    
+
     private class UpdateFileVerifier implements DataVerifier {
-        
+
         public UpdateFileVerifier(TorrentFile torrent) {
         }
 
@@ -505,7 +496,7 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
             sequence++;
         }
         noOfPieces = torrent.name.size();
-        
+
         return torrent;
     }
 }

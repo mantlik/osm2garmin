@@ -48,8 +48,8 @@ import org.openide.LifecycleManager;
 import org.openide.NotifyDescriptor;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
-import org.openide.util.*;
 import org.openide.util.NbBundle.Messages;
+import org.openide.util.*;
 import org.openide.windows.IOProvider;
 import org.openide.windows.InputOutput;
 import org.openide.windows.TopComponent;
@@ -781,11 +781,9 @@ public final class MainWindowTopComponent extends TopComponent implements Proper
         par.setProperty("torrent_download_limit", NbPreferences.forModule(Osm2garmin.class).get("torrent_download_limit", "0.0"));
         par.setProperty("torrent_upload_limit", NbPreferences.forModule(Osm2garmin.class).get("torrent_upload_limit", "0.0"));
         par.setProperty("log_report", NbPreferences.forModule(Osm2garmin.class).get("log_report", "report.log"));
-        par.setProperty("skip_planet_update", NbPreferences.forModule(Osm2garmin.class).get("skip_planet_update", "false"));
-        par.setProperty("update_regions", NbPreferences.forModule(Osm2garmin.class).get("update_regions", "false"));
+        par.setProperty("cycling_features", NbPreferences.forModule(Osm2garmin.class).get("cycling_features", "false"));
         par.setProperty("srtm_step", NbPreferences.forModule(Osm2garmin.class).get("srtm_step", "5"));
         par.setProperty("contours_density", NbPreferences.forModule(Osm2garmin.class).get("contours_density", "4"));
-        par.setProperty("splitter_overlap", NbPreferences.forModule(Osm2garmin.class).get("splitter_overlap", "2000"));
         par.setProperty("exclusive_utils", NbPreferences.forModule(Osm2garmin.class).get("exclusive_utils", "true"));
         //String settings = par.getProperty("userdir") + "/settings.properties";
         //if (new File(settings).exists()) {

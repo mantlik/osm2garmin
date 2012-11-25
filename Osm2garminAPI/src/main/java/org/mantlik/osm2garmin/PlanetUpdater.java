@@ -97,17 +97,6 @@ public class PlanetUpdater extends ThreadProcessor {
 
     @Override
     public void run() {
-        boolean skipPlanetUpdate = parameters.getProperty("skip_planet_update", "false").equals("true");
-        boolean updateRegions = parameters.getProperty("update_regions", "false").equals("true");
-        if (skipPlanetUpdate && (! updateRegions)) {
-            setProgress(100);
-            setStatus("Skipped.");
-            setState(COMPLETED);
-            synchronized (this) {
-                notify();
-            }
-            return;
-        }
         try {
             File f = new File(Utilities.getUserdir(this) + "update.osc.gz");
             if (f.exists()) {
@@ -117,7 +106,7 @@ public class PlanetUpdater extends ThreadProcessor {
             int i = 0;
             File upd = new File(Utilities.getUserdir(this) + "update" + i + ".osc.gz");
             int nchanges = 0;
-            while (upd.exists() && (! skipPlanetUpdate)) {
+            while (upd.exists()) {
                 l.add("--rxc");
                 l.add("file=" + upd.getPath());
                 l.add("--buffer-change");

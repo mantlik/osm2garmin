@@ -48,8 +48,6 @@ public class Utilities {
     public static final long REFRESH_INTERVAL = 1000;
     private static final long START_DATE_ODBL = new SimpleDateFormat("yyyy-MM-dd'T'HH\\:mm\\:ss'Z'").
             parse("timestamp=2012-09-12T08\\:00\\:00Z", new ParsePosition(10)).getTime();
-    public static final String[] ARGS_FILES = new String[]{"contours.args", "gmapsupp.args",
-        "gmapsupp_contours.args", "osm2img.args"};
     private static ArrayList<String> runningClasses = new ArrayList<String>();
     private static Utilities instance = null;
     private static ArrayList<ThreadProcessor> processesToMonitor = new ArrayList<ThreadProcessor>();
@@ -58,6 +56,7 @@ public class Utilities {
     public Utilities() {
         Properties monitorParams = new Properties();
         monitor = new ThreadProcessor(monitorParams) {
+
             @Override
             public void run() {
                 while (true) {
@@ -560,7 +559,7 @@ public class Utilities {
                 "2012-09-12", new ParsePosition(0)).getTime();
         int sequenceNo = (int) ((planetTime - startReplTime) / 1000 / 60 / 60); // hours
         String stateUrl = mirror + updateName(sequenceNo);
-        while (!downloadFile(stateUrl, targetPath)) {
+        while (! downloadFile(stateUrl, targetPath)) {
             // try older file
             sequenceNo--;
             max_retries--;
@@ -571,10 +570,10 @@ public class Utilities {
         }
         return true;
     }
-
+    
     /**
      * Download file from url and save to destination file
-     *
+     * 
      * @param url
      * @param destination
      * @return false means not downloaded
@@ -602,10 +601,10 @@ public class Utilities {
         }
         return true;
     }
-
+    
     /**
      * Get timestamp from state.txt file
-     *
+     * 
      * @param timestampFile
      * @return
      */
@@ -629,7 +628,7 @@ public class Utilities {
 
     /**
      * name of the sequence file relative to planet directory
-     *
+     * 
      * @param fileno sequence number of the hour-replicate update file
      * @return
      */
@@ -642,7 +641,7 @@ public class Utilities {
 
     /**
      * Get sequence number from state.txt
-     *
+     * 
      * @param osmosisstate
      * @return
      * @throws IOException
@@ -661,19 +660,5 @@ public class Utilities {
             }
         }
         return -1;
-    }
-
-    public static void checkArgFiles(String userdir) {
-        for (String name : ARGS_FILES) {
-            File argsFile = new File(userdir, name);
-            if (!argsFile.exists()) {
-                try {
-                    Utilities.copyFile(Utilities.class.getResourceAsStream(name),
-                            argsFile);
-                } catch (IOException ex) {
-                    Logger.getLogger(Utilities.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-        }
     }
 }

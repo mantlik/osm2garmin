@@ -69,7 +69,7 @@ public class Osm2garminTest {
      *
      * @throws Exception
      */
-    @Test(timeout=120000)
+    @Test(timeout=60000)
     public void testRunExternal() throws Exception {
         String testfile = getClass().getResource("25435000.osm.gz").getPath();
         String pbftestfile = getClass().getResource("63240001.osm.pbf").getPath();

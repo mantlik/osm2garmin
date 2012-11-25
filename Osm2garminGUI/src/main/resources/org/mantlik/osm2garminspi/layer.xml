@@ -9,6 +9,8 @@
             <file name="Separator4.instance_hidden"/>
             <file name="org-netbeans-modules-print-action-PageSetupAction.shadow_hidden"/>
             <file name="org-netbeans-modules-print-action-PrintAction.shadow_hidden"/>
+            <file name="org-openide-actions-SaveAction.shadow_hidden"/>
+            <file name="org-openide-actions-SaveAllAction.shadow_hidden"/>
             <file name="org-openide-actions-SaveAsAction.shadow_hidden"/>
         </folder>
         <folder name="GoTo">
@@ -35,10 +37,14 @@
         </folder>
     </folder>
     <folder name="Toolbars">
-        <folder name="File"/>
+        <file name="Clipboard_hidden"/>
+        <folder name="File">
+            <file name="org-openide-actions-SaveAllAction.shadow_hidden"/>
+        </folder>
         <folder name="Memory">
             <file name="org-netbeans-modules-profiler-actions-SelfSamplerAction.shadow_hidden"/>
         </folder>
+        <file name="UndoRedo_hidden"/>
     </folder>
     <folder name="Windows2">
         <file name="WindowManager.wswmgr" url="WindowManager.wswmgr"/>

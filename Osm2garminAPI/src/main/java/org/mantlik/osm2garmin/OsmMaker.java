@@ -107,17 +107,11 @@ public class OsmMaker extends ThreadProcessor {
     public void run() {
         String args[];
         setProgress(0);
-        Utilities.checkArgFiles(Utilities.getUserdir(this));
-        String splitterOverlap = parameters.getProperty("splitter_overlap", "2000");
-        String osm2imgArgsFileName = Utilities.getUserdir(this) + "osm2img.args";
-        String gmapsuppArgsFileName = Utilities.getUserdir(this) + "gmapsupp.args";
-        String gmapsuppContoursArgsFileName = Utilities.getUserdir(this) + "gmapsupp_contours.args";
         setStatus(region.name + " Splitting planet file.");
         String splitFile = region.dir.getPath() + "/" + "areas.list";
         if (!new File(splitFile).exists()) {
             args = new String[]{
-                "--output-dir=" + region.dir.getPath(), "--max-areas=" + max_areas, 
-                "--overlap=" + splitterOverlap, "--mapid=" + MAPID, "--output=pbf",
+                "--output-dir=" + region.dir.getPath(), "--max-areas=" + max_areas, "--mapid=" + MAPID, "--output=pbf",
                 "--geonames-file=" + Utilities.getUserdir(this) + "cities15000.zip", "--bottom=" + region.lat1,
                 "--top=" + region.lat2, "--left=" + region.lon1, "--right=" + region.lon2, "--status-freq=0",
                 "--max-threads=1", "--max-nodes=1200000", region.dir.getPath() + "/" + region.name + ".osm.pbf"
@@ -126,7 +120,7 @@ public class OsmMaker extends ThreadProcessor {
             args = new String[]{
                 "--output-dir=" + region.dir.getPath(), "--max-areas=" + max_areas, "--mapid=" + MAPID,
                 "--geonames-file=" + Utilities.getUserdir(this) + "cities15000.zip", "--status-freq=0",
-                "--overlap=" + splitterOverlap, "--split-file=" + splitFile, "--output=pbf",
+                "--split-file=" + splitFile, "--output=pbf",
                 "--max-threads=1", region.dir.getPath() + "/" + region.name + ".osm.pbf"
             };
         }
@@ -179,10 +173,16 @@ public class OsmMaker extends ThreadProcessor {
         setProgress(50);
         setStatus(region.name + " converting to Garmin format");
         args = new String[]{
-            "--output-dir=" + region.dir.getPath(), "--series-name=" + region.name,
-            "-c", osm2imgArgsFileName,
-            "-c", region.dir.getPath() + "/" + "template.args"
+            "--output-dir=" + region.dir.getPath(), "--draw-priority=20",
+            "--net", "--route", "--add-pois-to-areas", "--series-name=" + region.name,
+            "-c", region.dir.getPath() + "/" + "template.args",
+            "--remove-short-arcs"
         };
+        if (parameters.getProperty("cycling_features", "false").equals("true")) {
+            ArrayList<String> l = new ArrayList(Arrays.asList(args));
+            l.add("--make-all-cycleways");
+            args = l.toArray(new String[0]);
+        }
         try {
             //uk.me.parabola.mkgmap.main.Main.main(args);
             Utilities.getInstance().runExternal("uk.me.parabola.mkgmap.main.Main", "main", "mkgmap", args, this);
@@ -222,10 +222,16 @@ public class OsmMaker extends ThreadProcessor {
                 // convert to Garmin
                 setStatus(region.name + " converting to Garmin format");
                 args = new String[]{
-                    "--output-dir=" + region.dir.getPath(),
-                    "-c", osm2imgArgsFileName,
-                    "-c", region.dir.getPath() + "/" + "template.args"
+                    "--output-dir=" + region.dir.getPath(), "--draw-priority=20",
+                    "--net", "--route", "--add-pois-to-areas", "--series-name=" + region.name,
+                    "-c", region.dir.getPath() + "/" + "template.args",
+                    "--remove-short-arcs"
                 };
+                if (parameters.getProperty("cycling_features", "false").equals("true")) {
+                    ArrayList<String> l = new ArrayList(Arrays.asList(args));
+                    l.add("--make-all-cycleways");
+                    args = l.toArray(new String[0]);
+                }
                 try {
                     //uk.me.parabola.mkgmap.main.Main.main(args);
                     Utilities.getInstance().runExternal("uk.me.parabola.mkgmap.main.Main", "main", "mkgmap", args, this);
@@ -273,11 +279,9 @@ public class OsmMaker extends ThreadProcessor {
         aa.add("--family-id=" + region.familyID);
         aa.add("--family-name=" + region.name);
         aa.add("--series-name=" + region.name);
-        aa.add("-c");
-        aa.add(gmapsuppArgsFileName);
+        aa.add("--product-id=1");
         aa.addAll(osmMaps);
-        aa.add("-c");
-        aa.add(gmapsuppContoursArgsFileName);
+        aa.add("--show-profiles");
         aa.addAll(contourMaps);
         args = aa.toArray(new String[0]);
         try {
@@ -298,7 +302,7 @@ public class OsmMaker extends ThreadProcessor {
 
         // create MapSource registration files
         aa.set(0, "--tdbfile"); // replace --gmapsupp with --tdbfile
-        aa.add(1, "--nsis");
+        aa.add("--nsis");
         args = aa.toArray(new String[0]);
         try {
             Utilities.getInstance().runExternal("uk.me.parabola.mkgmap.main.Main", "main", "mkgmap", args, this);
