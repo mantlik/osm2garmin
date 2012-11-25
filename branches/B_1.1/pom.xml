@@ -160,10 +160,12 @@
                         <goals>clean install</goals>
                         <autoVersionSubmodules>true</autoVersionSubmodules>
                         <commitByProject>false</commitByProject>
-                        <developmentVersion>1.1-SNAPSHOT</developmentVersion>
-                        <releaseVersion>1.0</releaseVersion>
+                        <developmentVersion>1.1.1-SNAPSHOT</developmentVersion>
+                        <releaseVersion>1.1</releaseVersion>
                         <tagNameFormat>RELEASE_@{project.version}</tagNameFormat>
                         <remoteTagging>false</remoteTagging>
+                        <scmCommentPrefix>Update Issue 46 </scmCommentPrefix>
+                        <branchName>B_1.1</branchName>
                     </configuration>
                 </plugin>
                 <plugin>
