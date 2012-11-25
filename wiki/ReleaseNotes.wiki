@@ -7,12 +7,13 @@ New features:
  * Skip planet update option avoids planet updates and re-splitting of regions OSM data - Issue 60
  * Processing parameters files for mkgmap can be edited for three stages of processing: contours preparation step, OSM maps authoring step and final gmapsupp.img creation step - Issue 53
  * New parameter at the Processing parameters page Splitter overlap controls splitter parameter --overlap - Issue 53
+ * Typ files support - Issue 53
 
 Bug fixes: 
 
 No new bug fixes in this branch yet.
 
-== 1.1 - Pre-release (Build 223) ==
+== 1.1 (Build 250) - Stable release ==
 New features:
 
  * Regions can be newly defined by bounding polygons in addition to rectangles. Polygon definition file `<region_name>.poly` in the working directory overrides region rectangular boundaries - Issue 55
