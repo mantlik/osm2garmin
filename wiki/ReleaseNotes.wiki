@@ -5,6 +5,8 @@
 New features:
 
  * Skip planet update option avoids planet updates and re-splitting of regions OSM data - Issue 60
+ * Processing parameters files for mkgmap can be edited for three stages of processing: contours preparation step, OSM maps authoring step and final gmapsupp.img creation step - Issue 53
+ * New parameter at the Processing parameters page Splitter overlap controls splitter parameter --overlap - Issue 53
 
 Bug fixes: 
 
