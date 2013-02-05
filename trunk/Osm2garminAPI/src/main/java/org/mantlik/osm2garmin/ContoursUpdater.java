@@ -68,10 +68,12 @@ public class ContoursUpdater extends ThreadProcessor {
         }
         int step = 0;
         int srtmStep = Integer.parseInt(parameters.getProperty("srtm_step", "2"));
-        int nlon = (int) Math.ceil((region.lon2 - region.lon1) / srtmStep);
-        int nlat = (int) Math.ceil((region.lat2 - region.lat1) / srtmStep);
-        for (float lon = region.lon1 - (region.lon1 % srtmStep); lon < region.lon2; lon += srtmStep) {
-            for (float lat = region.lat1 - (region.lat1 % srtmStep); lat < region.lat2; lat += srtmStep) {
+        int startlon = (int) Math.floor(region.lon1 / srtmStep) * srtmStep;
+        int startlat = (int) Math.floor(region.lat1 / srtmStep) * srtmStep;
+        int nlon = (int) Math.ceil((region.lon2 - startlon) / srtmStep);
+        int nlat = (int) Math.ceil((region.lat2 - startlat) / srtmStep);
+        for (float lon = startlon; lon < region.lon2; lon += srtmStep) {
+            for (float lat = startlat; lat < region.lat2; lat += srtmStep) {
                 step++;
                 int perc = (100 * step) / nlat / nlon;
                 setProgress(perc);
