@@ -162,7 +162,7 @@ public class PlanetUpdater extends ThreadProcessor {
                     }
                 }
                 int procregions = nregions;
-                if (pass == 1) {
+                if (pass == 1 && (! skipPlanetUpdate)) {
                     procregions++;
                     ArrayList<String> largs = new ArrayList<String>();
                     largs.add(readSource);
