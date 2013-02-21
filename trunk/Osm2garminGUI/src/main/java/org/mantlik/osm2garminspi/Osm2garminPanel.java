@@ -22,7 +22,10 @@
 package org.mantlik.osm2garminspi;
 
 import java.io.File;
+import javax.swing.InputVerifier;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
+import javax.swing.text.JTextComponent;
 import org.mantlik.osm2garmin.Osm2garmin;
 import org.openide.util.NbPreferences;
 
@@ -216,6 +219,7 @@ final class Osm2garminPanel extends javax.swing.JPanel {
         minorintervalItem.setHorizontalAlignment(javax.swing.JTextField.TRAILING);
         minorintervalItem.setText(org.openide.util.NbBundle.getMessage(Osm2garminPanel.class, "Osm2garminPanel.minorintervalItem.text")); // NOI18N
         minorintervalItem.setToolTipText(org.openide.util.NbBundle.getMessage(Osm2garminPanel.class, "Osm2garminPanel.minorintervalItem.toolTipText")); // NOI18N
+        minorintervalItem.setInputVerifier(new ContoursIntervalVerifier());
         minorintervalItem.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
             public void propertyChange(java.beans.PropertyChangeEvent evt) {
                 minorintervalItemPropertyChange(evt);
@@ -227,6 +231,7 @@ final class Osm2garminPanel extends javax.swing.JPanel {
         majorintervalItem.setHorizontalAlignment(javax.swing.JTextField.TRAILING);
         majorintervalItem.setText(org.openide.util.NbBundle.getMessage(Osm2garminPanel.class, "Osm2garminPanel.majorintervalItem.text")); // NOI18N
         majorintervalItem.setToolTipText(org.openide.util.NbBundle.getMessage(Osm2garminPanel.class, "Osm2garminPanel.majorintervalItem.toolTipText")); // NOI18N
+        majorintervalItem.setInputVerifier(new ContoursIntervalVerifier());
         majorintervalItem.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
             public void propertyChange(java.beans.PropertyChangeEvent evt) {
                 majorintervalItemPropertyChange(evt);
@@ -247,6 +252,7 @@ final class Osm2garminPanel extends javax.swing.JPanel {
         mediumintervalItem.setHorizontalAlignment(javax.swing.JTextField.TRAILING);
         mediumintervalItem.setText(org.openide.util.NbBundle.getMessage(Osm2garminPanel.class, "Osm2garminPanel.mediumintervalItem.text")); // NOI18N
         mediumintervalItem.setToolTipText(org.openide.util.NbBundle.getMessage(Osm2garminPanel.class, "Osm2garminPanel.mediumintervalItem.toolTipText")); // NOI18N
+        mediumintervalItem.setInputVerifier(new ContoursIntervalVerifier());
         mediumintervalItem.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
             public void propertyChange(java.beans.PropertyChangeEvent evt) {
                 mediumintervalItemPropertyChange(evt);
@@ -712,6 +718,30 @@ final class Osm2garminPanel extends javax.swing.JPanel {
         // TODO check whether form is consistent and complete
         return true;
     }
+    
+    private class ContoursIntervalVerifier extends InputVerifier {
+
+        @Override
+        public boolean verify(JComponent input) {
+            if (! (input instanceof JTextComponent)) {
+                return true;
+            }
+            String s = ((JTextComponent) input).getText();
+            if (s != null) {
+                try {
+                    int i = Integer.parseInt(s);
+                    if (i > 0) {
+                        return true;
+                    }
+                } catch (NumberFormatException e) {
+                    return false;
+                }
+            }
+            return false;
+        }
+        
+    }
+    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextField contoursDensityItem;
     private javax.swing.JCheckBox deleteOldMapsItem;
