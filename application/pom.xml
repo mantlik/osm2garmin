@@ -106,7 +106,7 @@
                     <sectionLabelIncludesComponentLabel>1</sectionLabelIncludesComponentLabel>
                     <admonGraphics>1</admonGraphics>
                     <admonTextlabel>1</admonTextlabel>
-                    <admonGraphicsExtension>.gif</admonGraphicsExtension>
+                    <admonGraphicsExtension>.svg</admonGraphicsExtension>
                     <navigGraphics>1</navigGraphics>
                     <navigGraphicsExtension>.gif</navigGraphicsExtension>
                     <generateToc>
