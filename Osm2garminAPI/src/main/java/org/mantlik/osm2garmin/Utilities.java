@@ -48,7 +48,7 @@ public class Utilities {
     public static final long REFRESH_INTERVAL = 1000;
     private static final long START_DATE_ODBL = new SimpleDateFormat("yyyy-MM-dd'T'HH\\:mm\\:ss'Z'").
             parse("timestamp=2012-09-12T08\\:00\\:00Z", new ParsePosition(10)).getTime();
-    public static final String[] ARGS_FILES = new String[]{"contours.args", "gmapsupp.args",
+    public static final String[] ARGS_FILES = new String[]{"mkgmap.help", "contours.args", "gmapsupp.args",
         "gmapsupp_contours.args", "osm2img.args"};
     private static ArrayList<String> runningClasses = new ArrayList<String>();
     private static Utilities instance = null;
@@ -666,7 +666,7 @@ public class Utilities {
     public static void checkArgFiles(String userdir) {
         for (String name : ARGS_FILES) {
             File argsFile = new File(userdir, name);
-            if (!argsFile.exists()) {
+            if (!argsFile.exists() || name.endsWith("help")) {
                 try {
                     Utilities.copyFile(Utilities.class.getResourceAsStream(name),
                             argsFile);
