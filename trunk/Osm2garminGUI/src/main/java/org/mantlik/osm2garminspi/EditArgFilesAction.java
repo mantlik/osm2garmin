@@ -19,23 +19,6 @@
  * <http://www.gnu.org/licenses/gpl-2.0.html>.
  * #L%
  */
-/*
- * Copyright (C) 2012 fm
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
- */
 package org.mantlik.osm2garminspi;
 
 import java.awt.event.ActionEvent;
@@ -58,7 +41,6 @@ import org.openide.util.Exceptions;
 import org.openide.util.NbBundle.Messages;
 import org.openide.util.NbPreferences;
 import org.openide.windows.TopComponent;
-import org.openide.windows.WindowManager;
 
 @ActionID(
     category = "File",
@@ -84,7 +66,7 @@ public final class EditArgFilesAction implements ActionListener {
                 final Node node = dao.getNodeDelegate();
                 TopComponent tc = null;
                 for (TopComponent t : TopComponent.getRegistry().getOpened()) {
-                    if (t.getName().equals(name)) {
+                    if (t.getDisplayName().equals(name)) {
                         tc = t;
                     }
                 }
@@ -99,9 +81,9 @@ public final class EditArgFilesAction implements ActionListener {
                         a.actionPerformed(new ActionEvent(node, ActionEvent.ACTION_PERFORMED, "")); // NOI18N 
                     }
                 }
-            }
+    }
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
-        }
+}
     }
 }
