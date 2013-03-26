@@ -166,8 +166,16 @@ public class Srtm {
         } else {
             output = new File(path + "/" + region + "/" + fname + ".zip");
         }
-        return downloadFile(getUrl() + region
+        boolean result = downloadFile(getUrl() + region
                 + "/" + fname + ".zip", output);
+        // fix SRTM 2.1 naming problem in North America
+        if ((!result) && fname.startsWith("N5") && region.equalsIgnoreCase("North_America")) {
+            if (downloadFile(getUrl() + region
+                    + "/" + fname.replace(".hgt", "hgt") + ".zip", output)) {
+                return true;
+            }
+        }
+        return result;
     }
 
     /*
@@ -205,6 +213,12 @@ public class Srtm {
                             if (index >= 0) {
                                 String srtm = line.substring(index, index + 7);
                                 regionMap.put(srtm, i);
+                            } else {
+                                index = line.indexOf("hgt.zip") - 7;
+                                if (index >= 0) {
+                                    String srtm = line.substring(index, index + 7);
+                                    regionMap.put(srtm, i);
+                                }
                             }
                         }
                     }
