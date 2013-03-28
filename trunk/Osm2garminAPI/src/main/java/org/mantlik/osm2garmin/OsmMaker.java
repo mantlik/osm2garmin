@@ -108,7 +108,12 @@ public class OsmMaker extends ThreadProcessor {
         String args[];
         setProgress(0);
         Utilities.checkArgFiles(Utilities.getUserdir(this));
-        String splitterOverlap = parameters.getProperty("splitter_overlap", "2000");
+        // since Splitter r279 replace --overlap with --keep-complete=true for low memory systems
+        long maxMemory = Runtime.getRuntime().maxMemory();
+        String splitterOverlap = "--keep-complete=true";
+        if (maxMemory <= 1800000000l) {
+            splitterOverlap = "--overlap=" + parameters.getProperty("splitter_overlap", "2000");
+        }
         String osm2imgArgsFileName = Utilities.getUserdir(this) + "osm2img.args";
         String gmapsuppArgsFileName = Utilities.getUserdir(this) + "gmapsupp.args";
         String gmapsuppContoursArgsFileName = Utilities.getUserdir(this) + "gmapsupp_contours.args";
@@ -117,7 +122,7 @@ public class OsmMaker extends ThreadProcessor {
         if (!new File(splitFile).exists()) {
             args = new String[]{
                 "--output-dir=" + region.dir.getPath(), "--max-areas=" + max_areas, 
-                "--overlap=" + splitterOverlap, "--mapid=" + MAPID, "--output=pbf",
+                splitterOverlap, "--mapid=" + MAPID, "--output=pbf",
                 "--geonames-file=" + Utilities.getUserdir(this) + "cities15000.zip", "--bottom=" + region.lat1,
                 "--top=" + region.lat2, "--left=" + region.lon1, "--right=" + region.lon2, "--status-freq=0",
                 "--max-threads=1", "--max-nodes=1200000", region.dir.getPath() + "/" + region.name + ".osm.pbf"
@@ -126,7 +131,7 @@ public class OsmMaker extends ThreadProcessor {
             args = new String[]{
                 "--output-dir=" + region.dir.getPath(), "--max-areas=" + max_areas, "--mapid=" + MAPID,
                 "--geonames-file=" + Utilities.getUserdir(this) + "cities15000.zip", "--status-freq=0",
-                "--overlap=" + splitterOverlap, "--split-file=" + splitFile, "--output=pbf",
+                splitterOverlap, "--split-file=" + splitFile, "--output=pbf",
                 "--max-threads=1", region.dir.getPath() + "/" + region.name + ".osm.pbf"
             };
         }
