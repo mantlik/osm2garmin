@@ -22,13 +22,18 @@
 package org.mantlik.osm2garmin;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static org.mantlik.osm2garmin.ThreadProcessor.ERROR;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -44,7 +49,7 @@ public class OsmMaker extends ThreadProcessor {
     private Region region;
     private boolean isSplitting;
     private ClassLoader splitterLoader;
-    private int max_areas = 50;
+    private int max_areas = 200;
 
     /**
      *
@@ -59,50 +64,6 @@ public class OsmMaker extends ThreadProcessor {
         start();
     }
 
-    /**
-     *
-     * @return
-     */
-    @Override
-    public float getProgress() {
-        if (isSplitting && !(splitterLoader == null)) {
-            try {
-                Class splitter = splitterLoader.loadClass("uk.me.parabola.splitter.Main");
-                Field pr = splitter.getField("progress");
-                float progress = pr.getFloat(null) / 2;
-                return progress;
-            } catch (Exception ex) {
-                Logger.getLogger(OsmMaker.class.getName()).log(Level.SEVERE, null, ex);
-                return super.getProgress();
-            }
-        }
-        return super.getProgress();
-    }
-
-    /**
-     *
-     * @return
-     */
-    @Override
-    public String getStatus() {
-        if (isSplitting && !(splitterLoader == null)) {
-            String astatus;
-            try {
-                Class splitter = splitterLoader.loadClass("uk.me.parabola.splitter.Main");
-                Field st = splitter.getField("status");
-                astatus = (String) st.get(null);
-                String status = region.name + " splitting " + astatus;
-                setStatus(status);
-                setProgress(getProgress());
-                return status + waitingString();
-            } catch (Exception ex) {
-                Logger.getLogger(OsmMaker.class.getName()).log(Level.SEVERE, null, ex);
-                return super.getStatus();
-            }
-        }
-        return super.getStatus();
-    }
-
     @Override
     public void run() {
         String args[];
@@ -110,9 +71,9 @@ public class OsmMaker extends ThreadProcessor {
         Utilities.checkArgFiles(Utilities.getUserdir(this));
         // since Splitter r279 replace --overlap with --keep-complete=true for low memory systems
         long maxMemory = Runtime.getRuntime().maxMemory();
-        String splitterOverlap = "--keep-complete=true";
+        String keepComplete = "--keep-complete=true";
         if (maxMemory <= 1800000000l) {
-            splitterOverlap = "--overlap=" + parameters.getProperty("splitter_overlap", "2000");
+            keepComplete = "--keep-complete=false";
         }
         String osm2imgArgsFileName = Utilities.getUserdir(this) + "osm2img.args";
         String gmapsuppArgsFileName = Utilities.getUserdir(this) + "gmapsupp.args";
@@ -120,18 +81,48 @@ public class OsmMaker extends ThreadProcessor {
         setStatus(region.name + " Splitting planet file.");
         String splitFile = region.dir.getPath() + "/" + "areas.list";
         if (!new File(splitFile).exists()) {
+            String polyfile = region.dir.getPath() + "/" + "boundary.poly";
+            try {
+                Writer os = new FileWriter(polyfile);
+                os.write(region.name + "\n");
+                os.write("1" + "\n");
+                os.write(" " + region.lon1 + " " + region.lat1 + "\n"); 
+                os.write(" " + region.lon1 + " " + region.lat2 + "\n"); 
+                os.write(" " + region.lon2 + " " + region.lat2 + "\n"); 
+                os.write(" " + region.lon2 + " " + region.lat1 + "\n"); 
+                os.write(" " + region.lon1 + " " + region.lat1 + "\n");
+                os.write("END" + "\n");
+                os.write("END" + "\n");
+                os.close();
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(OsmMaker.class.getName()).log(Level.SEVERE, null, ex);
+                setState(ERROR);
+                setStatus(ex.getMessage());
+                synchronized (this) {
+                    notify();
+                }
+                return;
+            } catch (IOException ex) {
+                Logger.getLogger(OsmMaker.class.getName()).log(Level.SEVERE, null, ex);
+                setState(ERROR);
+                setStatus(ex.getMessage());
+                synchronized (this) {
+                    notify();
+                }
+                return;
+            }
             args = new String[]{
-                "--output-dir=" + region.dir.getPath(), "--max-areas=" + max_areas, 
-                splitterOverlap, "--mapid=" + MAPID, "--output=pbf",
-                "--geonames-file=" + Utilities.getUserdir(this) + "cities15000.zip", "--bottom=" + region.lat1,
-                "--top=" + region.lat2, "--left=" + region.lon1, "--right=" + region.lon2, "--status-freq=0",
+                "--output-dir=" + region.dir.getPath(), "--max-areas=" + max_areas,
+                keepComplete, "--mapid=" + MAPID, "--output=pbf",
+                "--geonames-file=" + Utilities.getUserdir(this) + "cities15000.zip", "--status-freq=0",
+                "--polygon-file=" + polyfile,
                 "--max-threads=1", "--max-nodes=1200000", region.dir.getPath() + "/" + region.name + ".osm.pbf"
             };
         } else {
             args = new String[]{
                 "--output-dir=" + region.dir.getPath(), "--max-areas=" + max_areas, "--mapid=" + MAPID,
                 "--geonames-file=" + Utilities.getUserdir(this) + "cities15000.zip", "--status-freq=0",
-                splitterOverlap, "--split-file=" + splitFile, "--output=pbf",
+                keepComplete, "--split-file=" + splitFile, "--output=pbf",
                 "--max-threads=1", region.dir.getPath() + "/" + region.name + ".osm.pbf"
             };
         }
