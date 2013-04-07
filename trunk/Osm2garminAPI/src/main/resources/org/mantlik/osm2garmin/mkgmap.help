@@ -44,7 +44,7 @@ filename
 -n name
 --mapname=name
 	Set the name of the map. Garmin maps are named by 8 digit
-	numbers.  The default is 63240001.  It is best to use a different
+	numbersList.  The default is 63240001.  It is best to use a different
 	name if you are going to be making a map for others to use so
 	that it is unique and does not clash with others.
 
@@ -127,15 +127,6 @@ Address search options:
   same code page and sorting options (eg. --code-page, --latin1 etc) must
   be used as were used to compile the individual map tiles.
 
---createboundsfile=filename
-    In case this option is set the given file is read and all boundary
-    data in it is stored in preprocessed bounds files which are stored 
-    in the directory given as bounds parameter. 
-    The input file with the given filename must contain the boundaries that 
-    should be preprocessed. It can have OSM or PBF fileformat. It is 
-    recommended that it contains the boundary data only to avoid very high
-    memory usage. 
-
 --bounds=directory|zipfile
     A directory or a zipfile containing the preprocessed bounds files. 
     Bounds files in a zipfile must be located in the zipfiles root directory.
@@ -151,6 +142,17 @@ Address search options:
               ..
               mkgmap:admin_level11
               mkgmap:postcode : the postal_code value
+              
+    Preprocessed bounds can be created with the following command:
+       java -cp mkgmap.jar 
+          uk.me.parabola.mkgmap.reader.osm.boundary.BoundaryPreprocessor
+          <inputfile> <boundsdir>
+    
+    The input file must contain the boundaries that should be preprocessed. 
+    It can have OSM, PBF or O5M fileformat. It is recommended that it 
+    contains the boundary data only to avoid very high memory usage.
+    The boundsdir gives the directory where the processed files are stored.
+    This directory can be used as --bounds parameter with mkgmap.               
     
 --location-autofill=[option1,[option2]]
 	Controls how the address fields for country, region, city and zip info 
@@ -291,7 +293,7 @@ Miscellaneous options:
 
 --keep-going
 	Don't quit whole application if an exception occurs while
-	processing a job - continue to process the other jobs.
+	processing a map - continue to process the other maps.
 
 --block-size=number
 	Changes the block size that is used in the generated map. This
@@ -299,12 +301,10 @@ Miscellaneous options:
 	will ask you to try a value for this option.
 
 --net
-	Create maps that supports the "lock to road" option. Not required
-	if --route is also given.
+	Obsolete, use --route instead.
 
 --route
-	Experimental: Create maps that support routing.  This implies --net
-	(so that --net need not be given if --route is given).
+	Create maps that support routing.
 
 --drive-on-left
 --drive-on-right
@@ -388,9 +388,6 @@ Miscellaneous options:
 	that join together but go nowhere, 2 = individual oneway roads
 	that go nowhere.
 
---report-undefined-nodes
-	Issue a warning when a way references an undefined node.
-
 --road-name-pois[=GarminCode]
 	Generate a POI for each named road. By default, the POIs'
 	Garmin type code is 0x640a. If desired, a different type code
@@ -435,13 +432,13 @@ Miscellaneous options:
     It is possible to define wildcards for tag values like entrance=*.
     Default: entrance=main;entrance=yes;building=entrance
 
---precomp-sea=directoryname
-    Defines the directory that contains the precompiled sea tiles.
-	When this option is defined all natural=coastline tags from the
-	input OSM tiles are removed and the precompiled data is used instead. 
-	This option can be combined with the generate-sea options 
-	multipolygon, polygons and land-tag. The coastlinefile option
-	is ignored if precomp-sea is set.     
+--precomp-sea=directory|zipfile
+    Defines the directory or a zip file that contains precompiled sea tiles. 
+    Sea files in a zipfile must be located in the zipfiles root directory or in 
+    a sub directory sea. When this option is defined all natural=coastline tags 
+    from the input OSM tiles are removed and the precompiled data is used instead. 
+    This option can be combined with the generate-sea options multipolygon, polygons 
+    and land-tag. The coastlinefile option is ignored if precomp-sea is set.      
 
 --coastlinefile=filename[,filename]
 	Defines a comma separated list of files that contain coastline 
@@ -533,6 +530,32 @@ Miscellaneous options:
 	access (e.g. bollards). Their access restrictions are applied
 	to a small region of the way near the POI.
 
+--process-destination
+	When using the Garmin Types 0x08 and 0x09 (Ramp) Garmin is
+	evaluating the first way after all the *_link ways to display
+	the destination of the link. But in the OSM data only the _link 
+	ways are tagged with destination. When this option is set the 
+	destination tags of motorway_link and trunk_link ways are copied 
+	to the first non link way so that the Garmin can show the 
+	destination. 
+	Note: There must be a rule in the lines	style file that uses the
+	      destination tag to set the mkgmap:display_name tag 
+	
+--process-exits
+    Usual Garmin devices do not tell the name of the exit on motorways 
+    while routing with mkgmap created maps. This option splits the each
+    motorway_link and trunk_link into three parts. All parts are tagged 
+    with the original tags of the link. Additionally the middle part is 
+    tagged with the following tags:
+      mkgmap:exit_hint=true
+      mkgmap:exit_hint_ref=<ref tag value of the exit>
+      mkgmap:exit_hint_name=<name tag value of the exit>
+      mkgmap:exit_hint_exit_to=<exit_to tag value of the exit>
+    Adding a rule checking the mkgmap:exit_hint=true makes it possible
+    to use Garmin type 0x01 (motorway) for the middle part so that the 
+    Garmin device tells the name of this middle part as hint where to 
+    leave the motorway/trunk. 
+	
 --delete-tags-file=FILENAME
 	Names a file that should contain one or more lines of the form
 	TAG=VALUE or TAG=*. Blank lines and lines that start with
@@ -540,9 +563,8 @@ Miscellaneous options:
 	compared with these patterns and those that match are deleted.
 
 --tdbfile
-	Write a .tdb file.
---tdb-v3
-	Write a version 3 tdb file instead of the default v4. Not useful.
+	Write files that are essential to running with MapSource, a .tdb file and
+	an overview map.
 
 --show-profiles=1
 	Sets a flag in tdb file which marks set mapset as having contour 
@@ -561,11 +583,12 @@ Miscellaneous options:
 	lower map too.  Useful for contour line maps among other
 	things.
 
---no-poi-address
-	Disable address / phone information to POIs. Address info is
+--poi-address
+	Enable address / phone information to POIs. Address info is
 	read according to the "Karlsruhe" tagging schema. Automatic
 	filling of missing information could be enabled using the
 	"location-autofill" option.
+	Default is enabled, use --no-poi-address to disable.
 
 --verbose
 	Makes some operations more verbose. Mostly used with --list-styles.
