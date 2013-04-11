@@ -45,3 +45,9 @@ Java HotSpot(TM) 64-Bit Server VM (build 20.4-b02, mixed mode)
 }}}
 
 for 64-Bit version.
+
+==How to change the location of the temporary directory?==
+
+Osmosis, the tool used by Osm2garmin, is creating a lot of large files in the temporary directory. If your temporary space is limited, you can change location of the temporary directory by the startup switch, e.g.
+
+`-J-Djava.io.tmpdir=d:/myosmosistempdir/`
