@@ -100,10 +100,14 @@ public class Srtm {
                 // try zip file
                 ZipFile zf = new ZipFile(srtmZipFile);
                 ZipEntry entry = zf.getEntry(fname);
+                if (entry == null) {
+                    throw(new IOException("Can't read zip file " + srtmZipFile));
+                }
                 s = zf.getInputStream(entry);
                 s.close();
             } catch (IOException ex) {
                 // broken download, try again
+                Logger.getLogger(Srtm.class.getName()).log(Level.WARNING, ex.getMessage());
                 srtmZipFile.delete();
             }
         }
