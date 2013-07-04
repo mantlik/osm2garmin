@@ -127,9 +127,15 @@ public class Srtm {
                 // try zip file
                 ZipFile zf = new ZipFile(srtmZipFile);
                 ZipEntry entry = zf.getEntry(fname);
+                if (entry == null) {
+                    Logger.getLogger(Srtm.class.getName()).log(Level.SEVERE, 
+                            "Can''t extract {0} from the archive {1}", 
+                            new Object[]{fname, srtmZipFile.getAbsolutePath()});
+                    return false;
+                }
                 s = zf.getInputStream(entry);
 
-            } catch (Exception ex) {
+            } catch (IOException ex) {
                 Logger.getLogger(Srtm.class.getName()).log(Level.SEVERE, "", ex);
                 return false;
             }
