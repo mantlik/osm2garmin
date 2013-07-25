@@ -46,7 +46,7 @@ import org.xml.sax.SAXException;
  * @author fm
  */
 public class PlanetUpdateDownloader extends ThreadProcessor {
-    
+
     private static final DecimalFormat DF = new DecimalFormat("0");
     public TorrentDownloader torrentDownloader = null;
     int startPiece = 0;
@@ -60,7 +60,7 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
     public PlanetUpdateDownloader(Properties parameters) {
         super(parameters);
     }
-    
+
     @Override
     public void run() {
         if (parameters.getProperty("skip_planet_update", "false").equals("true")) {
@@ -157,8 +157,8 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
             }
             return;
         }
-        torrentDownloader =
-                new TorrentDownloader(parameters, torrent, new File(Utilities.getUserdir(this)),
+        torrentDownloader
+                = new TorrentDownloader(parameters, torrent, new File(Utilities.getUserdir(this)),
                 startPiece, noOfPieces, new UpdateFileVerifier(torrent));
         Utilities.getInstance().addProcessToMonitor(torrentDownloader);
         torrentDownloader.changeSupport.addPropertyChangeListener(this);
@@ -187,6 +187,7 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
         String[] args;
         ArrayList<String> l = new ArrayList<String>();
         int ii = 0;
+        int iii = 0;
         int fileno;
         // process downloads with Osmosis - 24 files in a single pass
         for (fileno = firstPieceToProcess; fileno < (startPiece + noOfPieces); fileno++) {
@@ -216,6 +217,58 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
                         notify();
                     }
                     return;
+                }
+                iii++;
+                if (iii == 30) {  // collected 30 files, process then in an extra step
+                    ArrayList<String> ll = new ArrayList<String>();
+                    setStatus("Processing updates (" + ((int) getProgress()) + " %)... merging month #" + (sequence - 28) + " updates");
+                    for (int seq2 = sequence - 29; seq2 <= sequence; seq2++) {
+                        ll.add("--rxc");
+                        ll.add("file=" + Utilities.getUserdir(this) + "update" + seq2 + ".osc.gz");
+                        ll.add("--buffer-change");
+                        ll.add("bufferCapacity=10000");
+                    }
+                    ll.add("--apc");
+                    ll.add("sourceCount=30");
+                    ll.add("--sc");
+                    ll.add("--simc");
+                    ll.add("--wxc");
+                    ll.add("file=" + Utilities.getUserdir(this) + "update" + (sequence + 1) + ".osc.gz");
+                    args = ll.toArray(new String[0]);
+                    try {
+                        Utilities.getInstance().runExternal("org.openstreetmap.osmosis.core.Osmosis", "run", "osmosis",
+                                args, this);
+                    } catch (Exception ex) {
+                        setStatus(ex.getMessage());
+                        setState(ERROR);
+                        synchronized (this) {
+                            notify();
+                        }
+                        return;
+                    }
+                    for (int seq2 = sequence - 29; seq2 <= sequence; seq2++) {
+                        boolean deleted = new File(Utilities.getUserdir(this) + "update" + seq2 + ".osc.gz").delete();
+                        if (!deleted) {
+                            setStatus("Cannot delete " + "update" + seq2 + ".osc.gz");
+                            setState(ERROR);
+                            synchronized (this) {
+                                notify();
+                            }
+                            return;
+                        }
+                    }
+                    boolean renamed = new File(Utilities.getUserdir(this) + "update" + (sequence + 1) + ".osc.gz")
+                            .renameTo(new File(Utilities.getUserdir(this) + "update" + (sequence - 29) + ".osc.gz"));
+                    if (!renamed) {
+                        setStatus("Cannot rename " + "update" + (sequence+1) + ".osc.gz to update" + (sequence-29) + ".osc.gz");
+                        setState(ERROR);
+                        synchronized (this) {
+                            notify();
+                        }
+                        return;
+                    }
+                    sequence -= 29;
+                    iii = 0;
                 }
                 sequence++;
                 l.clear();
@@ -297,9 +350,9 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
             notify();
         }
     }
-    
+
     private class UpdateFileVerifier implements DataVerifier {
-        
+
         public UpdateFileVerifier(TorrentFile torrent) {
         }
 
@@ -505,7 +558,7 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
             sequence++;
         }
         noOfPieces = torrent.name.size();
-        
+
         return torrent;
     }
 }
