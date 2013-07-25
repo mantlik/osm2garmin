@@ -374,8 +374,16 @@ public class PlanetUpdateDownloader extends ThreadProcessor {
                     hashfile.delete();
                     return false;
                 }
-                return Utils.byteArrayToByteString(Utils.hash(data)).
+                boolean result = Utils.byteArrayToByteString(Utils.hash(data)).
                         matches(Utils.byteArrayToByteString(Utils.hexStringToByteArray(new String(hexhash))));
+                if (! result) {
+                    hashfile.delete();
+                    File datafile = new File(Utilities.getUserdir(PlanetUpdateDownloader.this) + Utilities.updateName(index));
+                    if (datafile.exists()) {
+                        datafile.delete();
+                    }
+                }
+                return result;
             }
             try {
                 is = new GZIPInputStream(new ByteArrayInputStream(data));
