@@ -13,6 +13,7 @@ New features:
 Bug fixes: 
 
  * SRTM 2.1 file naming bug - Issue 101
+ * Problem with state.txt download - Issue 119, Issue 123
 
 == 1.1 (Build 250) - Stable release ==
 New features:
