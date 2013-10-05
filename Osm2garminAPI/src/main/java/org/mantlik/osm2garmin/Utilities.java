@@ -559,7 +559,7 @@ public class Utilities {
         long startReplTime = new SimpleDateFormat("yyyy-MM-dd").parse(
                 "2012-09-12", new ParsePosition(0)).getTime();
         int sequenceNo = (int) ((planetTime - startReplTime) / 1000 / 60 / 60); // hours
-        String stateUrl = mirror + updateName(sequenceNo);
+        String stateUrl = mirror + updateName(sequenceNo).replace("osc.gz", "state.txt");
         while (!downloadFile(stateUrl, targetPath)) {
             // try older file
             sequenceNo--;
@@ -567,7 +567,7 @@ public class Utilities {
             if (max_retries <= 0) {
                 return false;
             }
-            stateUrl = mirror + updateName(sequenceNo);
+            stateUrl = mirror + updateName(sequenceNo).replace("osc.gz", "state.txt");
         }
         return true;
     }
