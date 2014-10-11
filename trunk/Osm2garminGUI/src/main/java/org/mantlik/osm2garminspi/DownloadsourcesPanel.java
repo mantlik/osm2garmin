@@ -342,7 +342,7 @@ final class DownloadsourcesPanel extends javax.swing.JPanel {
 
     private void torrentDownloadUrlItemPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_torrentDownloadUrlItemPropertyChange
         if (!torrentDownloadUrlItem.getText().equals(NbPreferences.forModule(Osm2garmin.class).get("torrent_download_url",
-                "http://osm-torrent.torres.voyager.hr/files/"))) {
+                "http://www.mantlik.cz/tracker/torrents/"))) {
             controller.changed();
         }
     }//GEN-LAST:event_torrentDownloadUrlItemPropertyChange
@@ -396,7 +396,7 @@ final class DownloadsourcesPanel extends javax.swing.JPanel {
                 + "http://ftp5.gwdg.de/pub/misc/openstreetmap/planet.openstreetmap.org/,"
                 + "http://planet.openstreetmap.org/").replace(",", "\n"));
         torrentDownloadUrlItem.setText(NbPreferences.forModule(Osm2garmin.class).get("torrent_download_url",
-                "http://osm-torrent.torres.voyager.hr/files/"));
+                "http://www.mantlik.cz/tracker/torrents/"));
         torrentMethodItem.setSelected(NbPreferences.forModule(Osm2garmin.class)
                 .get("download_method", "torrent").equals("torrent"));
         torrentPortStartItem.setText(NbPreferences.forModule(Osm2garmin.class).get("torrent_port_start",

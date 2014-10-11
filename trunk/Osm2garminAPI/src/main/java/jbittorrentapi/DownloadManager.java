@@ -239,9 +239,11 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
         if (!initialized) {
             init();
         }
-        DownloadTask dt = new WebseedTask(torrent.info_hash_as_binary, clientID, this);
-        task.put(WEBSEED_ID, dt);
-        dt.start();
+        for (int i = 0; i < torrent.urlList.size(); i++) {
+            DownloadTask dt = new WebseedTask(torrent.info_hash_as_binary, clientID, this, i+1);
+            task.put(WEBSEED_ID + (i+1), dt);
+            dt.start();
+        }
         this.pu = new PeerUpdater(this.clientID, this.torrent);
         this.pu.addPeerUpdateListener(this);
         this.pu.setListeningPort(this.cl.getConnectedPort());
@@ -377,7 +379,7 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
          * for (int i = 0; i < this.output_files.length; i++) { try {
          * this.output_files[i].close(); } catch (Exception e) {
          * System.err.println(e.getMessage()); }
-        }
+         }
          */
     }
 
@@ -548,9 +550,9 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
                     || (this.isComplete.cardinality() > this.nbPieces - 3))
                     && //(this.isRequested.cardinality() == this.nbPieces)) &&
                     (!this.isPieceComplete(startPiece + i))
-                    && (WEBSEED_ID.equals(id) || this.peerAvailabilies.get(id) != null)) {
+                    && (id.contains(WEBSEED_ID) || this.peerAvailabilies.get(id) != null)) {
 
-                if (WEBSEED_ID.equals(id) || this.peerAvailabilies.get(id).get(startPiece + i)) {
+                if (id.contains(WEBSEED_ID) || this.peerAvailabilies.get(id).get(startPiece + i)) {
                     possible.add(startPiece + i);
                 }
             }
@@ -628,7 +630,7 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
                 try {
                     this.task.get(it.next()).ms.addMessageToQueue(
                             new Message_PP(PeerProtocol.HAVE,
-                            Utils.intToByteArray(i), 1));
+                                    Utils.intToByteArray(i), 1));
                 } catch (NullPointerException npe) {
                 }
             }
@@ -641,7 +643,7 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
             } catch (Exception ex) {
                 System.out.println(ex);
             }
-            if (!peerID.equals(WEBSEED_ID)) {
+            if (!peerID.contains(WEBSEED_ID)) {
                 this.lastPieceReceived = System.currentTimeMillis();
             }
 
@@ -813,10 +815,10 @@ public class DownloadManager implements DTListener, PeerUpdateListener,
                 dt.ms.addMessageToQueue(new Message_PP(
                         PeerProtocol.PIECE,
                         Utils.concat(Utils.intToByteArray(piece),
-                        Utils.concat(Utils.intToByteArray(begin),
-                        this.getPieceBlock(piece,
-                        begin,
-                        length)))));
+                                Utils.concat(Utils.intToByteArray(begin),
+                                        this.getPieceBlock(piece,
+                                                begin,
+                                                length)))));
                 dt.peer.setULRate(length);
             }
             dt = null;

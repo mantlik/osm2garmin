@@ -28,6 +28,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.Observable;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -198,11 +199,10 @@ public class Downloader extends Observable implements Runnable {
             downloaded--;  // overlap to process correctly fully downloaded file
         }
 
-
         try {
             // Open connection to URL.
-            HttpURLConnection connection =
-                    (HttpURLConnection) url.openConnection();
+            HttpURLConnection connection
+                    = (HttpURLConnection) url.openConnection();
 
             // Specify what portion of file to download.
             if (size < 1) {
@@ -230,6 +230,11 @@ public class Downloader extends Observable implements Runnable {
                 System.out.println("Bad response code from server " + connection.getResponseCode()
                         + " - " + connection.getResponseMessage() + ".");
                 System.out.print(requestProperties);
+                error();
+            }
+            
+            if (connection.getHeaderField("content-length") == null) {
+                System.out.println("Server did not return content-length header.");
                 error();
             }
 
@@ -289,7 +294,11 @@ public class Downloader extends Observable implements Runnable {
                 stateChanged();
             }
         } catch (Exception e) {
-            System.out.println("Download error.");
+            if (e.getMessage() != null) {
+                System.out.println("Download error " + e.getMessage() + ".");
+            } else {
+                Exceptions.printStackTrace(e);
+            }
             error();
         } finally {
             // Close file.
