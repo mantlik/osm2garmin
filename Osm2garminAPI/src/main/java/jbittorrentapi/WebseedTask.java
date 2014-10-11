@@ -38,13 +38,15 @@ import java.util.TreeMap;
 public class WebseedTask extends DownloadTask implements Observer {
 
     private DownloadManager manager;
-    private static final long MAX_IDLE_TIME = 60000;  // start download when no piece received for 60 sec
+    private static final long MAX_IDLE_TIME = 20000;  // start download when no piece received for 60 sec
     public static boolean webseedActive = false;
     private long sleepAfterError = 1000;
+    private int sequence = 1;
 
-    public WebseedTask(byte[] fileID, byte[] myID, DownloadManager manager) {
+    public WebseedTask(byte[] fileID, byte[] myID, DownloadManager manager, int sequence) {
         super(null, fileID, myID, false, null);
         this.manager = manager;
+        this.sequence = sequence;
     }
 
     @Override
@@ -54,14 +56,13 @@ public class WebseedTask extends DownloadTask implements Observer {
                 if (!manager.isComplete() && (System.currentTimeMillis() - manager.lastPieceReceived) > MAX_IDLE_TIME) {
                     webseedActive = true;
                     downloadPiece = null;
-                    manager.peerReady(DownloadManager.WEBSEED_ID);
+                    manager.peerReady(DownloadManager.WEBSEED_ID + sequence);
                     if (downloadPiece != null) {
                         boolean breakDownload = false;
                         downloadPiece.clearData();
                         TreeMap<Integer, Long> offsets = (TreeMap<Integer, Long>) downloadPiece.getFileAndOffset();
                         ArrayList<String> urls = manager.torrent.urlList;
-                        int index = (int) (Math.random() * urls.size());
-                        String url = urls.get(index);
+                        String url = urls.get(sequence - 1);
                         int fileIndex = offsets.firstKey();
                         for (int i = 0; i < offsets.size(); i++) {
                             long offs = offsets.get(fileIndex);
@@ -80,7 +81,7 @@ public class WebseedTask extends DownloadTask implements Observer {
                             }
                             if (downloader.getStatus() != Downloader.COMPLETE) {
                                 downloader.cancel();
-                                manager.pieceCompleted(DownloadManager.WEBSEED_ID, downloadPiece.getIndex(), false);
+                                manager.pieceCompleted(DownloadManager.WEBSEED_ID + sequence, downloadPiece.getIndex(), false);
                                 breakDownload = true;
                                 continue;
                             }
@@ -103,9 +104,9 @@ public class WebseedTask extends DownloadTask implements Observer {
                             continue;
                         }
                         if (downloadPiece.verify()) {
-                            manager.pieceCompleted(DownloadManager.WEBSEED_ID, downloadPiece.getIndex(), true);
+                            manager.pieceCompleted(DownloadManager.WEBSEED_ID + sequence, downloadPiece.getIndex(), true);
                         } else {
-                            manager.pieceCompleted(DownloadManager.WEBSEED_ID, downloadPiece.getIndex(), false);
+                            manager.pieceCompleted(DownloadManager.WEBSEED_ID + sequence, downloadPiece.getIndex(), false);
                         }
                     }
                 } else {
@@ -114,7 +115,7 @@ public class WebseedTask extends DownloadTask implements Observer {
                 Thread.sleep(1000);
             } catch (IOException ex) {
                 if (downloadPiece != null) {
-                    manager.pieceCompleted(DownloadManager.WEBSEED_ID, downloadPiece.getIndex(), false);
+                    manager.pieceCompleted(DownloadManager.WEBSEED_ID + sequence, downloadPiece.getIndex(), false);
                 }
             } catch (InterruptedException ex) {
             }

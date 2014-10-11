@@ -40,8 +40,15 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.ByteBuffer;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -211,8 +218,8 @@ public class TorrentProcessor {
                 this.torrent.name.add(new String((byte[]) info.get("name")));
             }
             // Fill in piece lengths
-            torrent.setPieceLength(torrent.piece_hash_values_as_binary.size()-1, torrent.getPieceLength(0));
-            torrent.setPieceLength(torrent.piece_hash_values_as_binary.size()-1,
+            torrent.setPieceLength(torrent.piece_hash_values_as_binary.size() - 1, torrent.getPieceLength(0));
+            torrent.setPieceLength(torrent.piece_hash_values_as_binary.size() - 1,
                     (int) (torrent.total_length % torrent.getPieceLength(0)));
         } else {
             return null;
@@ -441,6 +448,133 @@ public class TorrentProcessor {
     }
 
     /**
+     * Generate the SHA-1 hashes for the file in the torrent in parameter The
+     * file is not saved locally
+     *
+     * @param torr TorrentFile
+     * @param remote_urls Server addresses to be used to download the file from
+     * @param md5list Optional MD5 hash, null if not provided
+     * @return true if successful
+     */
+    public boolean generatePieceHashesFromRemote(TorrentFile torr, String[] remote_urls, String[] md5list) {
+        ByteBuffer bb = ByteBuffer.allocate(torr.getPieceLength(0));
+        int index = 0;
+        long total = 0;
+        MessageDigest md = null;
+        torr.piece_hash_values_as_binary.clear();
+        for (int i = 0; i < torr.name.size(); i++) {
+            String md5 = null;
+            if (md5list != null) {
+                md5 = md5list[i];
+            }
+            boolean compute_md5 = md5 != null;
+            long length = torr.length.get(i);
+            total += length;
+            String fname = (String) torr.name.get(i);
+            long processed = 0;
+            if (compute_md5) {
+                try {
+                    md = MessageDigest.getInstance("MD5");
+                } catch (NoSuchAlgorithmException ex) {
+                    Exceptions.printStackTrace(ex);
+                    return false;
+                }
+            }
+            while (processed < length) {
+                InputStream fis = null;
+                try {
+                    URL url = new URL(remote_urls[(int) (Math.random() * remote_urls.length)] + "/" + fname);
+                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                    connection.setRequestProperty("Range",
+                            "bytes=" + processed + "-");
+                    connection.connect();
+                    if (connection.getResponseCode() / 100 != 2) {
+                        System.out.println("Bad response code from server " + connection.getResponseCode()
+                                + " - " + connection.getResponseMessage() + ".");
+                        continue;
+                    }
+                    long contentLength = Long.decode(connection.getHeaderField("content-length"));
+                    if (contentLength < 1) {
+                        System.out.println("Bad file size reported from server.");
+                        continue;
+                    }
+                    fis = connection.getInputStream();
+                    int read = 0;
+                    int piece = (int) (processed / torrent.getPieceLength(0));
+                    int pieces = (int) (torr.length.get(i) / torrent.getPieceLength(0));
+                    byte[] data = new byte[torr.getPieceLength(0)];
+                    System.out.println("Starting data download from " + url.toExternalForm());
+                    while ((read = fis.read(data, 0, bb.remaining())) != -1) {
+                        if (compute_md5 && read > 0) {
+                            md.update(data, 0, read);
+                        }
+                        bb.put(data, 0, read);
+                        processed += read;
+                        if (bb.remaining() == 0) {
+                            torr.piece_hash_values_as_binary.put(index++, Utils.hash(bb.array()));
+                            bb.clear();
+                            piece++;
+                            System.out.print("Piece " + piece + " / " + pieces + "          \r");
+                        }
+                    }
+                    fis.close();
+                    System.out.println();
+                    System.out.println("Finished download from " + url.toExternalForm());
+                    if (compute_md5) {
+                        byte[] mdbytes = md.digest();
+                        StringBuilder sb = new StringBuilder();
+                        for (int j = 0; j < mdbytes.length; j++) {
+                            sb.append(Integer.toString((mdbytes[j] & 0xff) + 0x100, 16).substring(1));
+                        }
+                        if (!md5.trim().toLowerCase().contains(sb.toString().toLowerCase())) {
+                            System.out.println(md5 + " != " + sb.toString());
+                            System.out.println("MD5 checksum of the file " + fname + " failed.");
+                            return false;
+                        } else {
+                            System.out.println("MD5 checksum of the file " + fname +" OK.");
+                        }
+                    }
+                } catch (MalformedURLException ex) {
+                    if (fis != null) {
+                        try {
+                            fis.close();
+                        } catch (IOException ex1) {
+                            Exceptions.printStackTrace(ex1);
+                        }
+                    }
+                    System.out.println("\r\n" + ex.getMessage() + " Retrying.");
+                } catch (IOException ex) {
+                    if (fis != null) {
+                        try {
+                            fis.close();
+                        } catch (IOException ex1) {
+                            Exceptions.printStackTrace(ex1);
+                        }
+                    }
+                    System.out.println("\r\n" + ex.getMessage() + " Retrying.");
+                }
+            }
+        }
+        if (bb.remaining() != bb.capacity()) {
+            torr.piece_hash_values_as_binary.put(index++, Utils.hash(Utils.subArray(
+                    bb.array(), 0, bb.capacity() - bb.remaining())));
+        }
+        return true;
+    }
+
+    /**
+     * Generate the SHA-1 hashes for the file in the torrent in parameter The
+     * file is not saved locally
+     *
+     * @param remote_urls Server address to be used to download the file from
+     * @param md5 Optional MD5 hash list, null if not provided
+     * @return true if successful
+     */
+    public boolean generatePieceHashesFromRemote(String[] remote_urls, String[] md5) {
+        return this.generatePieceHashesFromRemote(torrent, remote_urls, md5);
+    }
+
+    /**
      * Generate the SHA-1 hashes for the files in the current object TorrentFile
      */
     public void generatePieceHashes() {
@@ -464,6 +598,14 @@ public class TorrentProcessor {
         }
         if (torr.createdBy.length() > 0) {
             map.put("created by", torr.createdBy);
+        }
+        
+        if (! torr.announceList.isEmpty()) {
+            map.put("announce-list", torr.announceList);
+        }
+        
+        if (! torr.urlList.isEmpty()) {
+            map.put("url-list", torr.urlList);
         }
 
         SortedMap info = new TreeMap();
