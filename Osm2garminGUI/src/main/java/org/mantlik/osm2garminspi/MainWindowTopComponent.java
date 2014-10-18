@@ -512,8 +512,8 @@ public final class MainWindowTopComponent extends TopComponent implements Proper
                     if (evt.getSource().getClass().equals(PlanetDownloader.class)) {
                         PlanetDownloader downloader = (PlanetDownloader) evt.getSource();
                         planetDownloadStatus.setText(downloader.getStatus());
-                        int width = planetDownloadStatus.getWidth();
-                        int height = planetDownloadStatus.getHeight();
+                        int width = planetDownloadStatus.getWidth()-4;
+                        int height = planetDownloadStatus.getHeight()-4;
                         Image image = progressMap(width, height, downloader);
                         TorrentDownloader torrent = downloader.torrentDownloader;
                         if (torrent != null && torrent.getState() == TorrentDownloader.RUNNING) {
@@ -523,8 +523,8 @@ public final class MainWindowTopComponent extends TopComponent implements Proper
                     } else if (evt.getSource().getClass().equals(PlanetUpdateDownloader.class)) {
                         PlanetUpdateDownloader downloader = (PlanetUpdateDownloader) evt.getSource();
                         planetUpdateDownloadStatus.setText(downloader.getStatus());
-                        int width = planetUpdateDownloadStatus.getWidth();
-                        int height = planetUpdateDownloadStatus.getHeight();
+                        int width = planetUpdateDownloadStatus.getWidth()-4;
+                        int height = planetUpdateDownloadStatus.getHeight()-4;
                         TorrentDownloader torrent = downloader.torrentDownloader;
                         Image image = progressMap(width, height, downloader);
                         if (torrent != null && torrent.getState() == TorrentDownloader.RUNNING) {
@@ -534,22 +534,22 @@ public final class MainWindowTopComponent extends TopComponent implements Proper
                     } else if (evt.getSource().getClass().equals(PlanetUpdater.class)) {
                         PlanetUpdater updater = (PlanetUpdater) evt.getSource();
                         planetUpdateStatus.setText(updater.getStatus());
-                        int width = planetUpdateStatus.getWidth();
-                        int height = planetUpdateStatus.getHeight();
+                        int width = planetUpdateStatus.getWidth()-4;
+                        int height = planetUpdateStatus.getHeight()-4;
                         Image image = progressMap(width, height, updater);
                         ((JTextFieldImage) planetUpdateStatus).setImage(image);
                     } else if (evt.getSource().getClass().equals(ContoursUpdater.class)) {
                         ContoursUpdater updater = (ContoursUpdater) evt.getSource();
                         contoursStatus.setText(updater.getStatus());
-                        int width = contoursStatus.getWidth();
-                        int height = contoursStatus.getHeight();
+                        int width = contoursStatus.getWidth()-4;
+                        int height = contoursStatus.getHeight()-4;
                         Image image = progressMap(width, height, updater);
                         ((JTextFieldImage) contoursStatus).setImage(image);
                     } else if (evt.getSource().getClass().equals(OsmMaker.class)) {
                         OsmMaker updater = (OsmMaker) evt.getSource();
                         regionsStatus.setText(updater.getStatus());
-                        int width = regionsStatus.getWidth();
-                        int height = regionsStatus.getHeight();
+                        int width = regionsStatus.getWidth()-4;
+                        int height = regionsStatus.getHeight()-4;
                         Image image = progressMap(width, height, updater);
                         ((JTextFieldImage) regionsStatus).setImage(image);
                     } else if (evt.getSource().getClass().equals(TorrentDownloader.class)) {
@@ -880,7 +880,7 @@ public final class MainWindowTopComponent extends TopComponent implements Proper
             if (image != null) {
                 this.setBackground(OPAQUE);
                 setOpaque(false);
-                g2d.drawImage(image, 0, 0, this);
+                g2d.drawImage(image, 2, 2, this);
             } else {
                 setBackground(Color.WHITE);
                 setOpaque(true);
