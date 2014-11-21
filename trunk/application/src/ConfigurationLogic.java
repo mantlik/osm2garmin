@@ -205,7 +205,7 @@ public class ConfigurationLogic extends ProductConfigurationLogic {
         }
         
         // update startup configuration file
-        String replaceString = "-J-Xmx2000m"; // NOI18N
+        String replaceString = "-J-Xmx4000m"; // NOI18N
         if (SystemUtils.isWindows()) {
             if (! SystemUtils.isCurrentJava64Bit()) {
                 replaceString = "-J-Xmx1380m"; // NOI18N
