@@ -24,6 +24,12 @@
             <artifactId>platform</artifactId>
             <version>${netbeans.version}</version>
             <type>pom</type>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.netbeans.api</groupId>
+                    <artifactId>org-netbeans-libs-javafx</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -55,7 +61,13 @@
             <groupId>org.netbeans.modules</groupId>
             <artifactId>org-netbeans-modules-extbrowser</artifactId>
             <version>${netbeans.version}</version>
-            <type>nbm</type>
+            <!--<type>nbm</type>-->
+            <exclusions>
+                <exclusion>
+                    <groupId>org.netbeans.api</groupId>
+                    <artifactId>org-netbeans-libs-javafx</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 

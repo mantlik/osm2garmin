@@ -105,7 +105,7 @@
 
         <copy file="${icon.path}" tofile="${installer.build.dir}/ext/components/products/helloworld/src/org/mycompany/${icon.name}"/>
         
-        <copy file="${suite.location}/application/src/build.xml" tofile="${installer.build.dir}/build.xml" overwrite="true" />        
+        <copy file="${suite.location}/src/build.xml" tofile="${installer.build.dir}/build.xml" overwrite="true" />        
 
         <copy file="${configuration.logic.file}"  overwrite="true"
             tofile="${installer.build.dir}/ext/components/products/helloworld/src/org/mycompany/ConfigurationLogic.java"/>
