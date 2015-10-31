@@ -81,7 +81,7 @@
                     <installerOsLinux>true</installerOsLinux>
                     <installerOsMacosx>true</installerOsMacosx>
                     <installerLicenseFile>../LICENSE.txt</installerLicenseFile>
-                    <installersFilePrefix>${project.name}-${project.version}-build-${buildNumber}</installersFilePrefix>
+                    <installersFilePrefix>${project.name}-${project.version}-build-${buildNumber.mod}</installersFilePrefix>
                     <installDirName>${brandingToken}_${project.version.short}</installDirName>
                     <templateFile>../template.xml</templateFile>
                     <userSettings>
@@ -149,7 +149,7 @@
                             <fileset dir="${basedir}/../Osm2garminGUI/src/main/javahelp/org/mantlik/osm2garminspi/docs/" />
                         </copy>
                         <copy file="${basedir}/target/docbkx/Documentation/Documentation.html" tofile="${basedir}/target/docbkx/Documentation/index.html" failonerror="false" />
-                        <copy file="${basedir}/target/docbkx/Documentation.pdf" tofile="${basedir}/target/Documentation-${project.version}-build-${buildNumber}.pdf" failonerror="false" />
+                        <copy file="${basedir}/target/docbkx/Documentation.pdf" tofile="${basedir}/target/Documentation-${project.version}-build-${buildNumber.mod}.pdf" failonerror="false" />
                     </postProcess>
                 </configuration>
                 <executions>
@@ -158,7 +158,7 @@
                             <goal>generate-html</goal>
                             <goal>generate-pdf</goal>
                         </goals>
-                        <phase>generate-sources</phase>
+                        <phase>process-sources</phase>
                     </execution>
                 </executions>
             </plugin>
@@ -166,75 +166,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
             </plugin>
-            <plugin>
-                <groupId>com.googlecode.maven-gcu-plugin</groupId>
-                <artifactId>maven-gcu-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>deploy</phase>
-                        <goals>
-                            <goal>upload</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <projectName>osm2garmin</projectName>
-                    <failsOnError>false</failsOnError>
-                    <serverId>code.google.com</serverId>
-                    <uploads>
-                        <upload>
-                            <file>${project.build.directory}/Documentation-${project.version}-build-${buildNumber}.pdf</file>
-                            <labels>
-                                <label>Type-Docs</label>
-                                <label>Featured</label>
-                            </labels>
-                            <summary>User's guide in PDF format</summary>
-                        </upload>
-                        <upload>
-                            <file>${project.build.directory}/Osm2garminGUI-${project.version}-build-${buildNumber}-macosx.tgz</file>
-                            <labels>
-                                <label>OpSys-OSX</label>
-                                <label>Type-Installer</label>
-                                <label>Featured</label>
-                            </labels>
-                            <summary>Osm2Garmin GUI Mac installer</summary>
-                        </upload>
-                        <upload>
-                            <file>${project.build.directory}/Osm2garminGUI-${project.version}-build-${buildNumber}-linux.sh</file>
-                            <labels>
-                                <label>OpSys-Linux</label>
-                                <label>Type-Installer</label>
-                                <label>Featured</label>
-                            </labels>
-                            <summary>Osm2Garmin GUI Linux installer</summary>
-                        </upload>
-                        <upload>
-                            <file>${project.build.directory}/Osm2garminGUI-${project.version}-build-${buildNumber}-windows.exe</file>
-                            <labels>
-                                <label>OpSys-Windows</label>
-                                <label>Type-Installer</label>
-                                <label>Featured</label>
-                            </labels>
-                            <summary>Osm2Garmin GUI Windows installer</summary>
-                        </upload>
-                    </uploads>
-                </configuration>
-            </plugin>
-            <!-- To run NbModuleSuite in integration-test phase:
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.9</version>
-                <configuration>
-                    <systemProperties>
-                        <property>
-                            <name>cluster.path.final</name>
-                            <value>${project.build.directory}/${brandingToken}/${brandingToken}:${project.build.directory}/${brandingToken}/platform</value>
-                        </property>
-                    </systemProperties>
-                </configuration>
-            </plugin>
-            -->
         </plugins>
     </build>
 

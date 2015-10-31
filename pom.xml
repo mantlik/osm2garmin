@@ -39,8 +39,8 @@
     </distributionManagement>
 
     <scm>
-        <connection>scm:svn:http://osm2garmin.googlecode.com/svn/trunk</connection>
-        <developerConnection>scm:svn:https://osm2garmin.googlecode.com/svn/trunk/</developerConnection>
+        <connection>scm:git:git@github.com:mantlik/osm2garmin</connection>
+        <developerConnection>scm:git:git@github.com:mantlik/osm2garmin</developerConnection>
     </scm>
 
     <build>
@@ -121,7 +121,7 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>buildnumber-maven-plugin</artifactId>
-                    <version>1.0</version>
+                    <version>1.1-PREVIEW</version>
                     <executions>
                         <execution>
                             <phase>validate</phase>
@@ -132,7 +132,8 @@
                     </executions>
                     <configuration>
                         <doCheck>false</doCheck>
-                        <doUpdate>true</doUpdate>
+                        <doUpdate>false</doUpdate>
+                        <gitCountCommits>true</gitCountCommits>
                         <useLastCommittedRevision>true</useLastCommittedRevision>
                     </configuration>
                 </plugin>
@@ -169,8 +170,31 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-antrun-plugin</artifactId>
-                    <version>1.6</version>
+                    <version>1.7</version>
                     <executions>
+                        <execution>
+                            <id>modify-buildnumber</id>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>run</goal>
+                            </goals>
+                            <configuration>
+                                <target>
+                                    <macrodef name="add">
+                                        <attribute name="build" />
+                                        <sequential>
+                                            <script language="javascript">
+                                                project.setProperty("buildNumber.mod", eval("@{build}+100"))
+                                            </script>
+                                        </sequential>
+                                    </macrodef>
+                                    <echo>Original buildNumber: ${buildNumber}</echo>
+                                    <add build="${buildNumber}" />
+                                    <echo>Modified buildNumber: ${buildNumber.mod}</echo>
+                                </target>
+                                <exportAntProperties>true</exportAntProperties>
+                            </configuration>
+                        </execution>
                         <execution>
                             <id>update-version-build</id>
                             <phase>prepare-package</phase>
@@ -198,11 +222,6 @@
                     </dependencies>
                 </plugin>
                 <plugin>
-                    <groupId>com.googlecode.maven-gcu-plugin</groupId>
-                    <artifactId>maven-gcu-plugin</artifactId>
-                    <version>1.1</version>
-                </plugin>
-                <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>2.11</version>
@@ -219,7 +238,7 @@
     </modules>
 
     <properties>
-        <netbeans.version>RELEASE801</netbeans.version>
+        <netbeans.version>RELEASE802</netbeans.version>
         <brandingToken>osm2garmin</brandingToken>
         <netbeans.hint.license>gpl20</netbeans.hint.license>
         <project.version.short>1.2</project.version.short>
