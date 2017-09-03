@@ -1,5 +1,17 @@
 # Release notes #
 
+## 1.4 - Unstable Development branch ##
+No new features available yet.
+
+## 1.3 (Build 278) - Stable release ##
+New features:
+   * Changed region map provider to preview region definitions in interactive map
+   * Added parameter to control maximum number of regions in a single pass, this was hardcoded to 5 in earlier versions
+   * Map IDs differ for each region to allow using more regions concurrently in a single GPS unit
+   * Added built-in support for bounds or bounds.zip file
+   * Updated external tools to latest versions
+   * Changed default parameters to better support routing in the new mkgmap version 
+
 ## 1.2 - Unstable Development branch ##
 New features:
 
@@ -14,7 +26,7 @@ Bug fixes:
   * SRTM 2.1 file naming bug - [Issue 101](https://code.google.com/p/osm2garmin/issues/detail?id=101)
   * Problem with state.txt download - [Issue 119](https://code.google.com/p/osm2garmin/issues/detail?id=119), [Issue 123](https://code.google.com/p/osm2garmin/issues/detail?id=123)
 
-## 1.1 (Build 250) - Stable release ##
+## 1.1 (Build 250) - Stable deprecated release ##
 New features:
 
   * Regions can be newly defined by bounding polygons in addition to rectangles. Polygon definition file `<region_name>.poly` in the working directory overrides region rectangular boundaries - [Issue 55](https://code.google.com/p/osm2garmin/issues/detail?id=55)
