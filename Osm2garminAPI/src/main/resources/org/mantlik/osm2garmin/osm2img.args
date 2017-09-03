@@ -11,4 +11,4 @@ add-pois-to-areas
 copyright-message: (C) OpenStreetMap Contributors http://www.openstreetmap.org/copyright
 
 # Uncomment the next line to generate all cycling options.
-#make-all-cycleways
+#make-opposite-cycleways

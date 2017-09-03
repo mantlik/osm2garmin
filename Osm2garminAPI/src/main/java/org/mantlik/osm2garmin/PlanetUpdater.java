@@ -34,7 +34,7 @@ import java.util.logging.Logger;
  */
 public class PlanetUpdater extends ThreadProcessor {
 
-    private static int MAX_REGIONS_PASS = 5;
+    private static int maxRegionsPass;
     private int pass = 0;
     File planetFile;
     File oldPlanetFile;
@@ -51,6 +51,7 @@ public class PlanetUpdater extends ThreadProcessor {
         super(parameters, false);
         planetFile = new File(parameters.getProperty("planet_file"));
         oldPlanetFile = new File(parameters.getProperty("old_planet_file"));
+        maxRegionsPass = Integer.parseInt(parameters.getProperty("max_regions_pass","3"));
         uflen = 0;
         this.regions = regions;
         start();
@@ -69,7 +70,8 @@ public class PlanetUpdater extends ThreadProcessor {
         } else if (getState() == ERROR) {
             return super.getStatus();
         }
-        int npasses = (regions.size() + MAX_REGIONS_PASS - 1) / MAX_REGIONS_PASS + 2;
+        int npasses = (regions.size() + maxRegionsPass - 1) / 
+                maxRegionsPass + 2;
         double pass_progress = 0;
         File uf = new File(Utilities.getUserdir(this) + "update.osc.gz");
         if (uf.exists()) {
@@ -156,9 +158,9 @@ public class PlanetUpdater extends ThreadProcessor {
                 pass++;
                 int nregions = 0;
                 if ((pass > 1) || (nchanges == 0)) {
-                    nregions = (regions.size() - currRegion) % MAX_REGIONS_PASS;
+                    nregions = (regions.size() - currRegion) % maxRegionsPass;
                     if (nregions == 0) {
-                        nregions = MAX_REGIONS_PASS;
+                        nregions = maxRegionsPass;
                     }
                 }
                 int procregions = nregions;

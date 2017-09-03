@@ -41,7 +41,6 @@ import org.openide.util.Exceptions;
  */
 public class OsmMaker extends ThreadProcessor {
 
-    private static final long MAPID = 70000001;
     /**
      *
      */
@@ -50,6 +49,7 @@ public class OsmMaker extends ThreadProcessor {
     private boolean isSplitting;
     private ClassLoader splitterLoader;
     private int max_areas = 200;
+    private long map_start_id = 70000001;
 
     /**
      *
@@ -61,6 +61,7 @@ public class OsmMaker extends ThreadProcessor {
         super(parameters, false);
         this.region = region;
         this.max_areas = max_areas;
+        this.map_start_id = map_start_id + (region.familyID - 5000) * 100000;
         start();
     }
 
@@ -86,10 +87,10 @@ public class OsmMaker extends ThreadProcessor {
                 Writer os = new FileWriter(polyfile);
                 os.write(region.name + "\n");
                 os.write("1" + "\n");
-                os.write(" " + region.lon1 + " " + region.lat1 + "\n"); 
-                os.write(" " + region.lon1 + " " + region.lat2 + "\n"); 
-                os.write(" " + region.lon2 + " " + region.lat2 + "\n"); 
-                os.write(" " + region.lon2 + " " + region.lat1 + "\n"); 
+                os.write(" " + region.lon1 + " " + region.lat1 + "\n");
+                os.write(" " + region.lon1 + " " + region.lat2 + "\n");
+                os.write(" " + region.lon2 + " " + region.lat2 + "\n");
+                os.write(" " + region.lon2 + " " + region.lat1 + "\n");
                 os.write(" " + region.lon1 + " " + region.lat1 + "\n");
                 os.write("END" + "\n");
                 os.write("END" + "\n");
@@ -113,14 +114,14 @@ public class OsmMaker extends ThreadProcessor {
             }
             args = new String[]{
                 "--output-dir=" + region.dir.getPath(), "--max-areas=" + max_areas,
-                keepComplete, "--mapid=" + MAPID, "--output=pbf",
+                keepComplete, "--mapid=" + map_start_id, "--output=pbf",
                 "--geonames-file=" + Utilities.getUserdir(this) + "cities15000.zip", "--status-freq=0",
                 "--polygon-file=" + polyfile,
                 "--max-threads=1", "--max-nodes=1200000", region.dir.getPath() + "/" + region.name + ".osm.pbf"
             };
         } else {
             args = new String[]{
-                "--output-dir=" + region.dir.getPath(), "--max-areas=" + max_areas, "--mapid=" + MAPID,
+                "--output-dir=" + region.dir.getPath(), "--max-areas=" + max_areas, "--mapid=" + map_start_id,
                 "--geonames-file=" + Utilities.getUserdir(this) + "cities15000.zip", "--status-freq=0",
                 keepComplete, "--split-file=" + splitFile, "--output=pbf",
                 "--max-threads=1", region.dir.getPath() + "/" + region.name + ".osm.pbf"
@@ -165,7 +166,7 @@ public class OsmMaker extends ThreadProcessor {
         }
 
         // Create list of splitted files
-        long maxid = MAPID;
+        long maxid = map_start_id;
         while (new File(region.dir.getPath() + "/" + maxid + ".osm.pbf").exists()) {
             maxid++;
         }
@@ -184,10 +185,11 @@ public class OsmMaker extends ThreadProcessor {
             Utilities.getInstance().runExternal("uk.me.parabola.mkgmap.main.Main", "main", "mkgmap", args, this);
         } catch (Exception ex) {
             Logger.getLogger(OsmMaker.class.getName()).log(Level.SEVERE, null, ex);
+            Utilities.getInstance().endExclusive("uk.me.parabola.mkgmap.main.Main");
         }
 
-        for (long id = MAPID; id <= maxid; id++) {
-            setProgress((float) (75.0 + 20.0 * (id - MAPID) / (maxid - MAPID)));
+        for (long id = map_start_id; id <= maxid; id++) {
+            setProgress((float) (75.0 + 20.0 * (id - map_start_id) / (maxid - map_start_id)));
             setStatus(region.name + " checking converted files (" + id + ".img) - " + getProgress() + " %");
             File imgFile = new File(region.dir.getPath() + "/" + id + ".img");
             if ((!imgFile.exists()) || imgFile.length() < 10) {
@@ -205,6 +207,12 @@ public class OsmMaker extends ThreadProcessor {
                             args, this);
                 } catch (Exception ex) {
                     Logger.getLogger(OsmMaker.class.getName()).log(Level.SEVERE, null, ex);
+                    setState(ERROR);
+                    setStatus(ex.getMessage());
+                    synchronized (this) {
+                        notify();
+                    }
+                    return;
                 }
 
                 if (imgFile.exists()) {
@@ -227,6 +235,12 @@ public class OsmMaker extends ThreadProcessor {
                     Utilities.getInstance().runExternal("uk.me.parabola.mkgmap.main.Main", "main", "mkgmap", args, this);
                 } catch (Exception ex) {
                     Logger.getLogger(OsmMaker.class.getName()).log(Level.SEVERE, null, ex);
+                    setState(ERROR);
+                    setStatus(ex.getMessage());
+                    synchronized (this) {
+                        notify();
+                    }
+                    return;
                 }
 
             }
@@ -247,7 +261,7 @@ public class OsmMaker extends ThreadProcessor {
                 continue;
             }
             long id = Long.parseLong(name.replace(".img", ""));
-            if (id >= MAPID) {
+            if (id >= map_start_id) {
                 osmMaps.add(region.dir.getPath() + "/" + name);
             } else {
                 contourMaps.add(region.dir.getPath() + "/" + name);
@@ -257,18 +271,27 @@ public class OsmMaker extends ThreadProcessor {
         // create gmapsupp.img
         setStatus(region.name + " adding " + contourMaps.size() + " contour maps and "
                 + osmMaps.size() + " OSM maps to gmapsupp.img.");
-        ArrayList<String> aa = new ArrayList<String>();
+        ArrayList<String> aa = new ArrayList<>();
         aa.add("--gmapsupp");
         aa.add("--output-dir=" + region.dir.getPath());
         boolean withIndexes = false;
         if (Runtime.getRuntime().maxMemory() > 1800000000l) {
             aa.add("--index");
             aa.add("--location-autofill=nearest");
+            aa.add("--add-pois-to-areas");
+            if (new File("bounds").exists()) {
+                aa.add("--bounds=bounds");
+            } else {
+                if (new File("bounds.zip").exists()) {
+                    aa.add("--bounds=bounds.zip");
+                }
+            }
             withIndexes = true;
         }
         aa.add("--family-id=" + region.familyID);
         aa.add("--family-name=" + region.name);
         aa.add("--series-name=" + region.name);
+        aa.add("--area-name=" + region.name);
         aa.add("-c");
         aa.add(gmapsuppArgsFileName);
         aa.addAll(osmMaps);
@@ -310,7 +333,7 @@ public class OsmMaker extends ThreadProcessor {
         region.makeInstallers(withIndexes);
 
         // delete splitted pbf maps
-        for (long id = MAPID; id <= maxid; id++) {
+        for (long id = map_start_id; id <= maxid; id++) {
             File osmFile = new File(region.dir.getPath() + "/" + id + ".osm.pbf");
             if (!osmFile.delete()) {
                 try {

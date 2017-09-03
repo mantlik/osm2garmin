@@ -2,8 +2,8 @@
 <project>
     <target name="update_manifest">
         <property name="manifest.file" value="${basedir}/target/classes/META-INF/MANIFEST.MF"/>
-        <condition property="build.no" value="${buildNumber}"  else="0">
-            <isset property="buildNumber" />
+        <condition property="build.no" value="${buildNumber.mod}"  else="0">
+            <isset property="buildNumber.mod" />
         </condition>
         <loadresource property="version.no">
             <string value="${project.version}" />

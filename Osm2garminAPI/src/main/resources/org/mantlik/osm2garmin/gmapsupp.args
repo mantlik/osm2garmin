@@ -8,6 +8,7 @@
 #             -c gmapsupp.args <OSM files list> -c gmapsupp_contours.args <contours files list>
 # Systems with more than 1.8G memory:
 # java -jar mkgmap.jar [--gmapsupp | --tdbfile --nsis ] --index --location-autofill=nearest \
+#             --add-pois-to-areas --route --bounds=bounds.zip
 #             --output-dir=<output-dir> --family-name=<region> --series-name=<region> \
 #             -c gmapsupp.args <OSM files list> -c gmapsupp_contours.args <contours files list>
 

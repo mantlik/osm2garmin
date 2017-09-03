@@ -51,7 +51,7 @@ final class RegionsPanel extends javax.swing.JPanel implements ListSelectionList
         regionsTable.setDefaultRenderer(Float.class, new PolygonRenderer());
         moveDownRegionButton.setEnabled(false);
         moveUpRegionButton.setEnabled(false);
-        displayRegionButton.setEnabled(false);
+        displayRegionButton.setEnabled(true);
     }
 
     /**
@@ -229,30 +229,58 @@ final class RegionsPanel extends javax.swing.JPanel implements ListSelectionList
 
     private void displayRegionButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_displayRegionButtonActionPerformed
         DefaultTableModel model = (DefaultTableModel) regionsTable.getModel();
-        if ((selectedRow < 0) || (selectedRow >= regionsTable.getRowCount())) {
-            return;
-        }
-        boolean enabled = (Boolean) model.getValueAt(selectedRow, 0);
-        String name = (String) model.getValueAt(selectedRow, 1);
-        float lat1 = (Float) model.getValueAt(selectedRow, 2);
-        float lon1 = (Float) model.getValueAt(selectedRow, 3);
-        float lat2 = (Float) model.getValueAt(selectedRow, 4);
-        float lon2 = (Float) model.getValueAt(selectedRow, 5);
-        float left = Math.max(lon1 - 5, -180);
-        float right = Math.min(lon2 + 5, 180);
-        float bottom = Math.max(lat1 - 5, -65);
-        float top = Math.min(lat2 + 5, 85);
-        String addr = "http://dev.openstreetmap.org/~pafciu17/?module=map&bbox="
-                + left + "," + top + "," + right + "," + bottom
-                + "&height=600&width=800&filledPolygons=" + lon1 + "," + lat1 + "," + lon2 + ","
-                + lat1 + "," + lon2 + "," + lat2 + "," + lon1 + "," + lat2 + "," + "color:0:255:255,transparency:100";
         String rname = NbPreferences.forModule(Osm2garmin.class).get("userdir",
-                System.getProperty("netbeans.user") + "/") + name.trim() + ".html";
+                System.getProperty("netbeans.user") + "/") + "regions.html";
         File r = new File(rname);
         try {
             PrintStream printer = new PrintStream(r);
-            printer.println("<html><head><title>" + name + "</title></head><body>");
-            printer.println("<img src=\"" + addr + "\" />");
+            printer.println("<html><head>");
+            printer.println("<title>Regions Interactive Map</title>");
+            printer.println("<meta charset=\"utf-8\" />\n"
+                    + "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
+                    + "    <link rel=\"stylesheet\" href=\"https://unpkg.com/leaflet@1.1.0/dist/leaflet.css\" integrity=\"sha512-wcw6ts8Anuw10Mzh9Ytw4pylW8+NAD4ch3lqm9lzAsTxg0GFeJgoAtxuCLREZSC5lUXdVyo/7yfsqFjQ4S+aKw==\" crossorigin=\"\"/>\n"
+                    + "    <script src=\"https://unpkg.com/leaflet@1.1.0/dist/leaflet.js\" integrity=\"sha512-mNqn2Wg7tSToJhvHcqfzLMU6J4mkOImSPTxVZAdo+lcPlk+GhZmYgACEe0x35K7YzW1zJ7XyJV/TT1MrdXvMcA==\" crossorigin=\"\"></script>");
+            printer.println("</head><body>");
+            printer.println("<center>\n"
+                    + "<div id=\"title\"><h3>Regions Interactive Map</h3></div>\n"
+                    + "<div id=\"mapid\" style=\"width: 800px; height: 600px;\"></div>\n"
+                    + "<script>\n"
+                    + "\n"
+                    + "        // set up the map\n"
+                    + "	mymap = new L.Map('mapid').setView([0,0],1);\n"
+                    + "\n"
+                    + "	// create the tile layer with correct attribution\n"
+                    + "	var osmUrl='http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';\n"
+                    + "	var osmAttrib='Map data © <a href=\"http://openstreetmap.org\">OpenStreetMap</a> contributors';\n"
+                    + "	var osm = new L.TileLayer(osmUrl, {minZoom: 1, maxZoom: 18, attribution: osmAttrib});		\n"
+                    + "        mymap.addLayer(osm);\n");
+            for (int i = 0; i < regionsTable.getRowCount(); i++) {
+                boolean enabled = (Boolean) model.getValueAt(i, 0);
+                String name = (String) model.getValueAt(i, 1);
+                float lat1 = (Float) model.getValueAt(i, 2);
+                float lon1 = (Float) model.getValueAt(i, 3);
+                float lat2 = (Float) model.getValueAt(i, 4);
+                float lon2 = (Float) model.getValueAt(i, 5);
+                int weight = i==selectedRow ? 2 : 1;
+                String color = enabled ? "blue" : "gray";
+                printer.println("L.rectangle([["
+                        + lat1 + "," + lon1 + "],[" + lat2 + "," + lon2 
+                        + "]],{color:\"" + color + "\", weight:" + weight 
+                        + "}).bindTooltip(\"" + name + "\").addTo(mymap);");
+            }
+            printer.println("	var popup = L.popup();\n"
+                    + "\n"
+                    + "	function onMapClick(e) {\n"
+                    + "		popup\n"
+                    + "			.setLatLng(e.latlng)\n"
+                    + "			.setContent(e.latlng.toString())\n"
+                    + "			.openOn(mymap);\n"
+                    + "	}\n"
+                    + "\n"
+                    + "	mymap.on('click', onMapClick);\n"
+                    + "\n"
+                    + "</script>\n"
+                    + "</center>");
             printer.println("</body></html>");
             printer.close();
         } catch (IOException ex) {
@@ -389,7 +417,7 @@ final class RegionsPanel extends javax.swing.JPanel implements ListSelectionList
             if (selectedRow == -1) {
                 moveDownRegionButton.setEnabled(false);
                 moveUpRegionButton.setEnabled(false);
-                displayRegionButton.setEnabled(false);
+                displayRegionButton.setEnabled(true);
                 deleteRegionButton.setEnabled(false);
             } else {
                 if (selectedRow < regionsTable.getRowCount() - 1) {
