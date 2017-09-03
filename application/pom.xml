@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.mantlik</groupId>
         <artifactId>Osm2garminGUI</artifactId>
-        <version>1.3</version>
+        <version>1.4-SNAPSHOT</version>
     </parent>
 
     <artifactId>Osm2garminGUI-app</artifactId>

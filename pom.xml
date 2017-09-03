@@ -4,7 +4,7 @@
 
     <groupId>org.mantlik</groupId>
     <artifactId>Osm2garminGUI</artifactId>
-    <version>1.3</version>
+    <version>1.4-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Osm2garminGUI</name>
@@ -41,7 +41,7 @@
     <scm>
         <connection>scm:git:git@github.com:mantlik/osm2garmin</connection>
         <developerConnection>scm:git:git@github.com:mantlik/osm2garmin</developerConnection>
-      <tag>RELEASE_1.3</tag>
+      <tag>HEAD</tag>
   </scm>
 
     <build>
