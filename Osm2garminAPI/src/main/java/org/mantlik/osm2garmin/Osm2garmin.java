@@ -30,6 +30,7 @@ import java.util.Properties;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -337,6 +338,23 @@ public class Osm2garmin implements PropertyChangeListener {
                 }
             }
             Utilities.getInstance().removeMonitoredProcess(region.processor);
+            
+            // Copy gmapsupp.img to the images diretory
+            File gmapsupp = new File(region.dir,"gmapsupp.img");
+            if (gmapsupp.exists()) {
+                File imgdir = new File(userdir,"images");
+                imgdir.mkdirs();
+                File img = new File(imgdir,region.name+".img");
+                if (img.exists()) {
+                    Utilities.deleteFile(img);
+                }
+                try {
+                    Utilities.copyFile(gmapsupp, img);
+                } catch (IOException ex) {
+                    System.out.println("Cannot copy file "+gmapsupp.getPath()+" to "+img.getPath());
+                    System.out.println(ex.getLocalizedMessage());
+                }
+            }
             region.setState(Region.READY);
         }
 

@@ -676,4 +676,15 @@ public class Utilities {
             }
         }
     }
+
+    public static long coordToMap(double coord) {
+        long factor = 46603;
+        long base = 2048;
+        long raw = (long) coord * factor;
+        long remainder = raw % base;
+        if (remainder <= base / 2) {
+            return raw - remainder;
+        }
+        return raw + base - remainder;
+    }
 }

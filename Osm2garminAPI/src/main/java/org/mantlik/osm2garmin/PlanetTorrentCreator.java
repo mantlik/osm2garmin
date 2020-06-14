@@ -62,9 +62,8 @@ public class PlanetTorrentCreator {
 
     private static final SimpleDateFormat DF = new SimpleDateFormat("yyMMdd");
     private static final String[] MIRRORS = {
-        "http://ftp.heanet.ie/mirrors/openstreetmap.org/pbf",
-        "http://ftp5.gwdg.de/pub/misc/openstreetmap/planet.openstreetmap.org//pbf",
-        "http://planet.openstreetmap.org/pbf"
+        "https://ftp5.gwdg.de/pub/misc/openstreetmap/planet.openstreetmap.org//pbf",
+        "https://planet.openstreetmap.org/pbf"
     };
     private static final String[][] ANNOUNCE = {
         {"http://www.mantlik.cz:80/tracker/announce.php"},
@@ -120,7 +119,7 @@ public class PlanetTorrentCreator {
     private void createTorrent() {
         TorrentFile torrent = new TorrentFile();
         torrent.announceURL = ANNOUNCE[0][0];
-        torrent.comment = "Original data from http://planet.openstreetmap.org/ "
+        torrent.comment = "Original data from https://planet.openstreetmap.org/ "
                 + "(C) OpenStreetMap contributors";
         torrent.createdBy = "Osm2garmin 1.2";
         torrent.creationDate = System.currentTimeMillis() / 1000;

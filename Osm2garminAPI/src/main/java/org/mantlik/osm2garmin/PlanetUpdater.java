@@ -22,11 +22,16 @@
 package org.mantlik.osm2garmin;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static org.mantlik.osm2garmin.ThreadProcessor.ERROR;
 
 /**
  *
@@ -51,7 +56,7 @@ public class PlanetUpdater extends ThreadProcessor {
         super(parameters, false);
         planetFile = new File(parameters.getProperty("planet_file"));
         oldPlanetFile = new File(parameters.getProperty("old_planet_file"));
-        maxRegionsPass = Integer.parseInt(parameters.getProperty("max_regions_pass","3"));
+        maxRegionsPass = Integer.parseInt(parameters.getProperty("max_regions_pass", "3"));
         uflen = 0;
         this.regions = regions;
         start();
@@ -70,8 +75,7 @@ public class PlanetUpdater extends ThreadProcessor {
         } else if (getState() == ERROR) {
             return super.getStatus();
         }
-        int npasses = (regions.size() + maxRegionsPass - 1) / 
-                maxRegionsPass + 2;
+        int npasses = 4;
         double pass_progress = 0;
         File uf = new File(Utilities.getUserdir(this) + "update.osc.gz");
         if (uf.exists()) {
@@ -101,7 +105,7 @@ public class PlanetUpdater extends ThreadProcessor {
     public void run() {
         boolean skipPlanetUpdate = parameters.getProperty("skip_planet_update", "false").equals("true");
         boolean updateRegions = parameters.getProperty("update_regions", "false").equals("true");
-        if (skipPlanetUpdate && (! updateRegions)) {
+        if (skipPlanetUpdate && (!updateRegions)) {
             setProgress(100);
             setStatus("Skipped.");
             setState(COMPLETED);
@@ -119,7 +123,7 @@ public class PlanetUpdater extends ThreadProcessor {
             int i = 0;
             File upd = new File(Utilities.getUserdir(this) + "update" + i + ".osc.gz");
             int nchanges = 0;
-            while (upd.exists() && (! skipPlanetUpdate)) {
+            while (upd.exists() && (!skipPlanetUpdate)) {
                 l.add("--rxc");
                 l.add("file=" + upd.getPath());
                 l.add("--buffer-change");
@@ -151,83 +155,108 @@ public class PlanetUpdater extends ThreadProcessor {
                 inputFile = torrentFile.getPath();
             }
 
-            // merge changefile to planet and create regions files
-            int currRegion = 0;
-
-            while (currRegion < regions.size()) {
-                pass++;
-                int nregions = 0;
-                if ((pass > 1) || (nchanges == 0)) {
-                    nregions = (regions.size() - currRegion) % maxRegionsPass;
-                    if (nregions == 0) {
-                        nregions = maxRegionsPass;
-                    }
-                }
-                int procregions = nregions;
-                if (pass == 1 && (! skipPlanetUpdate)) {
-                    procregions++;
-                    ArrayList<String> largs = new ArrayList<String>();
-                    largs.add(readSource);
-                    largs.add("file=" + inputFile);
-                    largs.add("outPipe.0=ac0");
-                    String[] args1;
-                    if (nchanges > 0) {
-                        args1 = new String[]{
-                            "--rxc", "file=" + Utilities.getUserdir(this) + "update.osc.gz", //"--buffer-change", "bufferCapacity=10000",
-                            //"--buffer", "bufferCapacity=10000",
-                            "outPipe.0=ac1",
-                            "--ac", //"--buffer", "bufferCapacity=10000",
-                            "inPipe.0=ac0", "inPipe.1=ac1",
-                            "--log-progress", "interval=120",
-                            "--t", "outputCount=" + procregions,
-                            "--wb", "file=" + parameters.getProperty("planet_file")
-                        };
-                    } else {
-                        args1 = new String[]{
-                            "--log-progress", "interval=120", "inPipe.0=ac0",
-                            "--t", "outputCount=" + procregions,
-                            "--wb", "file=" + parameters.getProperty("planet_file")
-                        };
-                    }
-                    largs.addAll(Arrays.asList(args1));
-                    args = largs.toArray(new String[0]);
-                } else {
-                    args = new String[]{
-                        "--rb", "file=" + parameters.getProperty("planet_file"),
-                        //"--buffer", "bufferCapacity=10000",
-                        "--log-progress", "interval=120",
-                        "--t", "outputCount=" + procregions};
-                }
+            pass++;
+            if (!skipPlanetUpdate) {
                 ArrayList<String> largs = new ArrayList<String>();
-                largs.addAll(Arrays.asList(args));
-                if (nregions > 0) {
-                    regions_in_progress = " processing " + nregions + " regions ("
-                            + (currRegion + 1) + "-" + (currRegion + nregions) + "/"
-                            + regions.size() + ")";
+                largs.add(readSource);
+                largs.add("file=" + inputFile);
+                largs.add("outPipe.0=ac0");
+                String[] args1;
+                if (nchanges > 0) {
+                    args1 = new String[]{
+                        "--rxc", "file=" + Utilities.getUserdir(this) + "update.osc.gz", //"--buffer-change", "bufferCapacity=10000",
+                        //"--buffer", "bufferCapacity=10000",
+                        "outPipe.0=ac1",
+                        "--ac", //"--buffer", "bufferCapacity=10000",
+                        "inPipe.0=ac0", "inPipe.1=ac1",
+                        "--log-progress", "interval=120",
+                        "--t", "outputCount=1",
+                        "--wb", "file=" + parameters.getProperty("planet_file")
+                    };
                 } else {
-                    regions_in_progress = "";
+                    args1 = new String[]{
+                        "--log-progress", "interval=120", "inPipe.0=ac0",
+                        "--t", "outputCount=1",
+                        "--wb", "file=" + parameters.getProperty("planet_file")
+                    };
                 }
-                for (int j = 0; j < nregions; j++) {
-                    Region region = regions.get(currRegion);
-                    currRegion++;
-                    if (region.polygonFile == null) {
-                        largs.add("--bb");
-                        largs.add("left=" + region.lon1);
-                        largs.add("right=" + region.lon2);
-                        largs.add("bottom=" + region.lat1);
-                        largs.add("top=" + region.lat2);
-                    } else {
-                        largs.add("--bp");
-                        largs.add("file="+ region.polygonFile.getPath());
-                    }
-                    largs.add("--wb");
-                    largs.add("omitmetadata=true");
-                    largs.add("file=" + region.dir.getPath() + "/" + region.name + ".osm.pbf");
-                }
+                largs.addAll(Arrays.asList(args1));
                 args = largs.toArray(new String[0]);
+                regions_in_progress = "";
 
                 Utilities.getInstance().runExternal("org.openstreetmap.osmosis.core.Osmosis", "run", "osmosis",
                         args, this);
+            }
+
+            pass++;
+            // Split planet to regions
+            regions_in_progress = "Splitting planet file to "+ regions.size() +" regions.";
+            String regfile = Utilities.getUserdir(this) + "/" + "planet.list";
+            try {
+                Writer os = new FileWriter(regfile);
+                long id = 80000000;
+                for (Region region : regions) {
+                    id++;
+                    os.write("#" + id + ": " + " " + region.lat1 + "," + region.lon1
+                            + " to " + region.lat2 + "," + region.lon2 + " " + region.name + "\n");
+                    os.write(id + ": " + " " + Utilities.coordToMap(region.lat1) + ","
+                            + Utilities.coordToMap(region.lon1)
+                            + " to " + Utilities.coordToMap(region.lat2) + ","
+                            + Utilities.coordToMap(region.lon2) + "\n");
+                }
+                os.close();
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(PlanetUpdater.class.getName()).log(Level.SEVERE, null, ex);
+                setState(ERROR);
+                setStatus(ex.getMessage());
+                synchronized (this) {
+                    notify();
+                }
+                return;
+            } catch (IOException ex) {
+                Logger.getLogger(PlanetUpdater.class.getName()).log(Level.SEVERE, null, ex);
+                setState(ERROR);
+                setStatus(ex.getMessage());
+                synchronized (this) {
+                    notify();
+                }
+                return;
+            }
+            args = new String[]{
+                "--output-dir=" + Utilities.getUserdir(this), "--max-areas=" + maxRegionsPass,
+                "--output=pbf",
+                "--split-file=" + Utilities.getUserdir(this) + "/" + "planet.list",
+                parameters.getProperty("planet_file")
+            };
+            try {
+
+                Utilities.getInstance().runExternal("uk.me.parabola.splitter.Main", "main", "splitter",
+                        args, this);
+            } catch (Exception ex) {
+                Logger.getLogger(PlanetUpdater.class.getName()).log(Level.SEVERE, null, ex);
+                setState(ERROR);
+                setStatus(ex.getMessage());
+                synchronized (this) {
+                    notify();
+                }
+                return;
+            }
+            pass++;
+            // Move regions to maps
+            regions_in_progress = "Moving region files.";
+            long id = 80000000;
+            for (Region region : regions) {
+                id++;
+                File oldFile = new File(Utilities.getUserdir(this), id + ".osm.pbf");
+                File newFile = new File(region.dir, region.name + ".osm.pbf");
+                if (!oldFile.exists()) {
+                    continue;
+                }
+                if (newFile.exists()) {
+                    Utilities.deleteFile(newFile);
+                }
+                Utilities.copyFile(oldFile, newFile);
+                Utilities.deleteFile(oldFile);
             }
 
             if ((!planetFile.exists()) || (planetFile.length() < oldPlanetFile.length())) {
@@ -259,7 +288,8 @@ public class PlanetUpdater extends ThreadProcessor {
                 i++;
                 upd = new File(Utilities.getUserdir(this) + "update" + i + ".osc.gz");
             }
-
+            
+            pass++;
             setStatus("Completed.");
             setProgress(100);
             setState(COMPLETED);

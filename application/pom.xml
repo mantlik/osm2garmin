@@ -80,6 +80,7 @@
                     <installerOsWindows>true</installerOsWindows>
                     <installerOsLinux>true</installerOsLinux>
                     <installerOsMacosx>true</installerOsMacosx>
+                    <installerPack200Enable>false</installerPack200Enable>
                     <installerLicenseFile>../LICENSE.txt</installerLicenseFile>
                     <installersFilePrefix>${project.name}-${project.version}-build-${buildNumber.mod}</installersFilePrefix>
                     <installDirName>${brandingToken}_${project.version.short}</installDirName>
