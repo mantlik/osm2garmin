@@ -26,14 +26,12 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static org.mantlik.osm2garmin.ThreadProcessor.ERROR;
-import org.openide.util.Exceptions;
 
 /**
  *

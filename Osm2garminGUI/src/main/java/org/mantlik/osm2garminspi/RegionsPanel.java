@@ -32,6 +32,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellEditor;
 import org.mantlik.osm2garmin.Osm2garmin;
 import org.mantlik.osm2garmin.Region;
 import org.mantlik.osm2garmin.Utilities;
@@ -43,12 +44,14 @@ final class RegionsPanel extends javax.swing.JPanel implements ListSelectionList
 
     private final RegionsOptionsPanelController controller;
     private int selectedRow = -1;
+    private TableCellEditor editor;
 
     RegionsPanel(RegionsOptionsPanelController controller) {
         this.controller = controller;
         initComponents();
         regionsTable.getSelectionModel().addListSelectionListener(this);
         regionsTable.setDefaultRenderer(Float.class, new PolygonRenderer());
+        editor = regionsTable.getCellEditor();
         moveDownRegionButton.setEnabled(false);
         moveUpRegionButton.setEnabled(false);
         displayRegionButton.setEnabled(true);
@@ -77,8 +80,12 @@ final class RegionsPanel extends javax.swing.JPanel implements ListSelectionList
         moveDownRegionButton = new javax.swing.JButton();
         deleteRegionButton = new javax.swing.JButton();
         displayRegionButton = new javax.swing.JButton();
+        autoSplitPlanetItem = new javax.swing.JCheckBox();
+        jLabel1 = new javax.swing.JLabel();
+        nodesPerRegionItem = new javax.swing.JTextField();
+        jLabel2 = new javax.swing.JLabel();
 
-        jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(null, org.openide.util.NbBundle.getMessage(RegionsPanel.class, "RegionsPanel.jPanel3.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, null, new java.awt.Color(51, 153, 255))); // NOI18N
+        jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(null, org.openide.util.NbBundle.getMessage(RegionsPanel.class, "RegionsPanel.jPanel3.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("DejaVu Sans", 1, 12), new java.awt.Color(51, 153, 255))); // NOI18N
 
         regionsTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -105,12 +112,14 @@ final class RegionsPanel extends javax.swing.JPanel implements ListSelectionList
             }
         });
         jScrollPane3.setViewportView(regionsTable);
-        regionsTable.getColumnModel().getColumn(0).setHeaderValue(org.openide.util.NbBundle.getMessage(RegionsPanel.class, "RegionsPanel.regionsTable.columnModel.title5")); // NOI18N
-        regionsTable.getColumnModel().getColumn(1).setHeaderValue(org.openide.util.NbBundle.getMessage(RegionsPanel.class, "RegionsPanel.regionsTable.columnModel.title0_1")); // NOI18N
-        regionsTable.getColumnModel().getColumn(2).setHeaderValue(org.openide.util.NbBundle.getMessage(RegionsPanel.class, "RegionsPanel.regionsTable.columnModel.title1_1")); // NOI18N
-        regionsTable.getColumnModel().getColumn(3).setHeaderValue(org.openide.util.NbBundle.getMessage(RegionsPanel.class, "RegionsPanel.regionsTable.columnModel.title2_1")); // NOI18N
-        regionsTable.getColumnModel().getColumn(4).setHeaderValue(org.openide.util.NbBundle.getMessage(RegionsPanel.class, "RegionsPanel.regionsTable.columnModel.title3_1")); // NOI18N
-        regionsTable.getColumnModel().getColumn(5).setHeaderValue(org.openide.util.NbBundle.getMessage(RegionsPanel.class, "RegionsPanel.regionsTable.columnModel.title4_1")); // NOI18N
+        if (regionsTable.getColumnModel().getColumnCount() > 0) {
+            regionsTable.getColumnModel().getColumn(0).setHeaderValue(org.openide.util.NbBundle.getMessage(RegionsPanel.class, "RegionsPanel.regionsTable.columnModel.title5")); // NOI18N
+            regionsTable.getColumnModel().getColumn(1).setHeaderValue(org.openide.util.NbBundle.getMessage(RegionsPanel.class, "RegionsPanel.regionsTable.columnModel.title0_1")); // NOI18N
+            regionsTable.getColumnModel().getColumn(2).setHeaderValue(org.openide.util.NbBundle.getMessage(RegionsPanel.class, "RegionsPanel.regionsTable.columnModel.title1_1")); // NOI18N
+            regionsTable.getColumnModel().getColumn(3).setHeaderValue(org.openide.util.NbBundle.getMessage(RegionsPanel.class, "RegionsPanel.regionsTable.columnModel.title2_1")); // NOI18N
+            regionsTable.getColumnModel().getColumn(4).setHeaderValue(org.openide.util.NbBundle.getMessage(RegionsPanel.class, "RegionsPanel.regionsTable.columnModel.title3_1")); // NOI18N
+            regionsTable.getColumnModel().getColumn(5).setHeaderValue(org.openide.util.NbBundle.getMessage(RegionsPanel.class, "RegionsPanel.regionsTable.columnModel.title4_1")); // NOI18N
+        }
 
         org.openide.awt.Mnemonics.setLocalizedText(addRegionButton, org.openide.util.NbBundle.getMessage(RegionsPanel.class, "RegionsPanel.addRegionButton.text")); // NOI18N
         addRegionButton.addActionListener(new java.awt.event.ActionListener() {
@@ -148,20 +157,52 @@ final class RegionsPanel extends javax.swing.JPanel implements ListSelectionList
             }
         });
 
+        org.openide.awt.Mnemonics.setLocalizedText(autoSplitPlanetItem, org.openide.util.NbBundle.getMessage(RegionsPanel.class, "RegionsPanel.autoSplitPlanetItem.text")); // NOI18N
+        autoSplitPlanetItem.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                autoSplitPlanetItemStateChanged(evt);
+            }
+        });
+
+        org.openide.awt.Mnemonics.setLocalizedText(jLabel1, org.openide.util.NbBundle.getMessage(RegionsPanel.class, "RegionsPanel.jLabel1.text")); // NOI18N
+
+        nodesPerRegionItem.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        nodesPerRegionItem.setText(org.openide.util.NbBundle.getMessage(RegionsPanel.class, "RegionsPanel.nodesPerRegionItem.text")); // NOI18N
+        nodesPerRegionItem.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                nodesPerRegionItemPropertyChange(evt);
+            }
+        });
+
+        org.openide.awt.Mnemonics.setLocalizedText(jLabel2, org.openide.util.NbBundle.getMessage(RegionsPanel.class, "RegionsPanel.jLabel2.text")); // NOI18N
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 375, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addGap(6, 6, 6)
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(autoSplitPlanetItem)
+                            .addGroup(jPanel3Layout.createSequentialGroup()
+                                .addComponent(jLabel1)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(nodesPerRegionItem, javax.swing.GroupLayout.PREFERRED_SIZE, 67, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jLabel2)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 44, Short.MAX_VALUE))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)))
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(addRegionButton, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(moveUpRegionButton, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(moveDownRegionButton, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(deleteRegionButton, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(displayRegionButton, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(displayRegionButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
@@ -177,10 +218,20 @@ final class RegionsPanel extends javax.swing.JPanel implements ListSelectionList
                         .addComponent(moveDownRegionButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(deleteRegionButton)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 45, Short.MAX_VALUE)
-                        .addComponent(displayRegionButton))
+                        .addGap(0, 49, Short.MAX_VALUE))
                     .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
-                .addContainerGap())
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addComponent(autoSplitPlanetItem)
+                        .addGap(6, 6, 6)
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel1)
+                            .addComponent(nodesPerRegionItem, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel2)))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                        .addComponent(displayRegionButton)
+                        .addContainerGap())))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -254,19 +305,42 @@ final class RegionsPanel extends javax.swing.JPanel implements ListSelectionList
                     + "	var osmAttrib='Map data © <a href=\"http://openstreetmap.org\">OpenStreetMap</a> contributors';\n"
                     + "	var osm = new L.TileLayer(osmUrl, {minZoom: 1, maxZoom: 18, attribution: osmAttrib});		\n"
                     + "        mymap.addLayer(osm);\n");
-            for (int i = 0; i < regionsTable.getRowCount(); i++) {
-                boolean enabled = (Boolean) model.getValueAt(i, 0);
-                String name = (String) model.getValueAt(i, 1);
-                float lat1 = (Float) model.getValueAt(i, 2);
-                float lon1 = (Float) model.getValueAt(i, 3);
-                float lat2 = (Float) model.getValueAt(i, 4);
-                float lon2 = (Float) model.getValueAt(i, 5);
-                int weight = i==selectedRow ? 2 : 1;
-                String color = enabled ? "blue" : "gray";
-                printer.println("L.rectangle([["
-                        + lat1 + "," + lon1 + "],[" + lat2 + "," + lon2 
-                        + "]],{color:\"" + color + "\", weight:" + weight 
-                        + "}).bindTooltip(\"" + name + "\").addTo(mymap);");
+            if (autoSplitPlanetItem.isSelected()) {
+                File autoregfile = new File(new File(NbPreferences.forModule(Osm2garmin.class).get("regions",
+                        System.getProperty("netbeans.user") + "/" + "regions.txt")).getParentFile(), "autoregions.txt");
+                if (autoregfile.exists()) {
+                    Scanner sc = new Scanner(new BufferedReader(new FileReader(autoregfile)));
+                    while (sc.hasNextLine()) {
+                        boolean enabled = true;
+                        String[] reg = sc.nextLine().split(" +");
+                        String name = reg[4];
+                        float lon1 = Float.parseFloat(reg[0]);
+                        float lat1 = Float.parseFloat(reg[1]);
+                        float lon2 = Float.parseFloat(reg[2]);
+                        float lat2 = Float.parseFloat(reg[3]);
+                        int weight = 1;
+                        String color = enabled ? "blue" : "gray";
+                        printer.println("L.rectangle([["
+                                + lat1 + "," + lon1 + "],[" + lat2 + "," + lon2
+                                + "]],{color:\"" + color + "\", weight:" + weight
+                                + "}).bindTooltip(\"" + name + "\").addTo(mymap);");
+                    }
+                }
+            } else {
+                for (int i = 0; i < regionsTable.getRowCount(); i++) {
+                    boolean enabled = (Boolean) model.getValueAt(i, 0);
+                    String name = (String) model.getValueAt(i, 1);
+                    float lat1 = (Float) model.getValueAt(i, 2);
+                    float lon1 = (Float) model.getValueAt(i, 3);
+                    float lat2 = (Float) model.getValueAt(i, 4);
+                    float lon2 = (Float) model.getValueAt(i, 5);
+                    int weight = i == selectedRow ? 2 : 1;
+                    String color = enabled ? "blue" : "gray";
+                    printer.println("L.rectangle([["
+                            + lat1 + "," + lon1 + "],[" + lat2 + "," + lon2
+                            + "]],{color:\"" + color + "\", weight:" + weight
+                            + "}).bindTooltip(\"" + name + "\").addTo(mymap);");
+                }
             }
             printer.println("	var popup = L.popup();\n"
                     + "\n"
@@ -298,6 +372,30 @@ final class RegionsPanel extends javax.swing.JPanel implements ListSelectionList
     private void regionsTablePropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_regionsTablePropertyChange
         controller.changed();
     }//GEN-LAST:event_regionsTablePropertyChange
+
+    private void nodesPerRegionItemPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_nodesPerRegionItemPropertyChange
+        String nodesPerRegion = "" + (Integer.parseInt(nodesPerRegionItem.getText()) * 1000000);
+        if (!nodesPerRegion.equals(NbPreferences.forModule(Osm2garmin.class).get("nodes_per_region", "400000000"))) {
+            controller.changed();
+        }
+    }//GEN-LAST:event_nodesPerRegionItemPropertyChange
+
+    private void autoSplitPlanetItemStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_autoSplitPlanetItemStateChanged
+        regionsTable.setEnabled(!autoSplitPlanetItem.isSelected());
+        nodesPerRegionItem.setEnabled(autoSplitPlanetItem.isSelected());
+        if (autoSplitPlanetItem.isSelected()) {
+            moveDownRegionButton.setEnabled(false);
+            moveUpRegionButton.setEnabled(false);
+            displayRegionButton.setEnabled(true);
+            deleteRegionButton.setEnabled(false);
+            addRegionButton.setEnabled(false);
+        } else {
+            displayRegionButton.setEnabled(true);
+            deleteRegionButton.setEnabled(true);
+            addRegionButton.setEnabled(true);
+        }
+        controller.changed();
+    }//GEN-LAST:event_autoSplitPlanetItemStateChanged
 
     void load() {
         // TODO read settings and initialize GUI
@@ -354,6 +452,12 @@ final class RegionsPanel extends javax.swing.JPanel implements ListSelectionList
                     model.insertRow(model.getRowCount(), new Object[]{enabled, name, lat1, lon1, lat2, lon2});
                 }
             }
+            String nodesPerRegion = NbPreferences.forModule(Osm2garmin.class).get("nodes_per_region",
+                    "400000000");
+            nodesPerRegionItem.setText("" + (Integer.parseInt(nodesPerRegion) / 1000000));
+            autoSplitPlanetItem.setSelected(NbPreferences.forModule(Osm2garmin.class).get("auto_split_planet",
+                "false").equals("true"));
+            
         } catch (FileNotFoundException ex) {
             Exceptions.printStackTrace(ex);
         }
@@ -392,7 +496,10 @@ final class RegionsPanel extends javax.swing.JPanel implements ListSelectionList
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
         }
-    }
+        String nodesPerRegion = "" + (Integer.parseInt(nodesPerRegionItem.getText()) * 1000000);
+        NbPreferences.forModule(Osm2garmin.class).put("nodes_per_region", nodesPerRegion);
+        NbPreferences.forModule(Osm2garmin.class).put("auto_split_planet",
+                autoSplitPlanetItem.isSelected() ? "true" : "false");    }
 
     boolean valid() {
         // TODO check whether form is consistent and complete
@@ -400,12 +507,16 @@ final class RegionsPanel extends javax.swing.JPanel implements ListSelectionList
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addRegionButton;
+    private javax.swing.JCheckBox autoSplitPlanetItem;
     private javax.swing.JButton deleteRegionButton;
     private javax.swing.JButton displayRegionButton;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JButton moveDownRegionButton;
     private javax.swing.JButton moveUpRegionButton;
+    private javax.swing.JTextField nodesPerRegionItem;
     private javax.swing.JTable regionsTable;
     // End of variables declaration//GEN-END:variables
 
@@ -434,7 +545,13 @@ final class RegionsPanel extends javax.swing.JPanel implements ListSelectionList
                 deleteRegionButton.setEnabled(true);
             }
         }
-
+        if (autoSplitPlanetItem.isSelected()) {
+            moveDownRegionButton.setEnabled(false);
+            moveUpRegionButton.setEnabled(false);
+            displayRegionButton.setEnabled(true);
+            deleteRegionButton.setEnabled(false);
+            addRegionButton.setEnabled(false);
+        }
     }
 
     boolean polyNotExists(int row) {

@@ -30,7 +30,6 @@ import java.util.Properties;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.openide.util.Exceptions;
 
 /**
  *
@@ -131,109 +130,26 @@ public class Osm2garmin implements PropertyChangeListener {
         userdir = parameters.getProperty("userdir", userdir);
         // Delete libraries - ensure newest libraries versions are used
         File libdir = new File(userdir + "lib");
+
         Utilities.deleteFile(libdir);
-        // parse regions
-        File r = new File(parameters.getProperty("regions"));
-        File regDir = r.getParentFile();
-        try {
-            if (!r.exists()) {
-                Utilities.copyFile(Osm2garmin.class.getResourceAsStream("regions.txt"),
-                        r);
-            }
-            Scanner s = new Scanner(new FileInputStream(r));
-            int familyID = 5001;
-            while (s.hasNext()) {
-                String[] l = s.nextLine().split(" +");
-                // Comment starts with #
-                // GUI temporarily excluded region starts with x
-                if (l.length >= 5 && !(l[0].startsWith("#") || l[0].startsWith("x"))) {
-                    System.out.println("Preparing region " + l[4] + " directory.");
-                    Region region = new Region(l[4], parameters.getProperty("maps_dir"),
-                            parameters.getProperty("delete_old_maps", "false").equals("true")
-                            && (!parameters.getProperty("skip_planet_update", "false").equals("true") 
-                            || parameters.getProperty("update_regions", "false").equals("true")),
-                            familyID);
-                    familyID++;
-                    region.lon1 = Float.parseFloat(l[0]);
-                    region.lat1 = Float.parseFloat(l[1]);
-                    region.lon2 = Float.parseFloat(l[2]);
-                    region.lat2 = Float.parseFloat(l[3]);
-                    if ((regDir != null)) {
-                        File polyFile = new File(regDir, region.name + ".poly");
-                        if (polyFile.exists()) {
-                            region.polygonFile = polyFile;
-                            float[] f = Region.envelope(polyFile);
-                            region.lon1 = f[0];
-                            region.lat1 = f[1];
-                            region.lon2 = f[2];
-                            region.lat2 = f[3];
-                        } else {
-                            region.polygonFile = null;
-                        }
-                    }
-                    regions.add(region);
-                    region.changeSupport.addPropertyChangeListener(this);
-                    //System.out.println(region.name+": "+region.lon1+" "+region.lat1
-                    //        +" to "+region.lon2+" "+region.lat2);
-                } else if (l[0].startsWith("x")) {
-                    familyID++;
-                }
-            }
-            s.close();
-            // copy cities15000.zip
-            if (!new File(userdir + "cities15000.zip").exists()) {
+        // copy cities15000.zip
+        if (!new File(userdir + "cities15000.zip").exists()) {
+            try {
                 Utilities.copyFile(Osm2garmin.class.getResourceAsStream("cities15000.zip"),
                         new File(userdir + "cities15000.zip"));
+            } catch (IOException ex) {
+                return 1;
             }
-        } catch (Exception ex) {
-            Logger.getLogger(Osm2garmin.class.getName()).log(Level.SEVERE, "Problem parsing regions.", ex);
-            return 98;
-        }
-        if (regions.isEmpty()) {
-            System.out.println("No regions read from the file " + parameters.getProperty("regions") + " exiting.");
-            return 97;
-        } else {
-            System.out.println("Found " + regions.size() + " regions to process.");
-        }
-        contoursDir = new File(parameters.getProperty("contours_dir"));
-        if (!contoursDir.exists()) {
-            contoursDir.mkdirs();
         }
 
-        Utilities.loadProperties();
-
-        // start contours updates
-        final ThreadProcessor contoursProcessor = new ThreadProcessor(parameters) {
-            @Override
-            public void run() {
-                for (int reg = 0; reg < regions.size(); reg++) {
-                    Region region = regions.get(reg);
-                    region.processor = new ContoursUpdater(region, parameters);
-                    Utilities.getInstance().addProcessToMonitor(region.processor);
-                    region.processor.changeSupport.addPropertyChangeListener(Osm2garmin.this);
-                    System.out.println(region.name + " contours update started.");
-                    region.setState(Region.MAKING_CONTOURS);
-                    final ThreadProcessor preg = region.processor;
-                    try {
-                        synchronized (preg) {
-                            preg.wait();
-                        }
-                    } catch (InterruptedException ex) {
-                        region.processor.setStatus("Interrupted.");
-                        region.processor.setState(ContoursUpdater.ERROR);
-                        synchronized (region) {
-                            region.notify();
-                        }
-                        return;
-                    }
-                    Utilities.getInstance().removeMonitoredProcess(region.processor);
-                    region.setState(Region.CONTOURS_READY);
-                    synchronized (region) {
-                        region.notify();
-                    }
-                }
-            }
-        };
+        // If auto_split_planet, delete maps_dir
+        boolean autoSplitPlanet = parameters.getProperty("auto_split_planet", "false").equals("true");
+        File mapsDir = new File(parameters.getProperty("maps_dir"));
+        File imgdir = new File(userdir, "images");
+        if (autoSplitPlanet) {
+            Utilities.deleteFile(mapsDir);
+            Utilities.deleteFile(imgdir);
+        }
 
         // download planet file if needed
         planetDownloader = new PlanetDownloader(parameters);
@@ -301,11 +217,135 @@ public class Osm2garmin implements PropertyChangeListener {
             return 4;
         }
 
+        // parse regions
+        File r = new File(parameters.getProperty("regions"));
+        File ar = new File(userdir, "autoregions.txt");
+        File regDir = r.getParentFile();
+        try {
+            if (!r.exists()) {
+                Utilities.copyFile(Osm2garmin.class.getResourceAsStream("regions.txt"),
+                        r);
+            }
+            Scanner s;
+            if (autoSplitPlanet) {
+                s = new Scanner(new FileInputStream(ar));
+            } else {
+                s = new Scanner(new FileInputStream(r));
+            }
+            int familyID = 5001;
+            while (s.hasNext()) {
+                String[] l = s.nextLine().split(" +");
+                // Comment starts with #
+                // GUI temporarily excluded region starts with x
+                if (l.length >= 5 && !(l[0].startsWith("#") || l[0].startsWith("x"))) {
+                    System.out.println("Preparing region " + l[4] + " directory.");
+                    Region region = new Region(l[4], parameters.getProperty("maps_dir"),
+                            parameters.getProperty("delete_old_maps", "false").equals("true")
+                            && (!parameters.getProperty("skip_planet_update", "false").equals("true")
+                            || parameters.getProperty("update_regions", "false").equals("true")),
+                            familyID);
+                    familyID++;
+                    region.lon1 = Float.parseFloat(l[0]);
+                    region.lat1 = Float.parseFloat(l[1]);
+                    region.lon2 = Float.parseFloat(l[2]);
+                    region.lat2 = Float.parseFloat(l[3]);
+                    if ((regDir != null)) {
+                        File polyFile = new File(regDir, region.name + ".poly");
+                        if (polyFile.exists()) {
+                            region.polygonFile = polyFile;
+                            float[] f = Region.envelope(polyFile);
+                            region.lon1 = f[0];
+                            region.lat1 = f[1];
+                            region.lon2 = f[2];
+                            region.lat2 = f[3];
+                        } else {
+                            region.polygonFile = null;
+                        }
+                    }
+                    regions.add(region);
+                    region.changeSupport.addPropertyChangeListener(this);
+                    //System.out.println(region.name+": "+region.lon1+" "+region.lat1
+                    //        +" to "+region.lon2+" "+region.lat2);
+                } else if (l[0].startsWith("x")) {
+                    familyID++;
+                }
+            }
+            s.close();
+        } catch (IOException | NumberFormatException ex) {
+            Logger.getLogger(Osm2garmin.class.getName()).log(Level.SEVERE, "Problem parsing regions.", ex);
+            return 98;
+        }
+        if (regions.isEmpty()) {
+            System.out.println("No regions read from the file " + parameters.getProperty("regions") + " exiting.");
+            return 97;
+        } else {
+            System.out.println("Found " + regions.size() + " regions to process.");
+        }
+        contoursDir = new File(parameters.getProperty("contours_dir"));
+        if (!contoursDir.exists()) {
+            contoursDir.mkdirs();
+        }
+
+        // Move regions to maps
+        System.out.println("Moving region files.");
+        long id = 80000000;
+        try {
+            for (Region region : regions) {
+                id++;
+                File oldFile = new File(userdir, id + ".osm.pbf");
+                File newFile = new File(region.dir, region.name + ".osm.pbf");
+                if (!oldFile.exists()) {
+                    continue;
+                }
+                if (newFile.exists()) {
+                    Utilities.deleteFile(newFile);
+                }
+                Utilities.copyFile(oldFile, newFile);
+                Utilities.deleteFile(oldFile);
+            }
+        } catch (IOException ex) {
+            System.out.println("Moving maps to regions failed: " + ex.getLocalizedMessage());
+            return 96;
+        }
+
+        // start contours updates
+        final ThreadProcessor contoursProcessor = new ThreadProcessor(parameters) {
+            @Override
+            public void run() {
+                for (int reg = 0; reg < regions.size(); reg++) {
+                    Region region = regions.get(reg);
+                    region.processor = new ContoursUpdater(region, parameters);
+                    Utilities.getInstance().addProcessToMonitor(region.processor);
+                    region.processor.changeSupport.addPropertyChangeListener(Osm2garmin.this);
+                    System.out.println(region.name + " contours update started.");
+                    region.setState(Region.MAKING_CONTOURS);
+                    final ThreadProcessor preg = region.processor;
+                    try {
+                        synchronized (preg) {
+                            preg.wait();
+                        }
+                    } catch (InterruptedException ex) {
+                        region.processor.setStatus("Interrupted.");
+                        region.processor.setState(ContoursUpdater.ERROR);
+                        synchronized (region) {
+                            region.notify();
+                        }
+                        return;
+                    }
+                    Utilities.getInstance().removeMonitoredProcess(region.processor);
+                    region.setState(Region.CONTOURS_READY);
+                    synchronized (region) {
+                        region.notify();
+                    }
+                }
+            }
+        };
+
         // process regions
         for (int reg = 0; reg < regions.size(); reg++) {
             Region region = regions.get(reg);
             // wait for finishing contours unpacking if needed
-            while (region.getState() == Region.MAKING_CONTOURS) {
+            while (region.getState() == Region.MAKING_CONTOURS || region.getState() == Region.NEW) {
                 synchronized (region) {
                     try {
                         region.wait();
@@ -338,20 +378,19 @@ public class Osm2garmin implements PropertyChangeListener {
                 }
             }
             Utilities.getInstance().removeMonitoredProcess(region.processor);
-            
+
             // Copy gmapsupp.img to the images diretory
-            File gmapsupp = new File(region.dir,"gmapsupp.img");
+            File gmapsupp = new File(region.dir, "gmapsupp.img");
             if (gmapsupp.exists()) {
-                File imgdir = new File(userdir,"images");
                 imgdir.mkdirs();
-                File img = new File(imgdir,region.name+".img");
+                File img = new File(imgdir, region.name + ".img");
                 if (img.exists()) {
                     Utilities.deleteFile(img);
                 }
                 try {
                     Utilities.copyFile(gmapsupp, img);
                 } catch (IOException ex) {
-                    System.out.println("Cannot copy file "+gmapsupp.getPath()+" to "+img.getPath());
+                    System.out.println("Cannot copy file " + gmapsupp.getPath() + " to " + img.getPath());
                     System.out.println(ex.getLocalizedMessage());
                 }
             }

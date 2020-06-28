@@ -277,7 +277,7 @@
                                 HTTP protocol only is supported.
                             </para>
                             <para>
-                                Default value: http://dds.cr.usgs.gov/srtm/version2_1/SRTM3/
+                                Default value: https://dds.cr.usgs.gov/srtm/version2_1/SRTM3/
                             </para>
                         </listitem>
                     </varlistentry>
@@ -291,7 +291,7 @@
                                 This option affects BitTorrent download only.                            
                             </para>
                             <para>
-                                Default value: http://osm-torrent.torres.voyager.hr/files/
+                                Default value: http://www.mantlik.cz/tracker/torrents/
                             </para>
                         </listitem>
                     </varlistentry>
@@ -307,8 +307,9 @@
                                 Default value:
                             </para>
                             <simplelist>
-                                <member>http://ftp.heanet.ie/mirrors/openstreetmap.org/pbf</member>
-                                <member>http://ftp5.gwdg.de/pub/misc/openstreetmap/planet.openstreetmap.org//pbf</member>
+                                <member>https://ftp.heanet.ie/mirrors/openstreetmap.org/pbf</member>
+                                <member>https://ftp5.gwdg.de/pub/misc/openstreetmap/planet.openstreetmap.org//pbf</member>
+                                <member>https://planet.openstreetmap.org</member>
                             </simplelist>
                         </listitem>
                     </varlistentry>
@@ -323,9 +324,9 @@
                                 Default value:
                             </para>
                             <simplelist>
-                                <member>http://ftp.heanet.ie/mirrors/openstreetmap.org</member>
-                                <member>http://ftp5.gwdg.de/pub/misc/openstreetmap/planet.openstreetmap.org</member>
-                                <member>http://planet.openstreetmap.org</member>
+                                <member>https://ftp.heanet.ie/mirrors/openstreetmap.org</member>
+                                <member>https://ftp5.gwdg.de/pub/misc/openstreetmap/planet.openstreetmap.org</member>
+                                <member>https://planet.openstreetmap.org</member>
                             </simplelist>
                         </listitem>
                     </varlistentry>
@@ -553,17 +554,15 @@
                         </listitem>
                     </varlistentry>
                     <varlistentry>
-                        <term>Splitter overlap value</term>
+                        <term>Maximum no. of regions per pass</term>
                         <listitem>
                             <para>
-                                Increase this value if you experience routing problems
-                                over tiles boundaries.
+                                Number of regions to be processed in one pass when splitting planet file.
+                                If getting out of memory errors while splitting planet file into regions,
+                                try to decrease this value.
                             </para>
                             <para>
-                                A value of 10,000 has been reported to correct routing problems. 
-                            </para>
-                            <para>
-                                Default setting is 2,000.
+                                Default value is 12.
                             </para>
                         </listitem>
                     </varlistentry>
@@ -607,6 +606,38 @@
                         </imageobject>
                     </mediaobject>
                 </para>
+                <variablelist>
+                    <?dbfo list-presentation="blocks"?>
+                    <varlistentry>
+                        <term>Split planet to regions automatically</term>
+                        <listitem>
+                            <para>
+                                If checked, Splitter is used to determine optimal split of planet file
+                                into regions. This option is useful if your GPS unit is supporting multiple
+                                *.img files. Most modern units are supporting this feature.
+                            </para>
+                            <para>
+                                When this option is selected, regions table is locked and cannot be edited.
+                            </para>
+                            <para>
+                                Once splitting of the planet file is finished, Display button can be used
+                                to show distribution of the automatically created regions on the world map.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>Maximum number of nodes per region</term>
+                        <listitem>
+                            <para>
+                                Approximate maximum number of nodes in each region as a result of the
+                                automatic region selection.
+                            </para>
+                            <para>
+                                Default value is 400 million nodes.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
                 <para>
                     The Regions table defines individual regions for map generation. 
                 </para>
@@ -866,7 +897,7 @@
                         <literallayout>-J-Xmx2000m</literallayout>
                     </para>
                     <para>
-                        In Windows Vista or 7 use a privileged editor by right-clicking 
+                        In Windows use a privileged editor by right-clicking 
                         Notepad, Start, menu shortcut and select "Run as administrator".                    
                     </para>
                 </listitem>
@@ -946,7 +977,7 @@
             <itemizedlist>
                 <listitem>
                     <para>
-                        Windows XP/Vista/7/8 or Linux 2.6+ or Max OSX 10
+                        Windows 10 or Linux 2.6+ or Max OSX 10
                     </para>
                 </listitem>
             </itemizedlist>
@@ -960,7 +991,9 @@
             <itemizedlist>
                 <listitem>
                     <para>
-                        Sun Java JRE 6 or newer 64 or 32 bit
+                        Sun Java 8 or newer 64 or 32 bit or OpenJDK 9-12.
+                        OpenJDK 13 or newer cannot execute installer, but after installation
+                        the application can start successfully.
                     </para>
                     <para>
                         Java must be downloaded and installed separately from 
@@ -986,10 +1019,10 @@
             </info>
             <para>
                 Download the installer (stable or unstable version) for your os from:
-                <link xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="http://code.google.com/p/osm2garmin/downloads">http://code.google.com/p/osm2garmin/downloads</link>
+                <link xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="http://osm2garmin.mantlik.org/downloads/">http://osm2garmin.mantlik.org/downloads/</link>
             </para>
             <para>
-                Check that Java JRE 6 or newer is installed.
+                Check that Java 8 or newer is installed.
             </para>
             <para>
                 Change to the directory where you downloaded the Osm2garmin installer and:
@@ -1075,23 +1108,6 @@
                     It is not recommended to run Upgrade Wizard when maps generation is in progress.
                 </para>
             </note>
-        </section>
-        <section xml:id="unstable-version">
-            <info>
-                <title>Unstable (development) version</title>
-            </info>
-            <para>
-                Unstable version of the software implements the newest features 
-                not yet included in the stable version.
-            </para>
-            <para>
-                More information concerning unstable version including detail instructions
-                how to switch your installation of the Osm2garmin software into
-                unstable version can be found here:
-            </para>
-            <para>
-                <link xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="http://code.google.com/p/osm2garmin/wiki/UnstableVersionHowto">https://code.google.com/p/osm2garmin/wiki/UnstableVersionHowto</link>            
-            </para>
         </section>
     </chapter>
     <appendix xml:id="faq">
@@ -1220,15 +1236,15 @@
                 <listitem>
                     <para>
                         Mkgmap - 
-                        <link xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="http://www.mkgmap.org.uk/">http://www.mkgmap.org.uk/</link>
+                        <link xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="https://www.mkgmap.org.uk/">http://www.mkgmap.org.uk/</link>
                     </para>
                     <para>
                         Splitter - 
-                        <link xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="http://www.mkgmap.org.uk/doc/splitter.html">http://www.mkgmap.org.uk/doc/splitter.html</link>
+                        <link xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="https://www.mkgmap.org.uk/doc/splitter.html">http://www.mkgmap.org.uk/doc/splitter.html</link>
                     </para>
                     <para>
                         Osmosis - 
-                        <link xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="http://wiki.openstreetmap.org/wiki/Osmosis">http://wiki.openstreetmap.org/wiki/Osmosis</link>
+                        <link xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="https://wiki.openstreetmap.org/wiki/Osmosis">http://wiki.openstreetmap.org/wiki/Osmosis</link>
                     </para>
                 </listitem>
             </varlistentry>

@@ -91,8 +91,10 @@ final class Osm2garminPanel extends javax.swing.JPanel {
         jLabel10 = new javax.swing.JLabel();
         skipPlanetUpdateItem = new javax.swing.JCheckBox();
         updateRegionsItem = new javax.swing.JCheckBox();
+        jLabel6 = new javax.swing.JLabel();
+        maxRegionsPassItem = new javax.swing.JTextField();
 
-        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(null, org.openide.util.NbBundle.getMessage(Osm2garminPanel.class, "Osm2garminPanel.jPanel1.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, null, new java.awt.Color(51, 153, 255))); // NOI18N
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(null, org.openide.util.NbBundle.getMessage(Osm2garminPanel.class, "Osm2garminPanel.jPanel1.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("DejaVu Sans", 1, 12), new java.awt.Color(51, 153, 255))); // NOI18N
 
         org.openide.awt.Mnemonics.setLocalizedText(userdirBrowseItem, org.openide.util.NbBundle.getMessage(Osm2garminPanel.class, "Osm2garminPanel.userdirBrowseItem.text")); // NOI18N
         userdirBrowseItem.addActionListener(new java.awt.event.ActionListener() {
@@ -371,6 +373,17 @@ final class Osm2garminPanel extends javax.swing.JPanel {
                 .addContainerGap())
         );
 
+        jLabel6.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        org.openide.awt.Mnemonics.setLocalizedText(jLabel6, org.openide.util.NbBundle.getMessage(Osm2garminPanel.class, "Osm2garminPanel.jLabel6.text")); // NOI18N
+
+        maxRegionsPassItem.setHorizontalAlignment(javax.swing.JTextField.TRAILING);
+        maxRegionsPassItem.setText(org.openide.util.NbBundle.getMessage(Osm2garminPanel.class, "Osm2garminPanel.maxRegionsPassItem.text")); // NOI18N
+        maxRegionsPassItem.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                maxRegionsPassItemPropertyChange(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -381,6 +394,23 @@ final class Osm2garminPanel extends javax.swing.JPanel {
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(exclusiveUtilsItem, javax.swing.GroupLayout.PREFERRED_SIZE, 399, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(deleteOldMapsItem, javax.swing.GroupLayout.PREFERRED_SIZE, 276, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addGap(162, 162, 162)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(srtmStepItem, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                        .addComponent(contoursDensityItem, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 34, Short.MAX_VALUE)
+                                        .addComponent(maxRegionsPassItem)))))
+                        .addGap(13, 13, 13))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel21)
                         .addGap(18, 18, 18)
@@ -395,21 +425,7 @@ final class Osm2garminPanel extends javax.swing.JPanel {
                         .addComponent(srtmOffsLonItem, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabel25, javax.swing.GroupLayout.PREFERRED_SIZE, 12, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(deleteOldMapsItem, javax.swing.GroupLayout.PREFERRED_SIZE, 276, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(0, 0, Short.MAX_VALUE))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                .addGap(167, 167, 167)
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(srtmStepItem, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(contoursDensityItem, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                        .addGap(44, 44, 44))))
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
             .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
@@ -449,7 +465,7 @@ final class Osm2garminPanel extends javax.swing.JPanel {
                     .addComponent(jLabel3))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGap(4, 4, 4)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(srtmOffsLatItem, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel23)
@@ -469,7 +485,11 @@ final class Osm2garminPanel extends javax.swing.JPanel {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(contoursDensityItem, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel5)))
+                    .addComponent(jLabel5))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(maxRegionsPassItem, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel6)))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -490,39 +510,50 @@ final class Osm2garminPanel extends javax.swing.JPanel {
         );
     }// </editor-fold>//GEN-END:initComponents
 
+    private void maxRegionsPassItemPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_maxRegionsPassItemPropertyChange
+        if (!maxRegionsPassItem.getText().equals(NbPreferences.forModule(Osm2garmin.class).get("max_regions_pass",
+            "12"))) {
+    controller.changed();
+    }
+    }//GEN-LAST:event_maxRegionsPassItemPropertyChange
+
+    private void skipPlanetUpdateItemStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_skipPlanetUpdateItemStateChanged
+        updateRegionsItem.setEnabled(this.skipPlanetUpdateItem.isSelected());
+    }//GEN-LAST:event_skipPlanetUpdateItemStateChanged
+
     private void thresholdmediumItemPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_thresholdmediumItemPropertyChange
         if (!thresholdmediumItem.getText().equals(NbPreferences.forModule(Osm2garmin.class).get("plot_medium_threshold",
-                "3200"))) {
-            controller.changed();
-        }
+            "3200"))) {
+    controller.changed();
+    }
     }//GEN-LAST:event_thresholdmediumItemPropertyChange
 
     private void mediumintervalItemPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_mediumintervalItemPropertyChange
         if (!mediumintervalItem.getText().equals(NbPreferences.forModule(Osm2garmin.class).get("contour_medium_interval",
-                "50"))) {
-            controller.changed();
-        }
+            "50"))) {
+    controller.changed();
+    }
     }//GEN-LAST:event_mediumintervalItemPropertyChange
 
     private void thresholdminorItemPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_thresholdminorItemPropertyChange
         if (!thresholdminorItem.getText().equals(NbPreferences.forModule(Osm2garmin.class).get("plot_minor_threshold",
-                "800"))) {
-            controller.changed();
-        }
+            "800"))) {
+    controller.changed();
+    }
     }//GEN-LAST:event_thresholdminorItemPropertyChange
 
     private void majorintervalItemPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_majorintervalItemPropertyChange
         if (!majorintervalItem.getText().equals(NbPreferences.forModule(Osm2garmin.class).get("contour_major_interval",
-                "100"))) {
-            controller.changed();
-        }
+            "100"))) {
+    controller.changed();
+    }
     }//GEN-LAST:event_majorintervalItemPropertyChange
 
     private void minorintervalItemPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_minorintervalItemPropertyChange
         if (!minorintervalItem.getText().equals(NbPreferences.forModule(Osm2garmin.class).get("contour_minor_interval",
-                "25"))) {
-            controller.changed();
-        }
+            "25"))) {
+    controller.changed();
+    }
     }//GEN-LAST:event_minorintervalItemPropertyChange
 
     private void srtmOffsLonItemPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_srtmOffsLonItemPropertyChange
@@ -539,16 +570,16 @@ final class Osm2garminPanel extends javax.swing.JPanel {
 
     private void contoursDensityItemPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_contoursDensityItemPropertyChange
         if (!contoursDensityItem.getText().equals(NbPreferences.forModule(Osm2garmin.class).get("contours_density",
-                "1"))) {
-            controller.changed();
-        }
+            "1"))) {
+    controller.changed();
+    }
     }//GEN-LAST:event_contoursDensityItemPropertyChange
 
     private void srtmStepItemPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_srtmStepItemPropertyChange
         if (!srtmStepItem.getText().equals(NbPreferences.forModule(Osm2garmin.class).get("srtm_step",
-                "2"))) {
-            controller.changed();
-        }
+            "2"))) {
+    controller.changed();
+    }
     }//GEN-LAST:event_srtmStepItemPropertyChange
 
     private void exclusiveUtilsItemPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_exclusiveUtilsItemPropertyChange
@@ -567,9 +598,9 @@ final class Osm2garminPanel extends javax.swing.JPanel {
 
     private void srtmdirItemPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_srtmdirItemPropertyChange
         if (!srtmdirItem.getText().equals(NbPreferences.forModule(Osm2garmin.class).get("srtm_dir",
-                System.getProperty("netbeans.user") + "/SRTM/"))) {
-            controller.changed();
-        }
+            System.getProperty("netbeans.user") + "/SRTM/"))) {
+    controller.changed();
+    }
     }//GEN-LAST:event_srtmdirItemPropertyChange
 
     private void mapsdirBrowseItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mapsdirBrowseItemActionPerformed
@@ -584,16 +615,16 @@ final class Osm2garminPanel extends javax.swing.JPanel {
 
     private void mapsdirItemPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_mapsdirItemPropertyChange
         if (!mapsdirItem.getText().equals(NbPreferences.forModule(Osm2garmin.class).get("maps_dir",
-                System.getProperty("netbeans.user") + "/maps/"))) {
-            controller.changed();
-        }
+            System.getProperty("netbeans.user") + "/maps/"))) {
+    controller.changed();
+    }
     }//GEN-LAST:event_mapsdirItemPropertyChange
 
     private void userdirItemPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_userdirItemPropertyChange
         if (!userdirItem.getText().equals(NbPreferences.forModule(Osm2garmin.class).get("userdir",
-                System.getProperty("netbeans.user") + "/"))) {
-            controller.changed();
-        }
+            System.getProperty("netbeans.user") + "/"))) {
+    controller.changed();
+    }
     }//GEN-LAST:event_userdirItemPropertyChange
 
     private void userdirBrowseItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_userdirBrowseItemActionPerformed
@@ -605,10 +636,6 @@ final class Osm2garminPanel extends javax.swing.JPanel {
             userdirItem.setText(dial.getSelectedFile().getPath());
         }
     }//GEN-LAST:event_userdirBrowseItemActionPerformed
-
-    private void skipPlanetUpdateItemStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_skipPlanetUpdateItemStateChanged
-        updateRegionsItem.setEnabled(this.skipPlanetUpdateItem.isSelected());
-    }//GEN-LAST:event_skipPlanetUpdateItemStateChanged
     void load() {
         userdirItem.setText(NbPreferences.forModule(Osm2garmin.class).get("userdir",
                 System.getProperty("netbeans.user") + "/"));
@@ -643,6 +670,8 @@ final class Osm2garminPanel extends javax.swing.JPanel {
                 "5"));
         contoursDensityItem.setText(NbPreferences.forModule(Osm2garmin.class).get("contours_density",
                 "4"));
+        maxRegionsPassItem.setText(NbPreferences.forModule(Osm2garmin.class).get("max_regions_pass",
+                "12"));
     }
 
     void store() {
@@ -678,18 +707,19 @@ final class Osm2garminPanel extends javax.swing.JPanel {
                 updateRegionsItem.isSelected() ? "true" : "false");
         NbPreferences.forModule(Osm2garmin.class).put("srtm_step", srtmStepItem.getText());
         NbPreferences.forModule(Osm2garmin.class).put("contours_density", contoursDensityItem.getText());
+        NbPreferences.forModule(Osm2garmin.class).put("max_regions_pass", maxRegionsPassItem.getText());
     }
 
     boolean valid() {
         // TODO check whether form is consistent and complete
         return true;
     }
-    
+
     private class ContoursIntervalVerifier extends InputVerifier {
 
         @Override
         public boolean verify(JComponent input) {
-            if (! (input instanceof JTextComponent)) {
+            if (!(input instanceof JTextComponent)) {
                 return true;
             }
             String s = ((JTextComponent) input).getText();
@@ -705,9 +735,9 @@ final class Osm2garminPanel extends javax.swing.JPanel {
             }
             return false;
         }
-        
+
     }
-    
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextField contoursDensityItem;
     private javax.swing.JCheckBox deleteOldMapsItem;
@@ -734,12 +764,14 @@ final class Osm2garminPanel extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JTextField majorintervalItem;
     private javax.swing.JButton mapsdirBrowseItem;
     private javax.swing.JTextField mapsdirItem;
+    private javax.swing.JTextField maxRegionsPassItem;
     private javax.swing.JTextField mediumintervalItem;
     private javax.swing.JTextField minorintervalItem;
     private javax.swing.JCheckBox skipPlanetUpdateItem;

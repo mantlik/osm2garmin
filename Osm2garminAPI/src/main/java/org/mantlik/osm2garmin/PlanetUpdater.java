@@ -21,14 +21,19 @@
  */
 package org.mantlik.osm2garmin;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Scanner;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static org.mantlik.osm2garmin.ThreadProcessor.ERROR;
@@ -56,7 +61,7 @@ public class PlanetUpdater extends ThreadProcessor {
         super(parameters, false);
         planetFile = new File(parameters.getProperty("planet_file"));
         oldPlanetFile = new File(parameters.getProperty("old_planet_file"));
-        maxRegionsPass = Integer.parseInt(parameters.getProperty("max_regions_pass", "3"));
+        maxRegionsPass = Integer.parseInt(parameters.getProperty("max_regions_pass", "8"));
         uflen = 0;
         this.regions = regions;
         start();
@@ -105,6 +110,8 @@ public class PlanetUpdater extends ThreadProcessor {
     public void run() {
         boolean skipPlanetUpdate = parameters.getProperty("skip_planet_update", "false").equals("true");
         boolean updateRegions = parameters.getProperty("update_regions", "false").equals("true");
+        boolean autoSplitPlanet = parameters.getProperty("auto_split_planet", "false").equals("true");
+        int nodesPerRegion = Integer.parseInt(parameters.getProperty("nodes_per_region", "400000000"));
         if (skipPlanetUpdate && (!updateRegions)) {
             setProgress(100);
             setStatus("Skipped.");
@@ -190,44 +197,72 @@ public class PlanetUpdater extends ThreadProcessor {
 
             pass++;
             // Split planet to regions
-            regions_in_progress = "Splitting planet file to "+ regions.size() +" regions.";
-            String regfile = Utilities.getUserdir(this) + "/" + "planet.list";
-            try {
-                Writer os = new FileWriter(regfile);
-                long id = 80000000;
-                for (Region region : regions) {
-                    id++;
-                    os.write("#" + id + ": " + " " + region.lat1 + "," + region.lon1
-                            + " to " + region.lat2 + "," + region.lon2 + " " + region.name + "\n");
-                    os.write(id + ": " + " " + Utilities.coordToMap(region.lat1) + ","
-                            + Utilities.coordToMap(region.lon1)
-                            + " to " + Utilities.coordToMap(region.lat2) + ","
-                            + Utilities.coordToMap(region.lon2) + "\n");
+            String regfile = Utilities.getUserdir(this) + "/" + "regions.list";
+            if (autoSplitPlanet) {
+                regions_in_progress = "Splitting planet file.";
+            } else {
+                int noOfRegions = 0;
+                try {
+                    Scanner s = new Scanner(new File(parameters.getProperty("regions")));
+                    Writer os = new FileWriter(regfile);
+                    long id = 80000000;
+                    while (s.hasNextLine()) {
+                        String[] data = s.nextLine().split(" +");
+                        // Comment starts with #
+                        // GUI temporarily excluded region starts with x
+                        if (data.length >= 5 && !(data[0].startsWith("#") || data[0].startsWith("x"))) {
+                            float lon1 = Float.parseFloat(data[0]);
+                            float lat1 = Float.parseFloat(data[1]);
+                            float lon2 = Float.parseFloat(data[2]);
+                            float lat2 = Float.parseFloat(data[3]);
+                            String name = data[4];
+                            id++;
+                            noOfRegions++;
+                            os.write("#" + id + ": " + " " + lat1 + "," + lon1
+                                    + " to " + lat2 + "," + lon2 + " " + name + "\n");
+                            os.write(id + ": " + " " + Utilities.coordToMap(lat1) + ","
+                                    + Utilities.coordToMap(lon1)
+                                    + " to " + Utilities.coordToMap(lat2) + ","
+                                    + Utilities.coordToMap(lon2) + "\n");
+                        }
+                    }
+                    os.close();
+                } catch (FileNotFoundException ex) {
+                    Logger.getLogger(PlanetUpdater.class.getName()).log(Level.SEVERE, null, ex);
+                    setState(ERROR);
+                    setStatus(ex.getMessage());
+                    synchronized (this) {
+                        notify();
+                    }
+                    return;
+                } catch (IOException ex) {
+                    Logger.getLogger(PlanetUpdater.class.getName()).log(Level.SEVERE, null, ex);
+                    setState(ERROR);
+                    setStatus(ex.getMessage());
+                    synchronized (this) {
+                        notify();
+                    }
+                    return;
                 }
-                os.close();
-            } catch (FileNotFoundException ex) {
-                Logger.getLogger(PlanetUpdater.class.getName()).log(Level.SEVERE, null, ex);
-                setState(ERROR);
-                setStatus(ex.getMessage());
-                synchronized (this) {
-                    notify();
-                }
-                return;
-            } catch (IOException ex) {
-                Logger.getLogger(PlanetUpdater.class.getName()).log(Level.SEVERE, null, ex);
-                setState(ERROR);
-                setStatus(ex.getMessage());
-                synchronized (this) {
-                    notify();
-                }
-                return;
+                regions_in_progress = "Splitting planet file to " + noOfRegions + " regions.";
             }
-            args = new String[]{
-                "--output-dir=" + Utilities.getUserdir(this), "--max-areas=" + maxRegionsPass,
-                "--output=pbf",
-                "--split-file=" + Utilities.getUserdir(this) + "/" + "planet.list",
-                parameters.getProperty("planet_file")
-            };
+            if (autoSplitPlanet) {
+                args = new String[]{
+                    "--output-dir=" + Utilities.getUserdir(this), "--max-areas=" + maxRegionsPass,
+                    "--output=pbf",
+                    "--max-nodes=" + nodesPerRegion,
+                    "--mapid=80000001",
+                    "--geonames-file=" + Utilities.getUserdir(this) + "cities15000.zip",
+                    parameters.getProperty("planet_file")
+                };
+            } else {
+                args = new String[]{
+                    "--output-dir=" + Utilities.getUserdir(this), "--max-areas=" + maxRegionsPass,
+                    "--output=pbf",
+                    "--split-file=" + Utilities.getUserdir(this) + "/" + "regions.list",
+                    parameters.getProperty("planet_file")
+                };
+            }
             try {
 
                 Utilities.getInstance().runExternal("uk.me.parabola.splitter.Main", "main", "splitter",
@@ -241,23 +276,86 @@ public class PlanetUpdater extends ThreadProcessor {
                 }
                 return;
             }
-            pass++;
-            // Move regions to maps
-            regions_in_progress = "Moving region files.";
-            long id = 80000000;
-            for (Region region : regions) {
-                id++;
-                File oldFile = new File(Utilities.getUserdir(this), id + ".osm.pbf");
-                File newFile = new File(region.dir, region.name + ".osm.pbf");
-                if (!oldFile.exists()) {
-                    continue;
+
+            // Create regions file from splitted regions
+            if (autoSplitPlanet) {
+                File areasList = new File(Utilities.getUserdir(this), "areas.list");
+                if (!areasList.exists()) {
+                    setState(ERROR);
+                    setStatus("Cannot find areas.list file.");
+                    synchronized (this) {
+                        notify();
+                    }
+                    return;
                 }
-                if (newFile.exists()) {
-                    Utilities.deleteFile(newFile);
+                File autoregfile = new File(Utilities.getUserdir(this), "autoregions.txt");
+                if (autoregfile.exists()) {
+                    Utilities.deleteFile(autoregfile);
                 }
-                Utilities.copyFile(oldFile, newFile);
-                Utilities.deleteFile(oldFile);
+                File template = new File(Utilities.getUserdir(this), "template.args");
+                Map names = new TreeMap();
+                try {
+                    if (template.exists()) {
+                        int id = 1;
+                        Scanner tmpl = new Scanner(new BufferedReader(new FileReader(template)));
+                        while (tmpl.hasNextLine()) {
+                            String line = tmpl.nextLine();
+                            if (!line.startsWith("mapname: ")) {
+                                continue;
+                            }
+                            String key = (line.split(":")[1]).trim();
+                            line = tmpl.nextLine();
+                            String name = id + "_" + (line.split(":")[1]).trim().replaceAll(" ", "_").
+                                    replaceAll("-", "_");
+                            id++;
+                            names.put(key, name);
+                        }
+                        tmpl.close();
+                    }
+                    Scanner rd = new Scanner(new BufferedReader(new FileReader(areasList)));
+                    Writer os = new FileWriter(autoregfile);
+                    String id = "";
+                    while (rd.hasNextLine()) {
+                        String line = rd.nextLine();
+                        if (line.startsWith("#       :")) { // extract coords and write region record
+                            String[] coords = (line.split(":")[1]).trim().split(" to ");
+                            String[] from = coords[0].split(",");
+                            String[] to = coords[1].split(",");
+                            String lat1 = from[0];
+                            String lon1 = from[1];
+                            String lat2 = to[0];
+                            String lon2 = to[1];
+                            os.write(lon1 + " " + lat1 + " " + lon2 + " " + lat2 + " " + 
+                                    (names.containsKey(id) ? names.get(id) : id) + "\n");
+                        } else {
+                            if (line.trim().isEmpty() || line.startsWith("#")) {
+                                continue;
+                            }
+                            // extract ID
+                            id = line.split(":")[0];
+                        }
+                    }
+                    os.close();
+                    rd.close();
+                } catch (FileNotFoundException ex) {
+                    Logger.getLogger(PlanetUpdater.class.getName()).log(Level.SEVERE, null, ex);
+                    setState(ERROR);
+                    setStatus(ex.getMessage());
+                    synchronized (this) {
+                        notify();
+                    }
+                    return;
+                } catch (IOException ex) {
+                    Logger.getLogger(PlanetUpdater.class.getName()).log(Level.SEVERE, null, ex);
+                    setState(ERROR);
+                    setStatus(ex.getMessage());
+                    synchronized (this) {
+                        notify();
+                    }
+                    return;
+                }
             }
+            pass++;
 
             if ((!planetFile.exists()) || (planetFile.length() < oldPlanetFile.length())) {
                 //if (planetFile.exists()) {
@@ -288,7 +386,7 @@ public class PlanetUpdater extends ThreadProcessor {
                 i++;
                 upd = new File(Utilities.getUserdir(this) + "update" + i + ".osc.gz");
             }
-            
+
             pass++;
             setStatus("Completed.");
             setProgress(100);

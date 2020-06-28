@@ -429,13 +429,15 @@ public class Utilities {
                     }
                 }
             }
-        }
-        if (!path.delete()) {
-            try {
-                Thread.sleep(300);
-            } catch (InterruptedException ex) {
+            if (!path.delete()) {
+                try {
+                    Thread.sleep(300);
+                } catch (InterruptedException ex) {
+                }
+                return path.delete();
+            } else {
+                return true;
             }
-            return path.delete();
         } else {
             return true;
         }

@@ -711,6 +711,8 @@ public final class MainWindowTopComponent extends TopComponent implements Proper
         par.setProperty("splitter_overlap", NbPreferences.forModule(Osm2garmin.class).get("splitter_overlap", "2000"));
         par.setProperty("exclusive_utils", NbPreferences.forModule(Osm2garmin.class).get("exclusive_utils", "true"));
         par.setProperty("max_regions_pass", NbPreferences.forModule(Osm2garmin.class).get("max_regions_pass", "3"));
+        par.setProperty("auto_split_planet", NbPreferences.forModule(Osm2garmin.class).get("auto_split_planet", "false"));
+        par.setProperty("nodes_per_region", NbPreferences.forModule(Osm2garmin.class).get("nodes_per_region", "400000000"));
         //String settings = par.getProperty("userdir") + "/settings.properties";
         //if (new File(settings).exists()) {
         //    try {

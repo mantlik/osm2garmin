@@ -242,6 +242,6 @@
         <netbeans.version>RELEASE802</netbeans.version>
         <brandingToken>osm2garmin</brandingToken>
         <netbeans.hint.license>gpl20</netbeans.hint.license>
-        <project.version.short>1.3</project.version.short>
+        <project.version.short>1.4</project.version.short>
     </properties>
 </project>
